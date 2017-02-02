@@ -1,0 +1,39 @@
+{"seed" : 0,
+
+"len_chrom" : [500, 500],
+"Cent" : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+"p_ribo" : [[0, 0], [0, 0]],
+
+"R" : 27 ,
+"micron" : 32 ,
+
+"data_folder" : "./data/raw" ,
+
+"N_diffu" : 1000 ,
+"cut_off_inte" : 1.5 ,
+"p_inte" : 0.2 ,
+"dt" : 0.1 ,
+"p_origins" : [[4, 9, 51, 98, 136, 161, 188, 193, 200, 277, 329, 350, 372, 393, 444, 448, 453, 466, 489], [4, 9, 51, 98, 136, 161, 188, 193, 200, 277, 329, 350, 372, 393, 444, 448, 453, 466, 489]],
+"spb" : false ,
+"nucleole" : false ,
+"telomere" : false ,
+
+"microtubule_length" : 0.4 ,
+"diameter_nuc" :  0.18 ,
+"special_start" : false ,
+
+"Activ_Origins" : ["Ori"] ,
+"visu" : false ,
+"dump_hic" : false ,
+
+
+"diff_alone" : false ,
+
+"diff_bind_when_free" : false ,
+"diff_bind_when_on_DNA" : false ,
+
+"replicate_DNA" : false ,
+
+"n_steps" : 10,
+"length_steps" : 1000
+}

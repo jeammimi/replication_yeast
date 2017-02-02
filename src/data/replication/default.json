@@ -7,7 +7,7 @@
 "R" : 32 ,
 "micron" : 32 ,
 
-"data_folder" : "../data/" ,
+"data_folder" : "./data/raw" ,
 
 "N_diffu" : 10 ,
 "cut_off_inte" : 8 ,
@@ -33,5 +33,8 @@
 "diff_bind_when_free" : true ,
 "diff_bind_when_on_DNA" : false ,
 
-"replicate_DNA" : false
+"replicate_DNA" : false ,
+
+"n_steps" : 100,
+"length_steps" : 1000
 }

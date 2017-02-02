@@ -17,10 +17,7 @@ import time
 import json
 
 
-def simulate(traj_filename):
-
-    with open(traj_filename, "r") as f:
-        traj = json.load(f)
+def simulate(traj):
 
     seed = traj["seed"]
     len_chrom = traj["len_chrom"]
@@ -54,6 +51,10 @@ def simulate(traj_filename):
     diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
     replicate_DNA = traj["replicate_DNA"]
 
+
+    # Simulation parameters
+    n_steps = traj["n_steps"]
+    length_steps = traj["length_steps"]
 
     np.random.seed(seed)
     hoomd.context.initialize("--mode=cpu")
@@ -505,7 +506,7 @@ def simulate(traj_filename):
         group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
     # nl.tune(warmup=1,steps=1000)
 
-    for i in range(100):
+    for i in range(n_steps):
 
         # Chek that the microtubule length is correct
         if spb:
@@ -521,7 +522,7 @@ def simulate(traj_filename):
         # Dump the Hi-Cs
 
         # system.restore_snapshot(snp)
-        hoomd.run(1000)
+        hoomd.run(length_steps)
 
         if dump_hic:
             ph = np.array([p.position for p in group_hic])
@@ -698,5 +699,13 @@ def simulate(traj_filename):
     print(time.time() - t0)
 
 
+def load_parameters(filename):
+
+    with open(filename, "r") as f:
+        traj = json.load(f)
+    return traj
+
+
 if __name__ == "__main__":
-    simulate("./default.json")
+    traj = load_parameters("./default.json")
+    simulate(traj)
