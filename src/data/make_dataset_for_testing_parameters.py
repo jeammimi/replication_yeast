@@ -10,6 +10,7 @@ if __name__ == "__main__":
     if "sumatra_label" in parameters:
         parameters["data_folder"] = os.path.join(parameters["data_folder"],
                                                  parameters["sumatra_label"])
+        parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
     else:
         print("no extra label")
     simulate(parameters)
