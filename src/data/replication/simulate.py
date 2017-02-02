@@ -384,17 +384,18 @@ def simulate(traj):
     else:
         all_move = all_beads
     # Log
-    logger = analyze.log(
-        filename=data_folder +
-        'mylog.log',
-        period=1000,
-        quantities=[
-            'temperature',
-            'potential_energy',
-            'kinetic_energy',
-            'volume',
-            'pressure'],
-        overwrite=True)
+    if not visu:
+        logger = analyze.log(
+            filename=data_folder +
+            'mylog.log',
+            period=1000,
+            quantities=[
+                'temperature',
+                'potential_energy',
+                'kinetic_energy',
+                'volume',
+                'pressure'],
+            overwrite=True)
 
     # Warmup
     converged = False
