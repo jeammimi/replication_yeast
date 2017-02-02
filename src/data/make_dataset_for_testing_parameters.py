@@ -8,7 +8,7 @@ if __name__ == "__main__":
     param_file = sys.argv[1]
     parameters = load_parameters(param_file)
     print(sys.argv)
-    if len(sys.argv) >= 2:
+    if len(sys.argv) >= 3:
         parameters["visu"] = True
         if "sumatra_label" in parameters:
             parameters.pop("sumatra_label")
