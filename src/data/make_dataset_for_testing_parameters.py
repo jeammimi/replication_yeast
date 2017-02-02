@@ -16,10 +16,10 @@ if __name__ == "__main__":
     if "sumatra_label" in parameters:
         parameters["data_folder"] = os.path.join(parameters["data_folder"],
                                                  parameters["sumatra_label"])
-        parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
     else:
         print("no extra label")
 
+    parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
     parameters["filename"] = param_file
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
