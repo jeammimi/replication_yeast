@@ -15,7 +15,6 @@ import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
 import time
 import json
-import sys
 
 
 def simulate(traj):

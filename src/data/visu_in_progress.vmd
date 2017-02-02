@@ -1,16 +1,13 @@
 #!/usr/local/bin/vmd
 # VMD script written by save_state $Revision: 1.47 $
 # VMD version: 1.9.3
-set xml [lindex $argv 0]
-set dcd [lindex $argv 1]
-
 set viewplist {}
 set fixedlist {}
 proc vmdrestoremymaterials {} {
   set mlist { Opaque Transparent BrushedMetal Diffuse Ghost Glass1 Glass2 Glass3 Glossy HardPlastic MetallicPastel Steel Translucent Edgy EdgyShiny EdgyGlass Goodsell AOShiny AOChalky AOEdgy BlownGlass GlassBubble RTChrome }
   set mymlist [material list]
   foreach mat $mlist {
-    if { [lsearch $mymlist $mat] == -1 } {
+    if { [lsearch $mymlist $mat] == -1 } { 
       material add $mat
     }
   }
@@ -343,8 +340,8 @@ display aodirect 0.300000
 display dof off
 display dof_fnumber 64.000000
 display dof_focaldist 0.700000
-mol new $xml type hoomd first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
-mol addfile $dcd type dcd first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+mol new data/raw/20170202-155421/atoms.hoomdxml type hoomd first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+mol addfile data/raw/20170202-155421/poly.dcd type dcd first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
 mol delrep 0 top
 mol representation Lines 3.000000
 mol color Fragment
@@ -380,7 +377,7 @@ mol clipplane center 5 0 top {0.0 0.0 0.0}
 mol clipplane color  5 0 top {0.5 0.5 0.5 }
 mol clipplane normal 5 0 top {0.0 0.0 1.0}
 mol clipplane status 5 0 top {0}
-mol representation VDW 2.800000 12.000000
+mol representation VDW 2.000000 12.000000
 mol color Type
 mol selection {type Ori}
 mol material Opaque
@@ -414,7 +411,7 @@ mol clipplane center 5 1 top {0.0 0.0 0.0}
 mol clipplane color  5 1 top {0.5 0.5 0.5 }
 mol clipplane normal 5 1 top {0.0 0.0 1.0}
 mol clipplane status 5 1 top {0}
-mol representation VDW 2.900000 12.000000
+mol representation VDW 1.000000 12.000000
 mol color Type
 mol selection {type Diff}
 mol material Opaque
@@ -551,12 +548,10 @@ color scale colors WBlk {1.0 1.0 1.0} {0.5 0.5 0.5} {0.0 0.0 0.0}
     {color Display {FPS} white}
     {color Name {LPA} green}
     {color Name {LPB} green}
-    {color Name {T} pink}
     {color Name {M} pink}
     {color Name {D} cyan}
     {color Type {LP} green}
     {color Type {DRUD} pink}
-    {color Type {T} pink}
     {color Type {M} pink}
     {color Type {D} cyan}
     {color Element {X} cyan}
