@@ -10,11 +10,12 @@ from hoomd import data, init, md, group, dump, deprecated, analyze
 import numpy as np
 import scipy.linalg as linalg
 from scipy.spatial.distance import cdist
-from PMotion import Polymer
+from .PMotion import Polymer
 import _pickle as cPickle
 from createPoly import create_init_conf_yeast
 import time
 import json
+import sys
 
 
 def simulate(traj):
@@ -707,5 +708,7 @@ def load_parameters(filename):
 
 
 if __name__ == "__main__":
-    traj = load_parameters("./default.json")
+    import sys
+
+    traj = load_parameters(sys.argv[1])
     simulate(traj)
