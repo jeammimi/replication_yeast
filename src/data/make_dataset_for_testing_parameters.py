@@ -21,7 +21,7 @@ if __name__ == "__main__":
         print("no extra label")
 
     parameters["filename"] = param_file
-    with open(os.join(parameters["data_folder"], "params.json"), "w") as f:
+    with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
         f.write(s)
 
