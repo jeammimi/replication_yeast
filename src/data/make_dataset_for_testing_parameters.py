@@ -21,6 +21,8 @@ if __name__ == "__main__":
 
     parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
     parameters["filename"] = param_file
+
+    print(parameters["data_folder"])
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
         f.write(s)

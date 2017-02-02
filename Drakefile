@@ -1,0 +1,11 @@
+visu <-
+  source activate root
+  python src/data//make_dataset_for_testing_parameters.py $dir/params.json 1
+  vmd -e src/data/visu_in_progress.vmd -args $dir/atoms.hoomdxml $dir/poly.dcd
+
+visu2 <-
+  source activate root
+  conda info --envs
+  python src/data//make_dataset_for_testing_parameters.py $dir/params.json 1
+  source activate maya
+  python src/data/replication/visu.py $dir

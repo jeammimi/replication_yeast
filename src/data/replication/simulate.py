@@ -12,7 +12,7 @@ import scipy.linalg as linalg
 from scipy.spatial.distance import cdist
 from .PMotion import Polymer
 import _pickle as cPickle
-from createPoly import create_init_conf_yeast
+from .createPoly import create_init_conf_yeast
 import time
 import json
 import sys
@@ -274,7 +274,9 @@ def simulate(traj):
                     # exit()
                 initp += new
             else:
-                initp = (R - 1) * (2 * np.random.rand(3) - 1)
+                initp = (R - 2) * (2 * np.random.rand(3) - 1)
+                while linalg.norm(initp) > R - 1:
+                    initp = (R - 2) * (2 * np.random.rand(3) - 1)
 
             snapshot.particles.position[offset_particle + p] = initp
             snapshot.particles.typeid[
