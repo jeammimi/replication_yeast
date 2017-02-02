@@ -7,7 +7,7 @@ import json
 if __name__ == "__main__":
     param_file = sys.argv[1]
     parameters = load_parameters(param_file)
-    print(sys.argv)
+    # print(sys.argv)
     if len(sys.argv) >= 3:
         parameters["visu"] = True
         if "sumatra_label" in parameters:
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         print("no extra label")
 
     parameters["filename"] = param_file
-    with open("params.json", "w") as f:
+    with open(os.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
         f.write(s)
 
