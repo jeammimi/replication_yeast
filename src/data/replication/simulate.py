@@ -333,8 +333,8 @@ def simulate(traj):
     if soft:
         def cos_soft(r, rmin, rmax, epsilon, sigma):
 
-            V = epsilon * (1 + np.cos(r * 3.1415 / (1.6 * sigma)))
-            F = epsilon * 3.1415 / (1.6 * sigma) * np.sin(r * 3.1415 / (1.6 * sigma))
+            V = epsilon * (1 + np.cos(r * 3.1415 / (rmax)))
+            F = epsilon * 3.1415 / (rmax) * np.sin(r * 3.1415 / (rmax))
 
             return (V, F)
 
@@ -364,7 +364,7 @@ def simulate(traj):
                     if inuc == 0:
                         continue
                     table.pair_coeff.set(p1, p2,
-                                         func=cos_soft, rmin=0, rmax=d * r_cut,
+                                         func=cos_soft, rmin=0, rmax=d,  # smaller here
                                          coeff=dict(epsilon=6.5, sigma=d))
 
 
