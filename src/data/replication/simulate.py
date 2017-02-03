@@ -117,6 +117,8 @@ def simulate(traj):
 
     if spb:
         plist.append("Spb")
+        if visu:
+            plist.append("Cen")
     if nucleole:
         plist += ['Nuc', 'A_Nuc', 'P_Nuc']
 
@@ -195,7 +197,9 @@ def simulate(traj):
 
             if spb and p == Cent[i]:
                 Cen_pos.append(offset_particle + p)
-
+                if visu:
+                    snapshot.particles.typeid[
+                        offset_particle + p] = plist.index('Cen')  # A
                 found_cen = True
 
             if nucleole and p in list_nuc[i]:
