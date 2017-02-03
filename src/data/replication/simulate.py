@@ -330,7 +330,8 @@ def simulate(traj):
     nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
     # Potential for warmup
-    gauss = md.pair.gauss(r_cut=3.0, nlist=nl)
+    r_cut=1.5
+    gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
 
     gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
 
@@ -353,11 +354,10 @@ def simulate(traj):
                         r_cut=(
                             0.5 +
                             diameter_nuc /
-                            2.) *
-                        3)
+                            2.) * r_cut)
                 if inuc == 2:
                     gauss.pair_coeff.set(p1, p2, epsilon=1.0, sigma=diameter_nuc,
-                                         r_cut=3 * diameter_nuc)
+                                         r_cut=diameter_nuc * r_cut)
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
 
