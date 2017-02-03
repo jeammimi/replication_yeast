@@ -342,12 +342,12 @@ def simulate(traj):
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
         r_cut = 1.
-
+        epsilon = 1
 
         table = md.pair.table(width=1000, nlist=nl)
         table.pair_coeff.set(plist, plist,
                              func=cos_soft, rmin=0, rmax=r_cut,
-                             coeff=dict(epsilon=6.5, sigma=1.0))
+                             coeff=dict(epsilon=epsilon, sigma=1.0))
 
         if nucleole:
             for ip1, p1 in enumerate(plist):
@@ -362,12 +362,12 @@ def simulate(traj):
                         d = r_cut * d
                     if inuc == 2:
                         d = 1 + diameter_nuc
-                         # smaller here
+                        # smaller here
                     if inuc == 0:
                         continue
                     table.pair_coeff.set(p1, p2,
                                          func=cos_soft, rmin=0, rmax=d,
-                                         coeff=dict(epsilon=6.5, sigma=d))
+                                         coeff=dict(epsilon=epsilon, sigma=d))
 
 
     else:
