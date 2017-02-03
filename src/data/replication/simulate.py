@@ -330,7 +330,9 @@ def simulate(traj):
     nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
     # Potential for warmup
-    r_cut=1.5
+    def cos_soft(r, rmin, rmax, epsilon, sigma):
+        V = epsilon * (1 + cos(r * 3.1415 / sigma))
+    r_cut = 1.5
     gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
 
     gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
