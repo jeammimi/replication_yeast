@@ -359,12 +359,14 @@ def simulate(traj):
                         inuc += 1
                     if inuc == 1:
                         d = 0.5 + diameter_nuc / 2.
+                        d = r_cut * d
                     if inuc == 2:
                         d = 1 + diameter_nuc
+                         # smaller here
                     if inuc == 0:
                         continue
                     table.pair_coeff.set(p1, p2,
-                                         func=cos_soft, rmin=0, rmax=d,  # smaller here
+                                         func=cos_soft, rmin=0, rmax=d,
                                          coeff=dict(epsilon=6.5, sigma=d))
 
 
