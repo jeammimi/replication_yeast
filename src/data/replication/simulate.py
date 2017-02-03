@@ -371,14 +371,16 @@ def simulate(traj):
 
 
     else:
-        nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
         gauss = False
         if gauss:
             r_cut = 3.
+            nl = md.nlist.tree(r_buff=0.4, check_period=1)
+
             gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
         else:
-            r_cut = 3
+            r_cut = 1.12
+            nl = md.nlist.tree(r_buff=0.8, check_period=1)
             gauss = md.pair.slj(r_cut=r_cut, nlist=nl)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
