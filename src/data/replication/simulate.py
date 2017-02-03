@@ -331,7 +331,7 @@ def simulate(traj):
 
     # Potential for warmup
     if soft:
-        def cos_soft(r, rmin, rmax, epsilon, sigma):
+        def cos_soft(r, epsilon, sigma):
             V = epsilon * (1 + np.cos(r * 3.1415 / (1.6 * sigma)))
             F = epsilon * 3.1415 / (1.6 * sigma) * np.sin(r * 3.1415 / (1.6 * sigma))
             return (V, F)
@@ -342,8 +342,8 @@ def simulate(traj):
         r_cut = 1.6
 
 
-        table = md.pair.table(width=1000, nlist=nl)
-        table.pair_coeff.set(plist, plist, func=cos_soft, rmin=0.0, rmax=r_cut, coeff=dict(epsilon=6.5, sigma=1.0))
+        table = md.pair.table(width=1000, nlist=nl, r_cut=r_cut * (1 + diameter_nuc))
+        table.pair_coeff.set(plist, plist, func=cos_soft, coeff=dict(epsilon=6.5, sigma=1.0))
 
         if nucleole:
             for ip1, p1 in enumerate(plist):
@@ -359,8 +359,7 @@ def simulate(traj):
                         d = 1 + diameter_nuc
                     if inuc == 0:
                         continue
-                    table.pair_coeff.set(p1, p2, r_min=0, r_max=r_cut * d,
-                                         coeff=dict(epsilon=6.5, sigma=d))
+                    table.pair_coeff.set(p1, p2, coeff=dict(epsilon=6.5, sigma=d))
 
 
     else:
@@ -439,7 +438,7 @@ def simulate(traj):
 
     # Warmup
     converged = False
-    dt = 0.005
+    dt = 0.002
     while not converged and not visu:
         try:
 
