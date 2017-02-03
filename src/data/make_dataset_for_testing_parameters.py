@@ -3,6 +3,7 @@ sys.path.append("./")
 from replication.simulate import simulate, load_parameters
 import os
 import json
+import copy
 
 if __name__ == "__main__":
     param_file = sys.argv[1]
@@ -27,4 +28,8 @@ if __name__ == "__main__":
         s = json.dumps(parameters)
         f.write(s)
 
+    original = copy.deepcopy(parameters["visu"])
+    parameters["visu"] = True
+    simulate(parameters)  # generate files for visualisation
+    parameters["visu"] = original
     simulate(parameters)

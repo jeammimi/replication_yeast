@@ -19,20 +19,23 @@ except:
 import copy
 import sys
 import os
+sys.path.append("../")
+
 # Create a figure
-f = mlab.figure(size=(500,500))
+f = mlab.figure(size=(500, 500))
 # Tell visual to use this as the viewer.
 visual.set_viewer(f)
 
 # A silly visualization.
-color_d ={}
-color_d["green"] = (0,128,0)
+color_d = {}
+color_d["green"] = (0, 128, 0)
 # Even sillier animation.
 
 data_folder = sys.argv[1]
 
 t = md.load(os.path.join(data_folder, 'poly.dcd'),
             top=os.path.join(data_folder, "atoms.hoomdxml"))
+
 
 class Representation:
     def __init__(self,traj,what,by_resid=True,tube=True,t=0,update=False,time_color=None,color="red"):
@@ -41,7 +44,7 @@ class Representation:
         self.selections = []
         self.time_color = time_color
         self.tube = tube
-        self.color=color
+        self.color = color
         self.named_selections = []
 
         n_chains = len(list(self.traj.topology.chains))
@@ -51,13 +54,13 @@ class Representation:
             for i in range(n_chains):
                 add = ""
                 if what != "":
-                    add = " and %s"%what
-                sele = "resid %i"%i+add
+                    add = " and %s" % what
+                sele = "resid %i" % i + add
 
                 self.named_selections.append(sele)
                 sel = self.traj.topology.select(sele)
 
-                #print(sele,len(sel))
+                # print(sele,len(sel))
                 if len(sel) != 0:
                     self.selections.append(sel)
         else:
@@ -66,24 +69,24 @@ class Representation:
             if len(sel) != 0:
                 self.selections.append(sel)
             else:
-                print("Empty selection",what)
+                print("Empty selection", what)
 
-    def draw(self,time):
-        #print(self.selections)
+    def draw(self, time):
+        # print(self.selections)
         if self.first:
 
             self.rep = []
 
-        for isel,sel in enumerate(self.selections):
-            x,y,z = self.traj.xyz[time, sel].T
-            if self.time_color != None:
+        for isel, sel in enumerate(self.selections):
+            x, y, z = self.traj.xyz[time, sel].T
+            if self.time_color is not None:
 
 
                 colors = self.time_color(time)
                 if len(colors) < isel + 1:
                     print("The colouring function did not cover all the selection")
-                    print(isel,self.named_selections[isel])
-                    print(len(x),isel)
+                    print(isel, self.named_selections[isel])
+                    print(len(x), isel)
                     raise
 
                 colors = colors[isel]

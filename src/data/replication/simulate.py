@@ -694,7 +694,7 @@ def simulate(traj):
                     break
         # t0 = time.time()
         with open(data_folder + "polymer_timing.dat", "wb") as f:
-            cPickle.dump(lPolymers, f)
+            cPickle.dump(lPolymers, f, protocole=2)
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin
 

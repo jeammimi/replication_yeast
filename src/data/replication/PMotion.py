@@ -5,15 +5,15 @@ Created on Wed Jan 18 09:25:03 2017
 @author: jarbona
 """
 
-with open("logp.txt","w"):
+with open("logp.txt", "w"):
     pass
 
 class Origin:
-    def __init__(self,tag):
+    def __init__(self, tag):
         self.tag = tag
         self.position = self.tag
-        self.move=False
-        self.origin=True
+        self.move = False
+        self.origin = True
         self.passivated=False
         self.activated=False
         self.path = [[self.tag,0]]

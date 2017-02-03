@@ -7,5 +7,6 @@ visu2 <-
   source activate root
   conda info --envs
   python src/data//make_dataset_for_testing_parameters.py $dir/params.json 1
+  python src/data/convert3to2.py $dir/polymer_timing.dat
   source activate maya
-  python src/data/replication/visu.py $dir
+  python src/data/visu.py $dir
