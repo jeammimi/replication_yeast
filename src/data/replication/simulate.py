@@ -55,6 +55,7 @@ def simulate(traj):
     # Simulation parameters
     n_steps = traj["n_steps"]
     length_steps = traj["length_steps"]
+    benchmark = traj["benchmark"]
 
     np.random.seed(seed)
     hoomd.context.initialize("--mode=cpu")
@@ -464,6 +465,10 @@ def simulate(traj):
     md.integrate.mode_standard(dt=sim_dt)
     method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
     snp = system  # .take_snapshot()
+
+    if benchmark:
+        print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
+        return
 
     def Change_type(typep, particle_list, snp, msg=""):
         # print(particle_list)
