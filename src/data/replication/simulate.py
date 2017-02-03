@@ -378,7 +378,7 @@ def simulate(traj):
             r_cut = 3.
             gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
         else:
-            r_cut = 1.12
+            r_cut = 3
             gauss = md.pair.slj(r_cut=r_cut, nlist=nl)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
