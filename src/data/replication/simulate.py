@@ -563,9 +563,9 @@ def simulate(traj):
 
     #Small warmup
     md.integrate.mode_standard(dt=sim_dt / 4)
-    md.run(100)
+    hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
-    md.run(100)
+    hoomd.run(100)
 
     for i in range(n_steps):
 
