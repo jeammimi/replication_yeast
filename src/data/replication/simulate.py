@@ -372,7 +372,7 @@ def simulate(traj):
 
     else:
 
-        gauss = False
+        gauss = True
         if gauss:
             r_cut = 3.
             nl = md.nlist.tree(r_buff=0.4, check_period=1)

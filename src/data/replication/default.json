@@ -30,7 +30,7 @@
 
 "diff_alone" : false ,
 
-"diff_bind_when_free" : true ,
+"diff_bind_when_free" : false ,
 "diff_bind_when_on_DNA" : false ,
 
 "replicate_DNA" : false ,
