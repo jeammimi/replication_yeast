@@ -380,7 +380,7 @@ def simulate(traj):
             gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
         else:
             r_cut = 1.12
-            nl = md.nlist.tree(r_buff=0.8, check_period=1)
+            nl = md.nlist.tree(r_buff=3, check_period=1)
             gauss = md.pair.slj(r_cut=r_cut, nlist=nl)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
