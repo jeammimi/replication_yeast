@@ -340,12 +340,9 @@ def simulate(traj):
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
         r_cut = 1.6
-        gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
-
-        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
 
 
-        table = md.pair.table(width=1000)
+        table = md.pair.table(width=1000, nlist=nl)
         table.pair_coeff.set(plist, plist, func=cos_soft, rmin=0.0, rmax=r_cut, coeff=dict(epsilon=6.5, sigma=1.0))
 
         if nucleole:
