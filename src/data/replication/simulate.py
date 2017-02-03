@@ -342,7 +342,7 @@ def simulate(traj):
         r_cut = 1.6
 
 
-        table = md.pair.table(width=1000, nlist=nl, r_cut=r_cut * (1 + diameter_nuc))
+        table = md.pair.table(width=1000, nlist=nl)
         table.pair_coeff.set(plist, plist, func=cos_soft, coeff=dict(epsilon=6.5, sigma=1.0))
 
         if nucleole:
