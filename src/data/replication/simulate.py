@@ -56,6 +56,7 @@ def simulate(traj):
     n_steps = traj["n_steps"]
     length_steps = traj["length_steps"]
     benchmark = traj["benchmark"]
+    soft = traj["soft"]
 
     np.random.seed(seed)
     hoomd.context.initialize("--mode=cpu")
@@ -327,39 +328,75 @@ def simulate(traj):
         harmonic.bond_coeff.set(
             'Mono_Nuc', k=330, r0=diameter_nuc / 2. + 1. / 2)
 
-    nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
     # Potential for warmup
-    def cos_soft(r, rmin, rmax, epsilon, sigma):
-        V = epsilon * (1 + cos(r * 3.1415 / sigma))
-    r_cut = 1.5
-    gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+    if soft:
+        def cos_soft(r, rmin, rmax, epsilon, sigma):
+            V = epsilon * (1 + np.cos(r * 3.1415 / (1.6 * sigma)))
+            F = epsilon * 3.1415 / (1.6 * sigma) * np.sin(r * 3.1415 / (1.6 * sigma))
+            return (V, F)
 
-    gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
 
-    if nucleole:
-        for ip1, p1 in enumerate(plist):
-            for p2 in plist[ip1:]:
-                inuc = 0
-                if "Nuc" in p1:
-                    inuc += 1
-                if "Nuc" in p2:
-                    inuc += 1
-                if inuc == 1:
-                    gauss.pair_coeff.set(
-                        p1,
-                        p2,
-                        epsilon=.5,
-                        sigma=0.5 +
-                        diameter_nuc /
-                        2.,
-                        r_cut=(
-                            0.5 +
+        nl = md.nlist.tree(r_buff=0.4, check_period=1)
+
+        r_cut = 1.6
+        gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+
+        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
+
+
+        table = md.pair.table(width=1000)
+        table.pair_coeff.set(plist, plist, func=cos_soft, rmin=0.0, rmax=r_cut, coeff=dict(epsilon=6.5, sigma=1.0))
+
+        if nucleole:
+            for ip1, p1 in enumerate(plist):
+                for p2 in plist[ip1:]:
+                    inuc = 0
+                    if "Nuc" in p1:
+                        inuc += 1
+                    if "Nuc" in p2:
+                        inuc += 1
+                    if inuc == 1:
+                        d = 0.5 + diameter_nuc / 2.
+                    if inuc == 2:
+                        d = 1 + diameter_nuc
+                    if inuc == 0:
+                        continue
+                    table.pair_coeff.set(p1, p2, r_min=0, r_max=r_cut * d,
+                                         coeff=dict(epsilon=6.5, sigma=d))
+
+
+    else:
+        nl = md.nlist.tree(r_buff=0.4, check_period=1)
+
+        r_cut = 3.
+        gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+
+        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
+
+        if nucleole:
+            for ip1, p1 in enumerate(plist):
+                for p2 in plist[ip1:]:
+                    inuc = 0
+                    if "Nuc" in p1:
+                        inuc += 1
+                    if "Nuc" in p2:
+                        inuc += 1
+                    if inuc == 1:
+                        gauss.pair_coeff.set(
+                            p1,
+                            p2,
+                            epsilon=.5,
+                            sigma=0.5 +
                             diameter_nuc /
-                            2.) * r_cut)
-                if inuc == 2:
-                    gauss.pair_coeff.set(p1, p2, epsilon=1.0, sigma=diameter_nuc,
-                                         r_cut=diameter_nuc * r_cut)
+                            2.,
+                            r_cut=(
+                                0.5 +
+                                diameter_nuc /
+                                2.) * r_cut)
+                    if inuc == 2:
+                        gauss.pair_coeff.set(p1, p2, epsilon=1.0, sigma=diameter_nuc,
+                                             r_cut=diameter_nuc * r_cut)
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
 
