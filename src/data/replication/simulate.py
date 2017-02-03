@@ -31,7 +31,7 @@ def simulate(traj):
     N_diffu = traj["N_diffu"]
     cut_off_inte = traj["cut_off_inte"]
     p_inte = traj["p_inte"]
-    dt = traj["dt"]
+    sim_dt = traj["sim_dt"]
     p_origins = traj["p_origins"]
 
     # Yeast case
@@ -449,7 +449,7 @@ def simulate(traj):
             period=None,
             group=all_beads,
             vis=True)
-        exit()
+        return
     # gsd = dump.gsd(filename=data_folder + "atoms.gsd",period=None,group=all_beads)
     dcd = dump.dcd(filename=data_folder + 'poly.dcd',
                    period=100, overwrite=True)
@@ -457,7 +457,7 @@ def simulate(traj):
     # Dynamics
 
     t0 = time.time()
-    md.integrate.mode_standard(dt=0.01)
+    md.integrate.mode_standard(dt=sim_dt)
     method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
     snp = system  # .take_snapshot()
 
