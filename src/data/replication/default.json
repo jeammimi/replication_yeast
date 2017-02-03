@@ -36,5 +36,7 @@
 "replicate_DNA" : false ,
 
 "n_steps" : 100,
-"length_steps" : 1000
+"length_steps" : 1000 ,
+"benchmark" : false,
+"soft" : true
 }
