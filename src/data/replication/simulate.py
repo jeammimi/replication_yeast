@@ -341,7 +341,7 @@ def simulate(traj):
 
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
-        r_cut = 1.6
+        r_cut = 1.
 
 
         table = md.pair.table(width=1000, nlist=nl)
