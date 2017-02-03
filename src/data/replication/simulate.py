@@ -561,6 +561,12 @@ def simulate(traj):
         group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
     # nl.tune(warmup=1,steps=1000)
 
+    #Small warmup
+    md.integrate.mode_standard(dt=sim_dt / 4)
+    md.run(100)
+    md.integrate.mode_standard(dt=sim_dt / 2)
+    md.run(100)
+
     for i in range(n_steps):
 
         # Chek that the microtubule length is correct
