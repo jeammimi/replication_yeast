@@ -80,7 +80,7 @@ def simulate(traj):
             len_chrom=len_chrom,
             dist_centro=Cent,
             p_ribo=p_ribo,
-            Radius=R,
+            Radius=R-1,
             Mt=microtubule_length)
     else:
         Sim = []
@@ -456,7 +456,7 @@ def simulate(traj):
 
     # Warmup
     converged = False
-    dt = 0.002
+    dt = 0.001
 
     dcd = dump.dcd(filename=data_folder + 'init.dcd',
                    period=10, overwrite=True)
