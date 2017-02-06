@@ -604,7 +604,7 @@ def simulate(traj):
         # Dump the Hi-Cs
 
         # system.restore_snapshot(snp)
-        hoomd.run(length_steps)
+        hoomd.run(length_steps, profile=True)
 
         if dump_hic:
             ph = np.array([p.position for p in group_hic])
