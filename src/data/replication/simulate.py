@@ -342,7 +342,7 @@ def simulate(traj):
 
         # nl = md.nlist.tree(r_buff=0.4, check_period=1)
         #nl = md.nlist.stencil(r_buff=0.4, check_period=1)
-        nl = md.list.cell(r_buff=0.4, check_period=1)
+        nl = md.nlist.cell(r_buff=0.4, check_period=1)
 
         r_cut = 1.
         epsilon = 6.5
