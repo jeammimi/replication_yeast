@@ -20,12 +20,12 @@
 "telomere" : false ,
 
 "microtubule_length" : 0.4 ,
-"diameter_nuc" :  0.18 ,
+"diameter_nuc" :  0.16 ,
 "special_start" : false ,
 
 "Activ_Origins" : ["Ori"] ,
 "visu" : false ,
-"dump_hic" : false ,
+"dump_hic" : true ,
 
 
 "diff_alone" : false ,
