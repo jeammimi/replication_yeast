@@ -491,7 +491,7 @@ def simulate(traj):
 
     # Warmup
     converged = False
-    dt = 0.001
+    dt = 0.002
 
     dcd = dump.dcd(filename=data_folder + 'init.dcd',
                    period=10, overwrite=True)
