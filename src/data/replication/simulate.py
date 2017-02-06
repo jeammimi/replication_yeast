@@ -317,7 +317,7 @@ def simulate(traj):
     ###############################################
     # Defining force field:
     harmonic = md.bond.harmonic()
-    harmonic.bond_coeff.set(bond_list, k=300.0, r0=1)
+    harmonic.bond_coeff.set(bond_list, k=20.0, r0=1)
 
     harmonic.bond_coeff.set('Mono_Diff', k=10.0, r0=1)
 
