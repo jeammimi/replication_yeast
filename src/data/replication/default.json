@@ -38,5 +38,6 @@
 "n_steps" : 100,
 "length_steps" : 1000 ,
 "benchmark" : false,
-"soft" : true
+"soft" : true,
+"gauss" : true
 }

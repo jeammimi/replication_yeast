@@ -17,21 +17,16 @@ import time
 import json
 
 
-def simulate(traj):
+def create_initial_configuration(traj):
 
-    seed = traj["seed"]
     len_chrom = traj["len_chrom"]
     Cent = traj["Cent"]
     p_ribo = traj["p_ribo"]
     R = traj["R"]
     micron = traj["micron"]
-    data_folder = traj["data_folder"]
 
     # Diffusing elements
     N_diffu = traj["N_diffu"]
-    cut_off_inte = traj["cut_off_inte"]
-    p_inte = traj["p_inte"]
-    sim_dt = traj["sim_dt"]
     p_origins = traj["p_origins"]
 
     # Yeast case
@@ -39,40 +34,16 @@ def simulate(traj):
     nucleole = traj["nucleole"]
     telomere = traj["telomere"]
     microtubule_length = traj["microtubule_length"] * micron
-    diameter_nuc = traj["diameter_nuc"] * micron
     special_start = traj["special_start"]
-    Activ_Origins = traj["Activ_Origins"]
     visu = traj["visu"]
     dump_hic = traj["dump_hic"]
 
     # Scenari
-    diff_alone = traj["diff_alone"]
     diff_bind_when_free = traj["diff_bind_when_free"]
-    diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
-    replicate_DNA = traj["replicate_DNA"]
 
 
     # Simulation parameters
-    n_steps = traj["n_steps"]
-    length_steps = traj["length_steps"]
-    benchmark = traj["benchmark"]
-    soft = traj["soft"]
-    gauss = traj["gauss"]
 
-    np.random.seed(seed)
-    hoomd.context.initialize()#"--mode=cpu ")
-
-
-    if diff_alone:
-        # Check
-        assert(diff_bind_when_free is False)
-        assert (diff_bind_when_on_DNA is False)
-
-    # End of parameter
-    ##########################################
-
-    #########################################
-    # Define polymer bonding and positions
 
     Np = len(len_chrom)
     assert(len(len_chrom) == len(Cent) == len(p_ribo))
@@ -243,7 +214,6 @@ def simulate(traj):
                     'Spb_Cen')  # polymer_A
 
                 offset_bond += 1
-
     ############################################################
     # Diffusing elements
     # Defining useful classes
@@ -297,6 +267,62 @@ def simulate(traj):
         if p[0] == p[1]:
             print(i, p)
 
+    return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers
+
+
+def simulate(traj):
+
+    seed = traj["seed"]
+
+    R = traj["R"]
+    micron = traj["micron"]
+    data_folder = traj["data_folder"]
+
+    # Diffusing elements
+    cut_off_inte = traj["cut_off_inte"]
+    p_inte = traj["p_inte"]
+    sim_dt = traj["sim_dt"]
+
+    # Yeast case
+    spb = traj["spb"]
+    nucleole = traj["nucleole"]
+    telomere = traj["telomere"]
+    microtubule_length = traj["microtubule_length"] * micron
+    diameter_nuc = traj["diameter_nuc"] * micron
+    Activ_Origins = traj["Activ_Origins"]
+    visu = traj["visu"]
+    dump_hic = traj["dump_hic"]
+
+    # Scenari
+    diff_alone = traj["diff_alone"]
+    diff_bind_when_free = traj["diff_bind_when_free"]
+    diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
+
+
+    # Simulation parameters
+    n_steps = traj["n_steps"]
+    length_steps = traj["length_steps"]
+    benchmark = traj["benchmark"]
+    soft = traj["soft"]
+    gauss = True  # traj["gauss"]
+
+    np.random.seed(seed)
+    hoomd.context.initialize()  # "--mode=cpu ")
+
+
+    if diff_alone:
+        # Check
+        assert(diff_bind_when_free is False)
+        assert (diff_bind_when_on_DNA is False)
+
+    # End of parameter
+    ##########################################
+
+    #########################################
+    # Define polymer bonding and positions
+
+    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers = \
+        create_initial_configuration(traj)
     system = init.read_snapshot(snapshot)
 
     for i, p in enumerate(system.particles):
@@ -309,8 +335,6 @@ def simulate(traj):
             print(b.a, b.b)
 
             raise
-        # print(p)
-        # exit()
         assert b.tag == i
     ###############################################
 
@@ -341,8 +365,8 @@ def simulate(traj):
 
 
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
-        #nl = md.nlist.stencil(r_buff=0.4, check_period=1)
-        #nl = md.nlist.cell(r_buff=0.4, check_period=1)
+        # nl = md.nlist.stencil(r_buff=0.4, check_period=1)
+        # nl = md.nlist.cell(r_buff=0.4, check_period=1)
 
         r_cut = 1.5
         epsilon = 6.5
@@ -498,18 +522,7 @@ def simulate(traj):
                 system.particles[ip].position = p
 
     dcd.disable()
-    """
-    gauss.disable()
 
-    slj=md.pair.slj(r_cut=2, nlist=nl)
-    slj.pair_coeff.set(plist,plist,sigma=1,epsilon=1,r_cut=1.12)
-    print("Second minimizing")
-    method=md.integrate.mode_minimize_fire(group=all_beads,dt=0.05)
-    while not(method.has_converged()):
-       hoomd.run(100)
-    """
-    # hoomd.run(1000000)
-    # method.disable()
 
     # Dumping
 
@@ -606,7 +619,7 @@ def simulate(traj):
         # Dump the Hi-Cs
 
         # system.restore_snapshot(snp)
-        hoomd.run(length_steps, profile=True)
+        hoomd.run(length_steps, profile=False)
 
         if dump_hic:
             ph = np.array([p.position for p in group_hic])
