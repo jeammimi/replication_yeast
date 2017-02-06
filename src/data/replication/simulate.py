@@ -29,6 +29,24 @@ def create_initial_configuration(traj):
     N_diffu = traj["N_diffu"]
     p_origins = traj["p_origins"]
 
+    if type(p_origins) == list:
+        pass
+    else:
+        # ARS
+        c = ["I", "II", "III", "IV", "V", "VI", "VII",
+             "VIII", "IX", "X", "XI", "XII", "XIII",
+             "XIV", "XV", "XVI"]
+
+        coeff = len_chrom[3] / 1531933
+
+        ch = [[] for i in range(16)]
+        with open(p_origins, "r") as f:
+            for ligne in f.readlines():
+                if not ligne.startswith("#"):
+                    sp = ligne.split()
+                    if len(sp) > 3 and (sp[2] == "ARS" or False):  # sp[2] == "ARS_consensus_sequence"):
+                        ch[c.index(sp[0][3:])].append(int(coeff * sp[3]))
+    p_origins = ch
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]
@@ -518,6 +536,7 @@ def simulate(traj):
     n_steps = traj["n_steps"]
     length_steps = traj["length_steps"]
     benchmark = traj["benchmark"]
+    warmup = traj["warmup"]
 
     np.random.seed(seed)
     hoomd.context.initialize()  # "--mode=cpu ")
@@ -587,19 +606,9 @@ def simulate(traj):
             vis=True)
         return
     # gsd = dump.gsd(filename=data_folder + "atoms.gsd",period=None,group=all_beads)
-    dcd = dump.dcd(filename=data_folder + 'poly.dcd',
-                   period=100, overwrite=True)
 
     # Dynamics
 
-    t0 = time.time()
-    md.integrate.mode_standard(dt=sim_dt)
-    method = md.integrate.brownian(group=all_move, kT=1, seed=seed)
-    snp = system  # .take_snapshot()
-
-    if benchmark:
-        print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
-        return
 
     def Change_type(typep, particle_list, snp, msg=""):
         # print(particle_list)
@@ -644,16 +653,35 @@ def simulate(traj):
                 group_origin = group.union(name="Activ_origin", a=group_origin,
                                            b=group.type(name="tmp", type=t))
 
-    r_hic = []
-    if dump_hic:
-        group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
+
     # nl.tune(warmup=1,steps=1000)
 
     # Small warmup
+
+    t0 = time.time()
+    md.integrate.mode_standard(dt=sim_dt)
+    method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
+    snp = system  # .take_snapshot()
+
+    if benchmark:
+        print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
+        return
+
     md.integrate.mode_standard(dt=sim_dt / 4)
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
     hoomd.run(100)
+
+
+    if warmup != 0:
+        hoomd.warmup(warmup)
+
+    dcd = dump.dcd(filename=data_folder + 'poly.dcd',
+                   period=100, overwrite=True)
+
+    r_hic = []
+    if dump_hic:
+        group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
 
     for i in range(n_steps):
 

@@ -13,7 +13,7 @@
 "cut_off_inte" : 2 ,
 "p_inte" : 0.2 ,
 "sim_dt" : 0.1 ,
-"p_origins" : [[10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10]],
+"p_origins" : "./data/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
 
 "spb" : true ,
 "nucleole" : true ,
@@ -37,6 +37,7 @@
 
 "n_steps" : 100,
 "length_steps" : 1000 ,
+"warmup" : 100000,
 "benchmark" : false,
 "soft" : true,
 "gauss" : true
