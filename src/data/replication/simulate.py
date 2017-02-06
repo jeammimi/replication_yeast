@@ -476,6 +476,9 @@ def simulate(traj):
             quantities=[
                 'temperature',
                 'potential_energy',
+                'bond_harmonic_energy',
+                'external_wall_lj_energy',
+                "pair_table_energy",
                 'kinetic_energy',
                 'volume',
                 'pressure'],
