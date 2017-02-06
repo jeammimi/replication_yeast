@@ -550,7 +550,7 @@ def simulate(traj):
 
     t0 = time.time()
     md.integrate.mode_standard(dt=sim_dt)
-    method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
+    method = md.integrate.brownian(group=all_move, kT=1, seed=seed)
     snp = system  # .take_snapshot()
 
     if benchmark:
