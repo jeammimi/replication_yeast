@@ -479,7 +479,7 @@ def simulate(traj):
         except:
             converged = False
             dt /= 2.
-            print(dt)
+            print("Reducing time step",dt)
             # Restore positions
             for ip, p in enumerate(snapshot.particles.position):
 
