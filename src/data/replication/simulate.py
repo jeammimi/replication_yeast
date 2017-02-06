@@ -80,7 +80,7 @@ def simulate(traj):
             len_chrom=len_chrom,
             dist_centro=Cent,
             p_ribo=p_ribo,
-            Radius=R-1,
+            Radius=R - 1,
             Mt=microtubule_length)
     else:
         Sim = []
