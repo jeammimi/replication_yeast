@@ -45,7 +45,7 @@ def create_initial_configuration(traj):
                 if not ligne.startswith("#"):
                     sp = ligne.split()
                     if len(sp) > 3 and (sp[2] == "ARS" or False):  # sp[2] == "ARS_consensus_sequence"):
-                        ch[c.index(sp[0][3:])].append(int(coeff * sp[3]))
+                        ch[c.index(sp[0][3:])].append(int(coeff * int(sp[3])))
     p_origins = ch
     # Yeast case
     spb = traj["spb"]
