@@ -416,7 +416,7 @@ def simulate(traj):
     sphere = md.wall.group()
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
     # lj much more slower (at least in thu minimisation)
-    wall_force_slj = md.wall.lj(sphere, r_cut=3.0)
+    wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
                                    r_cut=1.12, mode="shift")
     # wall_force_slj.set_params(mode="shift")
@@ -428,7 +428,7 @@ def simulate(traj):
             sigma=diameter_nuc,
             r_cut=diameter_nuc * 1.12)
     if telomere:
-        wall_force_slj.force_coeff.set(plist, epsilon=2.0, sigma=1.5, r_cut=3)
+        wall_force_slj.force_coeff.set("Telo", epsilon=2.0, sigma=1.5, r_cut=3)
 
     # Group;
     all_beads = group.all()
