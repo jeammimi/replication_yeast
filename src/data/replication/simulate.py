@@ -418,7 +418,7 @@ def simulate(traj):
 
     wall_force_slj = md.wall.slj(sphere, r_cut=3.0)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
-                                   r_cut=1.12)#, mode="shift")
+                                   r_cut=1.12, mode="shift")
     # wall_force_slj.set_params(mode="shift")
 
     if nucleole:
