@@ -343,7 +343,7 @@ def simulate(traj):
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
 
         r_cut = 1.
-        epsilon = 1
+        epsilon = 6.5
 
         table = md.pair.table(width=1000, nlist=nl)
         table.pair_coeff.set(plist, plist,
