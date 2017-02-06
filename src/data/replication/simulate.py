@@ -445,7 +445,7 @@ def simulate(traj):
     # lj much more slower (at least in thu minimisation)
     wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
-                                   r_cut=1.12, mode="shift")
+                                   r_cut=1.12)#, mode="shift")
     # wall_force_slj.set_params(mode="shift")
 
     if nucleole:
