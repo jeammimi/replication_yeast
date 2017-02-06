@@ -57,6 +57,7 @@ def simulate(traj):
     length_steps = traj["length_steps"]
     benchmark = traj["benchmark"]
     soft = traj["soft"]
+    gauss = traj["gauss"]
 
     np.random.seed(seed)
     hoomd.context.initialize("--mode=cpu")
@@ -372,7 +373,7 @@ def simulate(traj):
 
     else:
 
-        gauss = True
+
         if gauss:
             r_cut = 3.
             nl = md.nlist.tree(r_buff=0.4, check_period=1)
@@ -382,7 +383,7 @@ def simulate(traj):
             r_cut = 1.12
             nl = md.nlist.tree()  # r_buff=10, check_period=1)
             # nl = md.nlist.cell()
-            gauss = md.pair.slj(r_cut=r_cut * diameter_nuc, nlist=nl, d_max=diameter_nuc)
+            gauss = md.pair.lj(r_cut=r_cut * diameter_nuc, nlist=nl, d_max=diameter_nuc)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
 
