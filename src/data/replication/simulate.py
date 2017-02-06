@@ -674,7 +674,7 @@ def simulate(traj):
 
 
     if warmup != 0:
-        hoomd.warmup(warmup)
+        hoomd.run(warmup)
 
     dcd = dump.dcd(filename=data_folder + 'poly.dcd',
                    period=100, overwrite=True)
