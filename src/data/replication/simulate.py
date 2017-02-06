@@ -270,18 +270,13 @@ def create_initial_configuration(traj):
     return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers
 
 
-def simulate(traj):
+def force_field(traj, bond_list, plist, tag_spb):
 
-    seed = traj["seed"]
 
     R = traj["R"]
     micron = traj["micron"]
-    data_folder = traj["data_folder"]
 
     # Diffusing elements
-    cut_off_inte = traj["cut_off_inte"]
-    p_inte = traj["p_inte"]
-    sim_dt = traj["sim_dt"]
 
     # Yeast case
     spb = traj["spb"]
@@ -289,57 +284,16 @@ def simulate(traj):
     telomere = traj["telomere"]
     microtubule_length = traj["microtubule_length"] * micron
     diameter_nuc = traj["diameter_nuc"] * micron
-    Activ_Origins = traj["Activ_Origins"]
-    visu = traj["visu"]
-    dump_hic = traj["dump_hic"]
 
-    # Scenari
-    diff_alone = traj["diff_alone"]
-    diff_bind_when_free = traj["diff_bind_when_free"]
-    diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
+
+
 
 
     # Simulation parameters
-    n_steps = traj["n_steps"]
-    length_steps = traj["length_steps"]
-    benchmark = traj["benchmark"]
+
     soft = traj["soft"]
-    gauss = True  # traj["gauss"]
+    gauss = traj["gauss"]
 
-    np.random.seed(seed)
-    hoomd.context.initialize()  # "--mode=cpu ")
-
-
-    if diff_alone:
-        # Check
-        assert(diff_bind_when_free is False)
-        assert (diff_bind_when_on_DNA is False)
-
-    # End of parameter
-    ##########################################
-
-    #########################################
-    # Define polymer bonding and positions
-
-    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers = \
-        create_initial_configuration(traj)
-    system = init.read_snapshot(snapshot)
-
-    for i, p in enumerate(system.particles):
-        # print(p)
-        # exit()
-        assert p.tag == i
-
-    for i, b in enumerate(system.bonds):
-        if b.a == b.b:
-            print(b.a, b.b)
-
-            raise
-        assert b.tag == i
-    ###############################################
-
-    ###############################################
-    # Defining force field:
     harmonic = md.bond.harmonic()
     harmonic.bond_coeff.set(bond_list, k=20.0, r0=1)
 
@@ -464,6 +418,7 @@ def simulate(traj):
 
     # Group;
     all_beads = group.all()
+    Spb_g = None
     if spb:
         Spb_g = group.tag_list(name="Spb", tags=[tag_spb])
         pspb = [p.position for p in Spb_g]
@@ -472,24 +427,25 @@ def simulate(traj):
         all_move = group.difference(name="move", a=all_beads, b=Spb_g)
     else:
         all_move = all_beads
-    # Log
-    if not visu:
-        logger = analyze.log(
-            filename=data_folder +
-            'mylog.log',
-            period=1000,
-            quantities=[
-                'temperature',
-                'potential_energy',
-                'bond_harmonic_energy',
-                'external_wall_lj_energy',
-                "pair_table_energy",
-                'kinetic_energy',
-                'volume',
-                'pressure'],
-            overwrite=True)
 
-    # Warmup
+    return all_beads, all_move, Spb_g, nl
+
+
+def minimize(traj, all_move, system, snapshot, Spb_g):
+
+    R = traj["R"]
+    data_folder = traj["data_folder"]
+
+    # Diffusing elements
+
+    # Yeast case
+    spb = traj["spb"]
+
+
+    visu = traj["visu"]
+
+    # Scenari
+
     converged = False
     dt = 0.002
 
@@ -531,6 +487,94 @@ def simulate(traj):
 
     dcd.disable()
 
+
+def simulate(traj):
+
+    seed = traj["seed"]
+
+    micron = traj["micron"]
+    data_folder = traj["data_folder"]
+
+    # Diffusing elements
+    cut_off_inte = traj["cut_off_inte"]
+    p_inte = traj["p_inte"]
+    sim_dt = traj["sim_dt"]
+
+    # Yeast case
+    spb = traj["spb"]
+
+    microtubule_length = traj["microtubule_length"] * micron
+    Activ_Origins = traj["Activ_Origins"]
+    visu = traj["visu"]
+    dump_hic = traj["dump_hic"]
+
+    # Scenari
+    diff_alone = traj["diff_alone"]
+    diff_bind_when_free = traj["diff_bind_when_free"]
+    diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
+
+
+    # Simulation parameters
+    n_steps = traj["n_steps"]
+    length_steps = traj["length_steps"]
+    benchmark = traj["benchmark"]
+
+    np.random.seed(seed)
+    hoomd.context.initialize()  # "--mode=cpu ")
+
+
+    if diff_alone:
+        # Check
+        assert(diff_bind_when_free is False)
+        assert (diff_bind_when_on_DNA is False)
+
+    # End of parameter
+    ##########################################
+
+    #########################################
+    # Define polymer bonding and positions
+
+    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers = \
+        create_initial_configuration(traj)
+    system = init.read_snapshot(snapshot)
+
+    for i, p in enumerate(system.particles):
+        # print(p)
+        # exit()
+        assert p.tag == i
+
+    for i, b in enumerate(system.bonds):
+        if b.a == b.b:
+            print(b.a, b.b)
+
+            raise
+        assert b.tag == i
+    ###############################################
+
+    ###############################################
+    # Defining force field:
+    all_beads, all_move, Spb_g, nl = force_field(traj, bond_list=bond_list, plist=plist, tag_spb=tag_spb)
+
+    # Log
+    if not visu:
+        logger = analyze.log(
+            filename=data_folder +
+            'mylog.log',
+            period=1000,
+            quantities=[
+                'temperature',
+                'potential_energy',
+                'bond_harmonic_energy',
+                'external_wall_lj_energy',
+                "pair_table_energy",
+                'kinetic_energy',
+                'volume',
+                'pressure'],
+            overwrite=True)
+
+    # Warmup
+
+    minimize(traj, all_move, system, snapshot, Spb_g)
 
     # Dumping
 
@@ -800,7 +844,7 @@ def simulate(traj):
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin
 
-    print(gauss.get_energy(all_beads), wall_force_slj.get_energy(all_beads))
+    # print(gauss.get_energy(all_beads), wall_force_slj.get_energy(all_beads))
     print(time.time() - t0)
 
 
