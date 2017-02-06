@@ -60,7 +60,7 @@ def simulate(traj):
     gauss = traj["gauss"]
 
     np.random.seed(seed)
-    hoomd.context.initialize("--mode=cpu")
+    hoomd.context.initialize()#"--mode=cpu ")
 
 
     if diff_alone:
