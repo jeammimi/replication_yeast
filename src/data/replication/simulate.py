@@ -383,7 +383,7 @@ def simulate(traj):
             r_cut = 1.12
             nl = md.nlist.tree()  # r_buff=10, check_period=1)
             # nl = md.nlist.cell()
-            gauss = md.pair.lj(r_cut=r_cut * diameter_nuc, nlist=nl)  # , d_max=diameter_nuc)
+            gauss = md.pair.lj(r_cut=r_cut, nlist=nl)  # , d_max=diameter_nuc)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
 
