@@ -416,7 +416,7 @@ def simulate(traj):
     sphere = md.wall.group()
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
     # lj much more slower (at least in thu minimisation)
-    wall_force_slj = md.wall.force_shifted_lj(sphere, r_cut=3.0)
+    wall_force_slj = md.wall.lj(sphere, r_cut=3.0)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
                                    r_cut=1.12, mode="shift")
     # wall_force_slj.set_params(mode="shift")
@@ -457,6 +457,9 @@ def simulate(traj):
     # Warmup
     converged = False
     dt = 0.002
+
+    dcd = dump.dcd(filename=data_folder + 'init.dcd',
+                   period=10, overwrite=True)
     while not converged and not visu:
         try:
 
@@ -479,12 +482,13 @@ def simulate(traj):
         except:
             converged = False
             dt /= 2.
-            print("Reducing time step",dt)
+            print("Reducing time step", dt)
             # Restore positions
             for ip, p in enumerate(snapshot.particles.position):
 
                 system.particles[ip].position = p
 
+    dcd.disable()
     """
     gauss.disable()
 
