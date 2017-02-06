@@ -364,7 +364,7 @@ def simulate(traj):
                         d = 0.5 + diameter_nuc / 2.
                         d = r_cut * d
                     if inuc == 2:
-                        d = 1 + diameter_nuc
+                        d = r_cut * (1 + diameter_nuc)
                         # smaller here
                     if inuc == 0:
                         continue
