@@ -478,6 +478,12 @@ def simulate(traj):
                     """
                 # exit()
                 hoomd.run(100)
+
+                # Check all particles are in the sphere:
+                for p in system.particles:
+                    if linalg.norm(p.position) > R:
+                        raise
+
             converged = True
         except:
             converged = False
@@ -575,7 +581,7 @@ def simulate(traj):
         group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
     # nl.tune(warmup=1,steps=1000)
 
-    #Small warmup
+    # Small warmup
     md.integrate.mode_standard(dt=sim_dt / 4)
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
