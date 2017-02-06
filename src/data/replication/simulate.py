@@ -662,6 +662,7 @@ def simulate(traj):
             for cen in Cen_pos:
                 cent_tmp = system.particles[cen]
                 # print(cent_tmp.position)
+                pspb = [p.position for p in Spb_g]
                 d = linalg.norm(
                     np.array(pspb[0]) - np.array(cent_tmp.position))
                 if d > 2 * microtubule_length:
