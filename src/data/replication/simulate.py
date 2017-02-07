@@ -714,7 +714,8 @@ def simulate(traj):
                 r_hic += D
             else:
                 r_hic = D
-            np.save(data_folder + "/hic", r_hic)
+            if i % 32 == 0:
+                np.save(data_folder + "/hic", r_hic)
 
         # snp = system.take_snapshot()
 
