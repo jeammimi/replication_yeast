@@ -10,9 +10,9 @@ from hoomd import data, init, md, group, dump, deprecated, analyze
 import numpy as np
 import scipy.linalg as linalg
 from scipy.spatial.distance import cdist
-from PMotion import Polymer
+from .PMotion import Polymer
 import _pickle as cPickle
-from createPoly import create_init_conf_yeast
+from .createPoly import create_init_conf_yeast
 import time
 import json
 
