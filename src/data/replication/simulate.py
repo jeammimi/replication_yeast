@@ -537,6 +537,7 @@ def simulate(traj):
     length_steps = traj["length_steps"]
     benchmark = traj["benchmark"]
     warmup = traj["warmup"]
+    dcd_period = traj["dcd_period"]
 
     np.random.seed(seed)
     hoomd.context.initialize()  # "--mode=cpu ")
@@ -677,7 +678,7 @@ def simulate(traj):
         hoomd.run(warmup)
 
     dcd = dump.dcd(filename=data_folder + 'poly.dcd',
-                   period=100, overwrite=True)
+                   period=dcd_period, overwrite=True)
 
     r_hic = []
     if dump_hic:

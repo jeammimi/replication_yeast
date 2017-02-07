@@ -25,7 +25,7 @@
 
 "Activ_Origins" : ["Ori"] ,
 "visu" : false ,
-"dump_hic" : false ,
+"dump_hic" : true ,
 
 
 "diff_alone" : false ,
@@ -38,6 +38,7 @@
 "n_steps" : 100,
 "length_steps" : 1000 ,
 "warmup" : 100000,
+"dcd_period" : 1000,
 "benchmark" : false,
 "soft" : true,
 "gauss" : true
