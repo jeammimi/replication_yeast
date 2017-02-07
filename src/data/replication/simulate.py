@@ -10,9 +10,9 @@ from hoomd import data, init, md, group, dump, deprecated, analyze
 import numpy as np
 import scipy.linalg as linalg
 from scipy.spatial.distance import cdist
-from .PMotion import Polymer
+from PMotion import Polymer
 import _pickle as cPickle
-from .createPoly import create_init_conf_yeast
+from createPoly import create_init_conf_yeast
 import time
 import json
 
@@ -33,6 +33,7 @@ def create_initial_configuration(traj):
         pass
     else:
         # ARS
+        #print(p_origins, type(p_origins))
         c = ["I", "II", "III", "IV", "V", "VI", "VII",
              "VIII", "IX", "X", "XI", "XII", "XIII",
              "XIV", "XV", "XVI"]
@@ -46,7 +47,7 @@ def create_initial_configuration(traj):
                     sp = ligne.split()
                     if len(sp) > 3 and (sp[2] == "ARS" or False):  # sp[2] == "ARS_consensus_sequence"):
                         ch[c.index(sp[0][3:])].append(int(coeff * int(sp[3])))
-    p_origins = ch
+        p_origins = ch
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]
