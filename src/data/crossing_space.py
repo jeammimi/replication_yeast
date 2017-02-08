@@ -43,6 +43,7 @@ if __name__ == "__main__":
     R = traj["R"]
     data_folder = traj["data_folder"]
     dcd_period = traj["dcd_period"]
+    control = traj["control"]
 
 
     plist = ["A", "B"]
@@ -88,9 +89,10 @@ if __name__ == "__main__":
     table.pair_coeff.set(plist, plist,
                          func=cos_soft, rmin=0, rmax=r_cut,
                          coeff=dict(epsilon=epsilon, sigma=1.0))
-    table.pair_coeff.set("A", "B",
-                         func=cos_soft, rmin=0, rmax=r_cut,
-                         coeff=dict(epsilon=0, sigma=1.0))
+    if not control:
+        table.pair_coeff.set("A", "B",
+                             func=cos_soft, rmin=0, rmax=r_cut,
+                             coeff=dict(epsilon=0, sigma=1.0))
 
     sphere = md.wall.group()
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
