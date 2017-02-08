@@ -3,19 +3,41 @@ from replication.simulate import load_parameters, minimize
 from hoomd import init, group, md
 import hoomd
 import numpy as np
+import os
+import sys
+import json
 
 if __name__ == "__main__":
 
-    traj = load_parameters("replication/cross.json")
-    traj["data_folder"] = "/tmp/"
-    traj["p_origins"] = [[10] for i in range(16)]
+
+    param_file = sys.argv[1]
+    parameters = load_parameters(param_file)
+    # print(sys.argv)
+    if len(sys.argv) >= 3:
+        parameters["visu"] = True
+        if "sumatra_label" in parameters:
+            parameters.pop("sumatra_label")
+
+    if "sumatra_label" in parameters:
+        parameters["data_folder"] = os.path.join(parameters["data_folder"],
+                                                 parameters["sumatra_label"])
+    else:
+        print("no extra label")
+
+    parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
+    parameters["filename"] = param_file
+
+    print(parameters["data_folder"])
+    with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
+        s = json.dumps(parameters)
+        f.write(s)
 
     hoomd.context.initialize()  # "--mode=cpu ")
 
     # print(type(traj["p_origins"]) == list)
     # if hoomd.comm.get_rank() == 0:
 
-    snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(traj)
+    snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(parameters)
 
     plist = ["A", "B"]
     bond_list = ["A-A"]
