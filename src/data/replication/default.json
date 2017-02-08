@@ -12,6 +12,7 @@
 "N_diffu" : 1000 ,
 "cut_off_inte" : 2 ,
 "p_inte" : 0.2 ,
+"fork_speed" : 0.0033,
 "sim_dt" : 0.1 ,
 "p_origins" : "./data/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
 

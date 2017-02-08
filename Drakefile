@@ -46,6 +46,6 @@ launch <-
   for ((i=1; i<=$N; i++))
     do
        echo "Welcome $i times $label$i"
-       smt run --main=src/data/make_dataset_for_testing_parameters.py src/data/replication/default.json n_steps=10000 sim_dt=0.02  N_diffu=500 --label=$label$i seed=$i --tag="Yeast full" --reason="Intra LJ"  --stdout=data/raw/$label$i/output &
+       smt run --main=src/data/make_dataset_for_testing_parameters.py src/data/replication/default.json n_steps=20000 sim_dt=0.02  N_diffu=500 --label=$label$i seed=$i --tag="Yeast full" --reason="Intra LJ"  --stdout=data/raw/$label$i/output &
        sleep 1
     done

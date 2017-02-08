@@ -528,7 +528,7 @@ def simulate(traj):
     cut_off_inte = traj["cut_off_inte"]
     p_inte = traj["p_inte"]
     sim_dt = traj["sim_dt"]
-
+    fork_speed = traj["fork_speed"]
     # Yeast case
     spb = traj["spb"]
 
@@ -739,7 +739,7 @@ def simulate(traj):
             #    verbose = True
             bind_diff, diff_diff, shifted_bonds, \
                 passivated_origin, to_release, alone = P.increment_time(
-                    1, verbose)
+                    fork_speed, verbose)
 
             Change_type(
                 'P_Ori',
