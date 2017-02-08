@@ -6,7 +6,7 @@ import numpy as np
 import os
 import sys
 import json
-
+import dump
 if __name__ == "__main__":
 
 
@@ -40,6 +40,10 @@ if __name__ == "__main__":
     snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(traj)
 
 
+    R = traj["R"]
+    data_folder = traj["data_folder"]
+    dcd_period = traj["dcd_period"]
+
 
     plist = ["A", "B"]
     bond_list = ["A-A"]
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     system = init.read_snapshot(snapshot)
 
     xml = deprecated.dump.xml(
-        filename=traj["data_folder"] +
+        filename=data_folder +
         "atoms.hoomdxml",
         period=None,
         group=group.all(),
@@ -88,8 +92,33 @@ if __name__ == "__main__":
                          func=cos_soft, rmin=0, rmax=r_cut,
                          coeff=dict(epsilon=0, sigma=1.0))
 
+    sphere = md.wall.group()
+    sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
+    # lj much more slower (at least in thu minimisation)
+    wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
+    wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
+                                   r_cut=1.12, mode="shift")
     # hoomd.comm.barrier()
     microtubule_length = None
     Spb_g = None
     all_move = group.all()
     minimize(traj, all_move, system, snapshot, Spb_g, Cp, microtubule_length)
+
+    sim_dt = traj["sim_dt"]
+    seed = traj["seed"]
+
+    md.integrate.mode_standard(dt=sim_dt)
+    method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
+    snp = system  # .take_snapshot()
+
+
+    md.integrate.mode_standard(dt=sim_dt / 4)
+    hoomd.run(100)
+    md.integrate.mode_standard(dt=sim_dt / 2)
+    hoomd.run(100)
+
+    dcd = dump.dcd(filename=data_folder + 'poly.dcd',
+                   period=dcd_period, overwrite=True)
+    hoomd.run(100000)
+
+    dcd.disable()

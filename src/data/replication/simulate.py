@@ -616,7 +616,7 @@ def simulate(traj):
             period=None,
             group=all_beads,
             vis=True)
-        xml.disable()
+        # xml.disable()
         return
     # gsd = dump.gsd(filename=data_folder + "atoms.gsd",period=None,group=all_beads)
 
