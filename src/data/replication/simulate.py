@@ -33,7 +33,7 @@ def create_initial_configuration(traj):
         pass
     else:
         # ARS
-        #print(p_origins, type(p_origins))
+        # print(p_origins, type(p_origins))
         c = ["I", "II", "III", "IV", "V", "VI", "VII",
              "VIII", "IX", "X", "XI", "XII", "XIII",
              "XIV", "XV", "XVI"]
@@ -450,7 +450,7 @@ def force_field(traj, bond_list, plist, tag_spb):
     return all_beads, all_move, Spb_g, nl
 
 
-def minimize(traj, all_move, system, snapshot, Spb_g):
+def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length):
 
     R = traj["R"]
     data_folder = traj["data_folder"]
@@ -478,6 +478,15 @@ def minimize(traj, all_move, system, snapshot, Spb_g):
 
                 if spb:
                     pspb = [p.position for p in Spb_g]
+
+                    for cen in Cen_pos:
+                        cent_tmp = system.particles[cen]
+                        d = linalg.norm(
+                            np.array(pspb[0]) - np.array(cent_tmp.position))
+                        if d > 2 * microtubule_length:
+                            print("MT too long", d)
+                            raise
+
                     """
                     print(pspb)
                     for cen in Cen_pos:
@@ -595,7 +604,7 @@ def simulate(traj):
 
     # Warmup
 
-    minimize(traj, all_move, system, snapshot, Spb_g)
+    minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length)
 
     # Dumping
 
@@ -606,6 +615,7 @@ def simulate(traj):
             period=None,
             group=all_beads,
             vis=True)
+        xml.disable()
         return
     # gsd = dump.gsd(filename=data_folder + "atoms.gsd",period=None,group=all_beads)
 
@@ -878,6 +888,9 @@ def simulate(traj):
 
     # print(gauss.get_energy(all_beads), wall_force_slj.get_energy(all_beads))
     print(time.time() - t0)
+    logger.disable()
+    method.disable()
+    dcd.disable()
 
 
 def load_parameters(filename):

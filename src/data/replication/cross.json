@@ -1,0 +1,44 @@
+{"seed" : 0,
+
+"len_chrom" :[46, 162, 63, 306, 115, 54, 218, 112, 87, 149, 133, 215, 184, 156, 218, 189],
+"Cent" : [30, 47, 22, 89, 30, 29, 99, 21, 71, 87, 88, 30, 53, 125, 65, 111],
+"p_ribo" : [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [90, 150], [0, 0], [0, 0], [0, 0], [0, 0]],
+
+"R" : 16 ,
+"micron" : 16 ,
+
+"data_folder" : "./data/raw" ,
+
+"N_diffu" : 0 ,
+"cut_off_inte" : 2 ,
+"p_inte" : 0.2 ,
+"sim_dt" : 0.1 ,
+"p_origins" : [[10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10]],
+
+"spb" : false ,
+"nucleole" : false ,
+"telomere" : false ,
+
+"microtubule_length" : 0.4 ,
+"diameter_nuc" :  0.18 ,
+"special_start" : false ,
+
+"Activ_Origins" : ["Ori"] ,
+"visu" : false ,
+"dump_hic" : false ,
+
+
+"diff_alone" : false ,
+
+"diff_bind_when_free" : false ,
+"diff_bind_when_on_DNA" : false ,
+
+"replicate_DNA" : false ,
+
+"n_steps" : 100,
+"length_steps" : 1000 ,
+"warmup" : 100000,
+"benchmark" : false,
+"soft" : true,
+"gauss" : false
+}
