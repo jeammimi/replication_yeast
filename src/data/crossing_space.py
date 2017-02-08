@@ -1,6 +1,6 @@
 from replication.simulate import create_initial_configuration
 from replication.simulate import load_parameters, minimize
-from hoomd import init, group, md, deprecated, dump
+from hoomd import init, group, md, deprecated, dump, analyze
 import hoomd
 import numpy as np
 import os
@@ -63,6 +63,21 @@ if __name__ == "__main__":
         period=None,
         group=group.all(),
         vis=True)
+
+    logger = analyze.log(
+        filename=data_folder +
+        'mylog.log',
+        period=1000,
+        quantities=[
+            'temperature',
+            'potential_energy',
+            'bond_harmonic_energy',
+            'external_wall_lj_energy',
+            "pair_table_energy",
+            'kinetic_energy',
+            'volume',
+            'pressure'],
+        overwrite=True)
     # xml.disable()
 
     # Force_field:
@@ -124,3 +139,4 @@ if __name__ == "__main__":
     hoomd.run(1000000)
 
     dcd.disable()
+    logger.disable()
