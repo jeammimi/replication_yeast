@@ -39,8 +39,12 @@ if __name__ == "__main__":
     traj = parameters
     snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(traj)
 
+
+
     plist = ["A", "B"]
     bond_list = ["A-A"]
+    snapshot.particles.types = plist
+    snapshot.bonds.types = bond_list
     for p in range(len(snapshot.particles.typeid)):
         snapshot.particles.typeid[p] = np.random.randint(2)
     for p in range(len(snapshot.bonds.typeid)):
