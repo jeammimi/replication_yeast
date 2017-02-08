@@ -121,6 +121,6 @@ if __name__ == "__main__":
 
     dcd = dump.dcd(filename=data_folder + 'poly.dcd',
                    period=dcd_period, overwrite=True)
-    hoomd.run(100000)
+    hoomd.run(1000000)
 
     dcd.disable()
