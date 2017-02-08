@@ -1,4 +1,4 @@
-from replication.simulate import create_initial_configuration, force_field
+from replication.simulate import create_initial_configuration
 from replication.simulate import load_parameters, minimize
 from hoomd import init, group, md
 import hoomd
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
     # print(type(traj["p_origins"]) == list)
     # if hoomd.comm.get_rank() == 0:
-
-    snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(parameters)
+    traj = parameters
+    snapshot, _, tag_spb, bond_list, plist, Cp, lP = create_initial_configuration(traj)
 
     plist = ["A", "B"]
     bond_list = ["A-A"]
