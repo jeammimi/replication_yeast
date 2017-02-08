@@ -1,6 +1,6 @@
 from replication.simulate import create_initial_configuration
 from replication.simulate import load_parameters, minimize
-from hoomd import init, group, md
+from hoomd import init, group, md, deprecated
 import hoomd
 import numpy as np
 import os
@@ -51,6 +51,14 @@ if __name__ == "__main__":
         snapshot.bonds.typeid[p] = 0
 
     system = init.read_snapshot(snapshot)
+
+    xml = deprecated.dump.xml(
+        filename=traj["data_folder"] +
+        "atoms.hoomdxml",
+        period=None,
+        group=group.all(),
+        vis=True)
+    xml.disable()
 
     # Force_field:
 
