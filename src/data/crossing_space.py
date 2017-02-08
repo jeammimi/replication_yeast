@@ -58,7 +58,7 @@ if __name__ == "__main__":
         period=None,
         group=group.all(),
         vis=True)
-    xml.disable()
+    # xml.disable()
 
     # Force_field:
 
