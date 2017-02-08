@@ -216,6 +216,7 @@ def create_initial_configuration(traj):
         phic = 0 + offset_particle - 1
     ###################################################
     # SPD
+    tag_spb = None
     if spb:
         tag_spb = 0 + offset_particle
         # print(tag_spb)
