@@ -1,12 +1,12 @@
 from replication.simulate import create_initial_configuration
 from replication.simulate import load_parameters, minimize
-from hoomd import init, group, md, deprecated
+from hoomd import init, group, md, deprecated, dump
 import hoomd
 import numpy as np
 import os
 import sys
 import json
-import dump
+
 if __name__ == "__main__":
 
 
