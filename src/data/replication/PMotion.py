@@ -106,6 +106,14 @@ class Polymer():
         return [self.number,self.start,self.end,
                 [m.state for m in self.modules],
                 [m.state for m in self.ended]]
+    def dettach_one_diff(self,ptag,otag):
+        if len(self.bound_to_origin[otag]) == 2:
+            print("Dettaching one but should have started")
+            print(otag,self.bound_to_origin[otag])
+            raise
+        if self.bound_to_origin[otag][0][0] == ptag:
+             self.bound_to_origin[otag] = []
+
 
     def attach_one_diff(self,ptag,otag,new_btag):
         if not otag in self.bound_to_origin:
@@ -118,6 +126,9 @@ class Polymer():
             return False #Do not start
         else:
             return True
+    def get_free_origins(self):
+        return self.bound_to_origin.keys()
+
     def get_diff_at_origin(self,otag):
         return self.bound_to_origin[otag] # list of particles tag , particle bond
 
@@ -129,6 +140,7 @@ class Polymer():
                 break
         if not found:
             print("Warning origin not found")
+            raise
 
         #Not necessary but just for checking elsewhere:
         self.bound_to_origin.pop(otag)
@@ -144,6 +156,7 @@ class Polymer():
         self.modules[i+1].activated=True
         self.ended.append(self.modules.pop(i+1))
 
+
     def get_replication_profile(self,t=None):
         self.position_index =  range(self.start,self.end+1)
         self.replication_state = [0 for i in range(self.start,self.end+1)]
@@ -154,6 +167,8 @@ class Polymer():
                 i = self.position_index.index(pos)
                 self.replication_state[i] = time
         return self.replication_state
+
+
 
         #print(self.modules)
 
@@ -223,6 +238,12 @@ class Polymer():
                         passivated_origin.append(self.modules[im + 1].tag)
                         self.modules[im + 1].passivated = True
                         self.ended.append(self.modules.pop(im + 1))
+                        if self.bound_to_origin[self.ended[-1].tag] != []:
+                            alone.append(self.bound_to_origin[self.ended[-1].tag][0][0])
+                            if len(self.bound_to_origin[self.ended[-1].tag]) == 2:
+                                print("Releasing passivated origin with two diffS")
+                        self.bound_to_origin.pop(self.ended[-1].tag)
+                        #print("Warning check to release possible attached single diff")
                         #a,b = self.modules[im:im+2]
                         #self.modules[im:im+2] = b,a
                         #im += 1
@@ -240,6 +261,12 @@ class Polymer():
                         passivated_origin.append(self.modules[im - 1].tag)
                         self.modules[im - 1].passivated = True
                         self.ended.append(self.modules.pop(im - 1))
+                        if self.bound_to_origin[self.ended[-1].tag] != []:
+                            alone.append(self.bound_to_origin[self.ended[-1].tag][0][0])
+                            if len(self.bound_to_origin[self.ended[-1].tag]) == 2:
+                                print("Releasing passivated origin with two diffS")
+                        self.bound_to_origin.pop(self.ended[-1].tag)
+                        #print("Warning check to release possible attached single diff")
                         N_mod -= 1
                         #a,b = self.modules[im-1:im+1]
                         #self.modules[im-1:im+1] = b,a
@@ -289,7 +316,8 @@ class Polymer():
         for im in to_remove[::-1]:
             m = self.modules.pop(im)
             m.path.pop(-1)
-            print(m.path)
+            if verbose:
+                print(m.path)
             self.ended.append(m)
             assert(m.move)
         #chek for colisions:
