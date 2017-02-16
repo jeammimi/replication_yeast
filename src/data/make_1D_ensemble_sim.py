@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
+    parameters.pop("ori_type")
 
     parameters["Nori"] = l_ori
     E = ensembleSim(**parameters)
