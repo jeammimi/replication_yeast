@@ -58,5 +58,6 @@ if __name__ == "__main__":
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
     E = ensembleSim(*parameters)
+    E.run_all(200)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(E, f)
