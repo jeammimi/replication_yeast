@@ -4,175 +4,264 @@ Created on Wed Jan 18 09:25:03 2017
 
 @author: jarbona
 """
-
+import numpy as np
 with open("logp.txt", "w"):
     pass
 
+
 class Origin:
+
     def __init__(self, tag):
         self.tag = tag
         self.position = self.tag
         self.move = False
         self.origin = True
-        self.passivated=False
-        self.activated=False
-        self.path = [[self.tag,0]]
+        self.passivated = False
+        self.activated = False
+        self.path = [[self.tag, 0]]
         self.type = "origin"
+        self.activation_time = None
 
     def state(self):
         add = "O"
         if self.passivated:
-            add="P"
+            add = "P"
         if self.activated:
-            add="A"
-        return add,self.tag,self.path
+            add = "A"
+        return add, self.tag, self.path
+
     def __repr__(self):
         add = ""
         if self.passivated:
-            add="Passi"
+            add = "Passi"
         if self.activated:
-            add="Activ"
-        return "Origin %i %s"%(self.path[-1][0],add)
+            add = "Activ"
+        return "Origin %i %s" % (self.path[-1][0], add)
+
 
 class Fork:
-    def __init__(self,tag,position,bond_tag,t,diff_diff_tag):
-        self.tag = tag  #particle tagg
-        self.position = position #Position on the chromosome
-        self.bond_tag = bond_tag #Bond between diffusive elements and monomec
-        self.move=True
-        self.update_bond=False
+
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
+        self.tag = tag  # particle tagg
+        self.position = position  # Position on the chromosome
+        self.bond_tag = bond_tag  # Bond between diffusive elements and monomec
+        self.move = True
+        self.update_bond = False
         self.origin = False
-        self.path = [[position,t]]
+        self.path = [[position, t]]
         self.t = t
-        self.type="fork"
+        self.type = "fork"
         self.diff_diff_tag = diff_diff_tag
 
-    def update_position(self,dt):
-        #print(self.position)
+    def update_position(self, dt):
+        # print(self.position)
         oldp = int(self.position)
         self.position += self.d * dt
         self.t += dt
         if oldp != int(self.position):
             self.update_bond = True
-            self.path.append([int(self.position),self.t])
+            self.path.append([int(self.position), self.t])
         else:
-            self.update_bond =  False
+            self.update_bond = False
 
     def state(self):
-        return "F",self.tag,self.path
+        return "F", self.tag, self.path
 
     def __repr__(self):
         add = "L"
         if self.d == 1:
-            add="R"
-        return "%sFork %i"%(add,self.path[-1][0])
+            add = "R"
+        return "%sFork %i" % (add, self.path[-1][0])
+
 
 class RFork(Fork):
-    def __init__(self,tag,position,bond_tag,t,diff_diff_tag):
-        Fork.__init__(self,tag,position,bond_tag,t,diff_diff_tag)
+
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
+        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag)
         self.d = 1
 
+
 class LFork(Fork):
-    def __init__(self,tag,position,bond_tag,t,diff_diff_tag):
-        Fork.__init__(self,tag,position,bond_tag,t,diff_diff_tag)
+
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
+        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag)
         self.d = -1
 
+
 class Polymer():
-    def __init__(self,number,start,end,origins):
+
+    def __init__(self, number, start, end, origins):
         self.number = number
         self.start = start
         self.end = end
         origins.sort()
         self.origins = origins
+        if self.origins != []:
+            #print(number,start,np.min(self.origins))
+            assert(np.min(self.origins) >= self.start)
+            #print(self.end,np.max(self.origins))
+            assert(np.max(self.origins) <= self.end)
         self.modules = [Origin(tag) for tag in origins]
-        self.bound_to_origin = {tag:[] for tag in origins} # to keep track of the diff attached in case we attach them one by one
+        # to keep track of the diff attached in case we attach them one by one
+        self.bound_to_origin = {tag: [] for tag in origins}
         #self.replication_state = [0 for i in range(start,end+1)]
         self.t = 0
         self.ended = []
-    def has_origin(self,ptag):
+
+    def has_origin(self, ptag):
         if ptag in self.origins:
             for m in self.modules:
                 if m.type == "origin":
                     if m.tag == ptag:
                         return True
 
-
-            #with open("logp.txt","a") as f:
+            # with open("logp.txt","a") as f:
             #    f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
             print("Warning, origin already used 1")
             return False
 
     def state(self):
-        return [self.number,self.start,self.end,
+        return [self.number, self.start, self.end,
                 [m.state for m in self.modules],
                 [m.state for m in self.ended]]
-    def dettach_one_diff(self,ptag,otag):
+
+    def dettach_one_diff(self, ptag, otag):
         if len(self.bound_to_origin[otag]) == 2:
             print("Dettaching one but should have started")
-            print(otag,self.bound_to_origin[otag])
+            print(otag, self.bound_to_origin[otag])
             raise
         if self.bound_to_origin[otag][0][0] == ptag:
-             self.bound_to_origin[otag] = []
+            self.bound_to_origin[otag] = []
 
-
-    def attach_one_diff(self,ptag,otag,new_btag):
-        if not otag in self.bound_to_origin:
+    def attach_one_diff(self, ptag, otag, new_btag):
+        if otag not in self.bound_to_origin:
             print("One free origin was not available")
             raise
         else:
-            self.bound_to_origin[otag].append([ptag,new_btag])
+            self.bound_to_origin[otag].append([ptag, new_btag])
 
         if len(self.bound_to_origin[otag]) == 1:
-            return False #Do not start
+            return False  # Do not start
         else:
             return True
+
     def get_free_origins(self):
         return self.bound_to_origin.keys()
 
-    def get_diff_at_origin(self,otag):
-        return self.bound_to_origin[otag] # list of particles tag , particle bond
+    def get_n_activ_fork(self):
+        return len([m for m in self.modules if not m.origin])
 
-    def add_fork(self,ptags,otag,new_btags,diff_diff_tag):
+
+    def get_diff_at_origin(self, otag):
+        # list of particles tag , particle bond
+        return self.bound_to_origin[otag]
+
+    def add_fork(self, ptags, otag, new_btags, diff_diff_tag):
         found = False
-        for i,mod in enumerate(self.modules):
-            if mod.tag == otag:
-                found = True
-                break
+        for i, mod in enumerate(self.modules):
+            if mod.origin:
+                if mod.tag == otag:
+                    found = True
+                    break
         if not found:
             print("Warning origin not found")
             raise
 
-        #Not necessary but just for checking elsewhere:
+        # Not necessary but just for checking elsewhere:
         self.bound_to_origin.pop(otag)
-           # with open("logp.txt","a") as f:
-           #     f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
-        self.modules.insert(i+1,RFork(ptags[1],otag,new_btags[1],self.t, diff_diff_tag))
-        self.modules.insert(i,LFork(ptags[0],otag,new_btags[0],self.t, diff_diff_tag))
+        # with open("logp.txt","a") as f:
+        #     f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
+        self.modules.insert(
+            i + 1, RFork(ptags[1], otag, new_btags[1], self.t, diff_diff_tag))
+        self.modules.insert(
+            i, LFork(ptags[0], otag, new_btags[0], self.t, diff_diff_tag))
         if self.modules[i + 1].passivated or self.modules[i + 1].activated:
             print("Warning origin already used")
-            #with open("logp.txt","a") as f:
+            # with open("logp.txt","a") as f:
             #    f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
-        self.modules[i+1].passivated=True
-        self.modules[i+1].activated=True
-        self.ended.append(self.modules.pop(i+1))
+        self.modules[i + 1].passivated = False
+        self.modules[i + 1].activated = True
+        self.modules[i + 1].activation_time = self.t
+        self.ended.append(self.modules.pop(i + 1))
 
-
-    def get_replication_profile(self,t=None):
-        self.position_index =  range(self.start,self.end+1)
-        self.replication_state = [0 for i in range(self.start,self.end+1)]
+    def get_replication_profile(self, t=None):
+        #self.position_index = range(self.start, self.end + 1)
+        self.replication_state = [0 for i in range(self.start, self.end + 1)]
         for m in self.modules + self.ended:
             if not m.move:
                 continue
-            for pos,time in m.path:
-                i = self.position_index.index(pos)
-                self.replication_state[i] = time
+            for pos, time in m.path:
+                #i = self.position_index.index(pos)
+                self.replication_state[pos-self.start] = time
+                #assert(i == pos - self.start)
         return self.replication_state
 
+    def get_fork_density(self, cut=0, normed=True):
+        fork_number = np.zeros(self.t)
+        rep_p = np.array(self.get_replication_profile())
+        for m in self.modules + self.ended:
+            if not m.origin:
+                start = m.path[0][1]
+                end = m.path[-1][1]
+                fork_number[start - self.start: end - self.start] += 1
+
+        if normed:
+            for t in np.arange(self.t):
+                Un_replicated = np.sum(rep_p >= t)
+                if Un_replicated == 0:
+                    Un_replicated = 1
+                fork_number[t] /= Un_replicated
+        #print("Done1")
+        if cut != 0:
+            fork_number[-cut:] = 0
+        return fork_number
+
+    def get_norm(self):
+        Un_replicated = np.zeros(self.t)
+
+        rep_p = np.array(self.get_replication_profile())
+
+        for t in np.arange(self.t):
+            Un_replicated[t] = np.sum(rep_p >= t)
+
+        return Un_replicated
 
 
-        #print(self.modules)
+    def get_DNA_with_time(self):
+        rep_p = np.array(self.get_replication_profile())
 
-    def increment_time(self,dt,verbose=False):
+        DNA = np.zeros(self.t)
+
+        for t in np.arange(self.t):
+            replicated = np.sum(rep_p < t)
+            DNA[t] = replicated
+
+        return DNA
+
+    def get_firing_time_It(self, normed=True):
+        firing_time = []
+        rep_p = np.array(self.get_replication_profile())
+        for m in self.modules + self.ended:
+            if not m.move:
+                if m.activation_time is not None:
+                    firing_time.append(m.activation_time)
+        firing_time.sort()
+        It = np.zeros(self.t)
+        for el in firing_time:
+                It[el] += 1
+
+        if normed:
+            for t in np.arange(self.t):
+                Un_replicated = np.sum(rep_p >= t)
+                if Un_replicated == 0:
+                    Un_replicated = 1
+                It[t] /= Un_replicated
+        #print("Done1")
+        return firing_time, It
+
+        # print(self.modules)
+
+    def increment_time(self, dt, verbose=False):
         self.t += dt
         update_bond = []
         alone = []
@@ -181,65 +270,32 @@ class Polymer():
         bind_diff = []
         passivated_origin = []
         if verbose and self.modules != []:
-            print(self.start,self.end)
+            print(self.start, self.end)
             print(self.modules)
             print(self.ended)
         for m in self.modules:
             if m.move:
                 m.update_position(dt)
         N_mod = len(self.modules)
-        im = 0
-        to_remove = []
-        #####################################
-        #Take care of fork outside of boundaries
-        while im < N_mod:
 
-            m = self.modules[im]
-            if m.move:
-                if m.position < self.start or m.position > self.end:
-                    alone.append(m.tag)
-                    to_release.append(m.bond_tag)
-
-                    #Release possible diff_diff bonds
-                    if m.diff_diff_tag is not None:
-                        print("La")
-                        to_release.append(m.diff_diff_tag)
-                        to_erase = 0 + m.diff_diff_tag
-                        #Look for this tag in other fork:
-                        for other_fork in self.modules:
-                            if other_fork.type == "fork" and other_fork.diff_diff_tag == to_erase:
-                                print("Found")
-                                other_fork.diff_diff_tag = None
-
-                    to_remove.append(im)
-                    m.update_bond = False # because we will delete it
-                    #Remove last path of the fork if up
-
-
-            im += 1
-
-        for im in to_remove[::-1]:
-            m = self.modules.pop(im)
-            m.path.pop(-1)
-            self.ended.append(m)
-            N_mod -= 1
-            assert(m.move)
 
         to_remove = []
         #####################################
 
         im = 0
         while im < N_mod:
-        #Take care of passivated Origin Left to right
+            # Take care of passivated Origin Left to right
             m = self.modules[im]
             if m.move:
-                if im != N_mod -1 and m.position > self.modules[im + 1].position:
+                if im != N_mod - 1 and m.position > self.modules[im + 1].position:
                     if self.modules[im + 1].origin:
                         passivated_origin.append(self.modules[im + 1].tag)
                         self.modules[im + 1].passivated = True
                         self.ended.append(self.modules.pop(im + 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
-                            alone.append(self.bound_to_origin[self.ended[-1].tag][0][0])
+
+                            alone.append(self.bound_to_origin[
+                                         self.ended[-1].tag][0][0])
                             if len(self.bound_to_origin[self.ended[-1].tag]) == 2:
                                 print("Releasing passivated origin with two diffS")
                         self.bound_to_origin.pop(self.ended[-1].tag)
@@ -251,9 +307,9 @@ class Polymer():
 
             im += 1
 
-        im = N_mod-1
+        im = N_mod - 1
         while im > 0:
-        #Take care of passivated Origin Right to left
+            # Take care of passivated Origin Right to left
             m = self.modules[im]
             if m.move:
                 if im != 0 and m.position < self.modules[im - 1].position:
@@ -262,7 +318,9 @@ class Polymer():
                         self.modules[im - 1].passivated = True
                         self.ended.append(self.modules.pop(im - 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
-                            alone.append(self.bound_to_origin[self.ended[-1].tag][0][0])
+                            alone.append(self.bound_to_origin[
+                                         self.ended[-1].tag][0][0])
+                            #print("Ici")
                             if len(self.bound_to_origin[self.ended[-1].tag]) == 2:
                                 print("Releasing passivated origin with two diffS")
                         self.bound_to_origin.pop(self.ended[-1].tag)
@@ -272,46 +330,83 @@ class Polymer():
                         #self.modules[im-1:im+1] = b,a
                         #im -= 1
 
-
             im -= 1
 
-
+        #####################################
+        # Take care of fork outside of boundaries
         im = 0
+        #to_remove = []
         while im < N_mod:
-            #Take care of fork collision and bond motion
+
             m = self.modules[im]
             if m.move:
-                if im != N_mod -1 and m.position > self.modules[im + 1].position:
+                if m.position < self.start or m.position > self.end:
+                    alone.append(m.tag)
+                    #print(alone,m.position)
+
+                    to_release.append(m.bond_tag)
+
+                    # Release possible diff_diff bonds
+                    if m.diff_diff_tag is not None:
+                        to_release.append(m.diff_diff_tag)
+                        to_erase = 0 + m.diff_diff_tag
+                        # Look for this tag in other fork:
+                        for other_fork in self.modules:
+                            if other_fork.type == "fork" and other_fork.diff_diff_tag == to_erase:
+                                print("Found")
+                                other_fork.diff_diff_tag = None
+
+                    to_remove.append(im)
+                    m.update_bond = False  # because we will delete it
+                    # Remove last path of the fork if up
+
+            im += 1
+        #Remove here to avaid updating link
+        for im in to_remove[::-1]:
+            m = self.modules.pop(im)
+            m.path.pop(-1)
+            self.ended.append(m)
+            N_mod -= 1
+            assert(m.move)
+
+        to_remove = []
+        im = 0
+        while im < N_mod:
+            # Take care of fork collision and bond motion
+            m = self.modules[im]
+            if m.move:
+                if im != N_mod - 1 and m.position > self.modules[im + 1].position:
                     if self.modules[im + 1].move:
-                        #Collision
+                        # Collision
                         to_release.append(m.bond_tag)
                         to_release.append(self.modules[im + 1].bond_tag)
                         diff_diff.append(m.tag)
                         diff_diff.append(self.modules[im + 1].tag)
-                        bind_diff.append([m.tag,self.modules[im + 1].tag])
+                        bind_diff.append([m.tag, self.modules[im + 1].tag])
                         to_remove.append(im)
                         to_remove.append(im + 1)
 
-                        #Release possible diff_diff bonds
+                        # Release possible diff_diff bonds
                         if m.diff_diff_tag is not None:
                             to_release.append(m.diff_diff_tag)
                             to_erase = 0 + m.diff_diff_tag
-                            #Look for this tag in other fork:
+                            # Look for this tag in other fork:
                             for other_fork in self.modules:
                                 if other_fork.type == "fork" and other_fork.diff_diff_tag == to_erase:
                                     other_fork.diff_diff_tag = None
 
                         if self.modules[im + 1].diff_diff_tag is not None:
-                            to_release.append(self.modules[im + 1].diff_diff_tag)
+                            to_release.append(
+                                self.modules[im + 1].diff_diff_tag)
                             to_erase = 0 + self.modules[im + 1].diff_diff_tag
-                            #Look for this tag in other fork:
+                            # Look for this tag in other fork:
                             for other_fork in self.modules:
                                 if other_fork.type == "fork" and other_fork.diff_diff_tag == to_erase:
                                     other_fork.diff_diff_tag = None
 
                         im += 1
                 elif m.update_bond:
-                    update_bond.append([m.bond_tag,int(m.position)])
+                    update_bond.append([m.bond_tag, int(m.position)])
             im += 1
         for im in to_remove[::-1]:
             m = self.modules.pop(im)
@@ -320,13 +415,13 @@ class Polymer():
                 print(m.path)
             self.ended.append(m)
             assert(m.move)
-        #chek for colisions:
-        #for m in
+        # chek for colisions:
+        # for m in
         if verbose and self.modules != []:
             print(self.modules)
-        return bind_diff, diff_diff,update_bond,passivated_origin,to_release,alone
+        return bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone
 if __name__ == "__main__":
-    P = Polymer(0,30,[5,10,20])
-    P.add_fork([0,1],10,["a","b"])
+    P = Polymer(0, 30, [5, 10, 20])
+    P.add_fork([0, 1], 10, ["a", "b"])
     for i in range(11):
-        print(P.increment_time(1,verbose=True))
+        print(P.increment_time(1, verbose=True))
