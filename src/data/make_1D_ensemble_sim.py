@@ -16,6 +16,7 @@ if __name__ == "__main__":
     if "sumatra_label" in parameters:
         parameters["data_folder"] = os.path.join(parameters["data_folder"],
                                                  parameters["sumatra_label"])
+        parameters.pop("sumatra_label")
     else:
         print("no extra label")
 
@@ -54,6 +55,8 @@ if __name__ == "__main__":
             tot += len(l_ori[i])
             assert(max(l_ori[i]) < parameters["lengths"][i])
 
-    E = ensembleSim(**parameters)
-    with open(os.path.join(parameters["data_folder"], "ensembleSim.pick"), "wb") as f:
+    parameters.pop("filename")
+    data_folder = parameters.pop("data_folder")
+    E = ensembleSim(*parameters)
+    with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(E, f)
