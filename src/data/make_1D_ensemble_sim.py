@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
         # Filters ori:
         for ch, p, status in zip(Oris["chr"], Oris["start"], Oris["status"]):
-            if status in ["Confirmed"]:  # ,"Likely"]:
+            if status in parameters["ori_type"]:  # ,"Likely"]:
                 l_ori[ch - 1].append(int(p / 1000))
 
         # Then remove duplicate (/kb ) and outside of boundaries
@@ -57,6 +57,8 @@ if __name__ == "__main__":
 
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
+
+    parameters["Nori"] = l_ori
     E = ensembleSim(**parameters)
     E.run_all(200)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
