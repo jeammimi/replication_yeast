@@ -11,11 +11,13 @@
 
 "N_diffu" : 500 ,
 "cut_off_inte" : 2 ,
-"p_inte" : 0.2 ,
+"p_inte" : 0.05 ,
 "sim_dt" : 0.1 ,
 "dscale" : 1.0,
-"fork_speed":0.01,
-"p_origins" : [[10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10], [10]],
+"fork_speed":0.04,
+"p_origins" : "./data/external/oridb.csv",
+"ori_type" : ["Confirmed"],
+"coarse": 5,
 
 "spb" : true ,
 "nucleole" : true ,
@@ -37,7 +39,7 @@
 
 "replicate_DNA" : false ,
 
-"n_steps" : 100,
+"n_steps" : 9000,
 "length_steps" : 1000 ,
 "warmup" : 100000,
 "dcd_period" : 1000,

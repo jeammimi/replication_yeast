@@ -13,6 +13,7 @@ from scipy.spatial.distance import cdist
 from .PMotion import Polymer
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
+from replication.tools import load_ori_position
 import time
 import json
 
@@ -34,21 +35,8 @@ def create_initial_configuration(traj):
     else:
         # ARS
         # print(p_origins, type(p_origins))
-        c = ["I", "II", "III", "IV", "V", "VI", "VII",
-             "VIII", "IX", "X", "XI", "XII", "XIII",
-             "XIV", "XV", "XVI"]
-
-        coeff = len_chrom[3] / 1531933
-
-        ch = [[] for i in range(16)]
-        with open(p_origins, "r") as f:
-            for ligne in f.readlines():
-                if not ligne.startswith("#"):
-                    sp = ligne.split()
-                    # sp[2] == "ARS_consensus_sequence"):
-                    if len(sp) > 3 and (sp[2] == "ARS" or False):
-                        ch[c.index(sp[0][3:])].append(int(coeff * int(sp[3])))
-        p_origins = ch
+        traj["lengths"] = traj["len_chrom"]
+        p_origins = load_ori_position(traj)
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]

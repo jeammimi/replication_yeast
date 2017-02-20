@@ -3,6 +3,7 @@ import sys
 sys.path.append("./")
 from replication.ensembleSim import ensembleSim
 from replication.simulate import load_parameters
+from replication.tools import load_ori_position
 import os
 import json
 import _pickle as cPickle
@@ -31,29 +32,8 @@ if __name__ == "__main__":
     # ensembleSim(Nsim, Nori, Ndiff, lengths, p_on, p_off, only_one,
     # all_same_ori=False, l_ori=[], cut=10)
     if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
-        Oris = pandas.read_csv(parameters["Nori"], comment="#")
+        l_ori = load_ori_position(parameters)
 
-        l_ori = [[] for i in range(16)]
-
-        # Filters ori:
-        for ch, p, status in zip(Oris["chr"], Oris["start"], Oris["status"]):
-            if status in parameters["ori_type"]:  # ,"Likely"]:
-                l_ori[ch - 1].append(int(p / 1000))
-
-        # Then remove duplicate (/kb ) and outside of boundaries
-
-        tot = 0
-        for i in range(len(parameters["lengths"])):
-            isize = len(l_ori[i])
-            l_ori[i] = list(set(l_ori[i]))
-            l_ori[i].sort()
-            print(isize, len(l_ori[i]))
-            while not (max(l_ori[i]) < parameters["lengths"][i]):
-                l_ori[i].remove(max(l_ori[i]))
-            # print(max(l_ori[i]),len_chrom[i]*5
-
-            tot += len(l_ori[i])
-            assert(max(l_ori[i]) < parameters["lengths"][i])
     if parameters["Nori"] == "xenope":
         l_ori = [list(range(parameters["lengths"][0]))]
 
