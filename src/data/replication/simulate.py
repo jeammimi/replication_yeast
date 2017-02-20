@@ -35,7 +35,9 @@ def create_initial_configuration(traj):
     else:
         # ARS
         # print(p_origins, type(p_origins))
+
         traj["lengths"] = traj["len_chrom"]
+        traj["Nori"] = p_origins
         p_origins = load_ori_position(traj)
     # Yeast case
     spb = traj["spb"]
