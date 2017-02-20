@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # ensembleSim(Nsim, Nori, Ndiff, lengths, p_on, p_off, only_one,
     # all_same_ori=False, l_ori=[], cut=10)
-    if type(parameters["Nori"]) == str:
+    if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
         Oris = pandas.read_csv(parameters["Nori"], comment="#")
 
         l_ori = [[] for i in range(16)]
@@ -54,6 +54,8 @@ if __name__ == "__main__":
 
             tot += len(l_ori[i])
             assert(max(l_ori[i]) < parameters["lengths"][i])
+    if parameters["Nori"] == "xenope":
+        l_ori = [list(range(parameters["lengths"][0]))]
 
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")

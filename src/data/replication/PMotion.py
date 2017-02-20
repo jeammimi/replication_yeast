@@ -97,9 +97,9 @@ class Polymer():
         origins.sort()
         self.origins = origins
         if self.origins != []:
-            #print(number,start,np.min(self.origins))
+            # print(number,start,np.min(self.origins))
             assert(np.min(self.origins) >= self.start)
-            #print(self.end,np.max(self.origins))
+            # print(self.end,np.max(self.origins))
             assert(np.max(self.origins) <= self.end)
         self.modules = [Origin(tag) for tag in origins]
         # to keep track of the diff attached in case we attach them one by one
@@ -151,7 +151,6 @@ class Polymer():
     def get_n_activ_fork(self):
         return len([m for m in self.modules if not m.origin])
 
-
     def get_diff_at_origin(self, otag):
         # list of particles tag , particle bond
         return self.bound_to_origin[otag]
@@ -192,7 +191,7 @@ class Polymer():
                 continue
             for pos, time in m.path:
                 #i = self.position_index.index(pos)
-                self.replication_state[pos-self.start] = time
+                self.replication_state[pos - self.start] = time
                 #assert(i == pos - self.start)
         return self.replication_state
 
@@ -211,7 +210,7 @@ class Polymer():
                 if Un_replicated == 0:
                     Un_replicated = 1
                 fork_number[t] /= Un_replicated
-        #print("Done1")
+        # print("Done1")
         if cut != 0:
             fork_number[-cut:] = 0
         return fork_number
@@ -225,7 +224,6 @@ class Polymer():
             Un_replicated[t] = np.sum(rep_p >= t)
 
         return Un_replicated
-
 
     def get_DNA_with_time(self):
         rep_p = np.array(self.get_replication_profile())
@@ -248,7 +246,7 @@ class Polymer():
         firing_time.sort()
         It = np.zeros(self.t)
         for el in firing_time:
-                It[el] += 1
+            It[el] += 1
 
         if normed:
             for t in np.arange(self.t):
@@ -256,7 +254,7 @@ class Polymer():
                 if Un_replicated == 0:
                     Un_replicated = 1
                 It[t] /= Un_replicated
-        #print("Done1")
+        # print("Done1")
         return firing_time, It
 
         # print(self.modules)
@@ -277,7 +275,6 @@ class Polymer():
             if m.move:
                 m.update_position(dt)
         N_mod = len(self.modules)
-
 
         to_remove = []
         #####################################
@@ -320,7 +317,7 @@ class Polymer():
                         if self.bound_to_origin[self.ended[-1].tag] != []:
                             alone.append(self.bound_to_origin[
                                          self.ended[-1].tag][0][0])
-                            #print("Ici")
+                            # print("Ici")
                             if len(self.bound_to_origin[self.ended[-1].tag]) == 2:
                                 print("Releasing passivated origin with two diffS")
                         self.bound_to_origin.pop(self.ended[-1].tag)
@@ -342,7 +339,7 @@ class Polymer():
             if m.move:
                 if m.position < self.start or m.position > self.end:
                     alone.append(m.tag)
-                    #print(alone,m.position)
+                    # print(alone,m.position)
 
                     to_release.append(m.bond_tag)
 
@@ -361,7 +358,7 @@ class Polymer():
                     # Remove last path of the fork if up
 
             im += 1
-        #Remove here to avaid updating link
+        # Remove here to avaid updating link
         for im in to_remove[::-1]:
             m = self.modules.pop(im)
             m.path.pop(-1)

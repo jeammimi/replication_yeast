@@ -45,7 +45,8 @@ def create_initial_configuration(traj):
             for ligne in f.readlines():
                 if not ligne.startswith("#"):
                     sp = ligne.split()
-                    if len(sp) > 3 and (sp[2] == "ARS" or False):  # sp[2] == "ARS_consensus_sequence"):
+                    # sp[2] == "ARS_consensus_sequence"):
+                    if len(sp) > 3 and (sp[2] == "ARS" or False):
                         ch[c.index(sp[0][3:])].append(int(coeff * int(sp[3])))
         p_origins = ch
     # Yeast case
@@ -60,9 +61,7 @@ def create_initial_configuration(traj):
     # Scenari
     diff_bind_when_free = traj["diff_bind_when_free"]
 
-
     # Simulation parameters
-
 
     Np = len(len_chrom)
     assert(len(len_chrom) == len(Cent) == len(p_ribo))
@@ -292,7 +291,6 @@ def create_initial_configuration(traj):
 
 def force_field(traj, bond_list, plist, tag_spb):
 
-
     R = traj["R"]
     micron = traj["micron"]
 
@@ -304,10 +302,6 @@ def force_field(traj, bond_list, plist, tag_spb):
     telomere = traj["telomere"]
     microtubule_length = traj["microtubule_length"] * micron
     diameter_nuc = traj["diameter_nuc"] * micron
-
-
-
-
 
     # Simulation parameters
 
@@ -327,7 +321,6 @@ def force_field(traj, bond_list, plist, tag_spb):
         harmonic.bond_coeff.set(
             'Mono_Nuc', k=330, r0=diameter_nuc / 2. + 1. / 2)
 
-
     # Potential for warmup
     if soft:
         def cos_soft(r, rmin, rmax, epsilon, sigma):
@@ -336,7 +329,6 @@ def force_field(traj, bond_list, plist, tag_spb):
             F = epsilon * 3.1415 / (rmax) * np.sin(r * 3.1415 / (rmax))
 
             return (V, F)
-
 
         nl = md.nlist.tree(r_buff=0.4, check_period=1)
         # nl = md.nlist.stencil(r_buff=0.4, check_period=1)
@@ -370,9 +362,7 @@ def force_field(traj, bond_list, plist, tag_spb):
                                          func=cos_soft, rmin=0, rmax=d,
                                          coeff=dict(epsilon=epsilon, sigma=d))
 
-
     else:
-
 
         if gauss:
             r_cut = 3.
@@ -461,7 +451,6 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
     # Yeast case
     spb = traj["spb"]
 
-
     visu = traj["visu"]
 
     # Scenari
@@ -529,6 +518,7 @@ def simulate(traj):
     p_inte = traj["p_inte"]
     sim_dt = traj["sim_dt"]
     fork_speed = traj["fork_speed"]
+    dscale = traj["dscale"]
     # Yeast case
     spb = traj["spb"]
 
@@ -542,7 +532,6 @@ def simulate(traj):
     diff_bind_when_free = traj["diff_bind_when_free"]
     diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
 
-
     # Simulation parameters
     n_steps = traj["n_steps"]
     length_steps = traj["length_steps"]
@@ -552,7 +541,6 @@ def simulate(traj):
 
     np.random.seed(seed)
     hoomd.context.initialize()  # "--mode=cpu ")
-
 
     if diff_alone:
         # Check
@@ -584,7 +572,8 @@ def simulate(traj):
 
     ###############################################
     # Defining force field:
-    all_beads, all_move, Spb_g, nl = force_field(traj, bond_list=bond_list, plist=plist, tag_spb=tag_spb)
+    all_beads, all_move, Spb_g, nl = force_field(
+        traj, bond_list=bond_list, plist=plist, tag_spb=tag_spb)
 
     # Log
     if not visu:
@@ -621,7 +610,6 @@ def simulate(traj):
     # gsd = dump.gsd(filename=data_folder + "atoms.gsd",period=None,group=all_beads)
 
     # Dynamics
-
 
     def Change_type(typep, particle_list, snp, msg=""):
         # print(particle_list)
@@ -666,14 +654,13 @@ def simulate(traj):
                 group_origin = group.union(name="Activ_origin", a=group_origin,
                                            b=group.type(name="tmp", type=t))
 
-
     # nl.tune(warmup=1,steps=1000)
 
     # Small warmup
 
     t0 = time.time()
     md.integrate.mode_standard(dt=sim_dt)
-    method = md.integrate.langevin(group=all_move, kT=1, seed=seed)
+    method = md.integrate.langevin(group=all_move, kT=1, seed=seed, dscale=dscale)
     snp = system  # .take_snapshot()
 
     if benchmark:
@@ -684,7 +671,6 @@ def simulate(traj):
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
     hoomd.run(100)
-
 
     if warmup != 0:
         hoomd.run(warmup)
