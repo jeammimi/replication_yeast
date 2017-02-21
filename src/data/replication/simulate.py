@@ -13,7 +13,7 @@ from scipy.spatial.distance import cdist
 from .PMotion import Polymer
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
-from replication.tools import load_ori_position
+from replication.tools import load_ori_position, get_lengths_and_centro
 import time
 import json
 
