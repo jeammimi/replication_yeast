@@ -3,11 +3,10 @@ import sys
 sys.path.append("./")
 from replication.ensembleSim import ensembleSim
 from replication.simulate import load_parameters
-from replication.tools import load_ori_position
+from replication.tools import load_ori_position, load_lengths_and_centro
 import os
 import json
 import _pickle as cPickle
-import pandas
 
 
 if __name__ == "__main__":
@@ -31,8 +30,15 @@ if __name__ == "__main__":
 
     # ensembleSim(Nsim, Nori, Ndiff, lengths, p_on, p_off, only_one,
     # all_same_ori=False, l_ori=[], cut=10)
+    if type(parameters["lengths"]) == str:
+        lengths, _ = load_lengths_and_centro(parameters["lengths"], parameters["coarse"])
+        parameters["lengths"] = lengths
+
     if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
-        l_ori = load_ori_position(parameters)
+        l_ori = load_ori_position(parameters["Nori"],
+                                  parameters["ori_type"],
+                                  parameters["lengths"],
+                                  parameters["coarse"])
 
     if parameters["Nori"] == "xenope":
         l_ori = [list(range(parameters["lengths"][0]))]
@@ -40,6 +46,7 @@ if __name__ == "__main__":
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
     parameters.pop("ori_type")
+    parameters.pop("coarse")
 
     parameters["Nori"] = l_ori
     E = ensembleSim(**parameters)

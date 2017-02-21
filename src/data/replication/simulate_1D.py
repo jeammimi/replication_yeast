@@ -4,7 +4,7 @@ from replication.PMotion import Polymer
 
 class simulate:
 
-    def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False, tolerance=0.1):
+    def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False, fork_speed=1, tolerance=0.1):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -12,6 +12,7 @@ class simulate:
         self.oris = []
         self.only_one = only_one
         self.lengths = lengths
+        self.fork_speed = fork_speed
         # print(nori)
 
         assert(len(lengths) == len(nori))
@@ -100,7 +101,7 @@ class simulate:
             ended = 0
             for P in self.polys:
                 bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
-                    1)
+                    self.fork_speed)
 
                 if self.only_one:
                     for k in P.bound_to_origin:
@@ -172,7 +173,7 @@ class simulate:
 
 
 if __name__ == "__main__":
-    S = simu([[1, 4, 89]], 10, [1000], p_on=0.8, p_off=0.2, only_one=True)
+    S = simulate([[1, 4, 89]], 10, [1000], p_on=0.8, p_off=0.2, only_one=True)
     S.simulate(100)
-    S = simu([3], 10, [1000], p_on=0.8, p_off=0.2, only_one=True)
+    S = simulate([3], 10, [1000], p_on=0.8, p_off=0.2, only_one=True)
     S.simulate(100)
