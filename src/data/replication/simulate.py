@@ -41,6 +41,7 @@ def create_initial_configuration(traj):
                                       traj["ori_type"],
                                       len_chrom,
                                       traj["coarse"])
+    p_ribo = [[position / traj["coarse"], length] for position, length in p_ribo]
 
     # Yeast case
     spb = traj["spb"]
