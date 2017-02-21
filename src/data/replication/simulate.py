@@ -30,15 +30,18 @@ def create_initial_configuration(traj):
     N_diffu = traj["N_diffu"]
     p_origins = traj["p_origins"]
 
-    if type(p_origins) == list:
-        pass
-    else:
-        # ARS
-        # print(p_origins, type(p_origins))
+    if type(len_chrom) != list:
+        len_chrom, _ = get_lengths_and_centro(len_chrom, traj["coarse"])
 
-        traj["lengths"] = traj["len_chrom"]
-        traj["Nori"] = p_origins
-        p_origins = load_ori_position(traj)
+    if type(Cent) != list:
+        _, Cent = get_lengths_and_centro(Cent, traj["coarse"])
+
+    if type(p_origins) != list:
+        p_origins = load_ori_position(traj["p_origins"],
+                                      traj["ori_type"],
+                                      len_chrom,
+                                      traj["coarse"])
+
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]

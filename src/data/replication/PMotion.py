@@ -196,13 +196,15 @@ class Polymer():
         return self.replication_state
 
     def get_fork_density(self, cut=0, normed=True):
-        fork_number = np.zeros(self.t)
+        fork_number = np.zeros(int(self.t))
         rep_p = np.array(self.get_replication_profile())
         for m in self.modules + self.ended:
             if not m.origin:
-                start = m.path[0][1]
-                end = m.path[-1][1]
-                fork_number[start - self.start: end - self.start] += 1
+                # print(m.path)
+                if m.path != []:
+                    start = m.path[0][1]
+                    end = m.path[-1][1]
+                    fork_number[int(start) - self.start: int(end) - self.start] += 1
 
         if normed:
             for t in np.arange(self.t):
@@ -216,11 +218,11 @@ class Polymer():
         return fork_number
 
     def get_norm(self):
-        Un_replicated = np.zeros(self.t)
+        Un_replicated = np.zeros(int(self.t))
 
         rep_p = np.array(self.get_replication_profile())
 
-        for t in np.arange(self.t):
+        for t in np.arange(int(self.t)):
             Un_replicated[t] = np.sum(rep_p >= t)
 
         return Un_replicated
@@ -228,9 +230,9 @@ class Polymer():
     def get_DNA_with_time(self):
         rep_p = np.array(self.get_replication_profile())
 
-        DNA = np.zeros(self.t)
+        DNA = np.zeros(int(self.t))
 
-        for t in np.arange(self.t):
+        for t in np.arange(int(self.t)):
             replicated = np.sum(rep_p < t)
             DNA[t] = replicated
 
@@ -244,12 +246,12 @@ class Polymer():
                 if m.activation_time is not None:
                     firing_time.append(m.activation_time)
         firing_time.sort()
-        It = np.zeros(self.t)
+        It = np.zeros(int(self.t))
         for el in firing_time:
-            It[el] += 1
+            It[int(el)] += 1
 
         if normed:
-            for t in np.arange(self.t):
+            for t in np.arange(int(self.t)):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
                     Un_replicated = 1

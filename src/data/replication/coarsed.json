@@ -1,0 +1,49 @@
+{"seed" : 0,
+
+"len_chrom" : "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
+"Cent" : "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
+"p_ribo" : [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [450, 150], [0, 0], [0, 0], [0, 0], [0, 0]],
+
+"R" : 16 ,
+"micron" : 16 ,
+
+"data_folder" : "./data/raw" ,
+
+"N_diffu" : 500 ,
+"cut_off_inte" : 2 ,
+"p_inte" : 0.05 ,
+"sim_dt" : 0.1 ,
+"dscale" : 1.0,
+"fork_speed":0.04,
+"p_origins" : "./data/external/oridb.csv",
+"ori_type" : ["Confirmed"],
+"coarse": 1000,
+
+"spb" : true ,
+"nucleole" : true ,
+"telomere" : true ,
+
+"microtubule_length" : 0.4 ,
+"diameter_nuc" :  0.18 ,
+"special_start" : true ,
+
+"Activ_Origins" : ["Ori"] ,
+"visu" : false ,
+"dump_hic" : false ,
+
+
+"diff_alone" : false ,
+
+"diff_bind_when_free" : false ,
+"diff_bind_when_on_DNA" : false ,
+
+"replicate_DNA" : false ,
+
+"n_steps" : 9000,
+"length_steps" : 1000 ,
+"warmup" : 100000,
+"dcd_period" : 1000,
+"benchmark" : false,
+"soft" : true,
+"gauss" : false
+}

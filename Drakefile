@@ -1,3 +1,8 @@
+get_external_data <-
+  echo go to  http://www.yeastgenome.org/strain/S288C/overview
+  echo to get S288C_contigs.txt (By clicking download.txt)
+
+
 configure_smt <-
   smt -d ./data/raw
   smt -l parameters
