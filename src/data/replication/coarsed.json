@@ -9,7 +9,7 @@
 
 "data_folder" : "./data/raw" ,
 
-"N_diffu" : 500 ,
+"N_diffu" : 150 ,
 "cut_off_inte" : 2 ,
 "p_inte" : 0.05 ,
 "sim_dt" : 0.1 ,
