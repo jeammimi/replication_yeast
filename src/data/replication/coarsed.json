@@ -17,7 +17,7 @@
 "fork_speed":0.04,
 "p_origins" : "./data/external/oridb.csv",
 "ori_type" : ["Confirmed"],
-"coarse": 1000,
+"coarse": 5000,
 
 "spb" : true ,
 "nucleole" : true ,
