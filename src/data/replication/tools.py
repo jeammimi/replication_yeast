@@ -41,4 +41,5 @@ def get_lengths_and_centro(File, coarse=1):
     cents = [int(end) // int(coarse)
              for inf, end in zip(gff["info"], gff["end"]) if inf == "centromere"]
     # print(cents,len(cents))
+    print(lengths, cents)
     return lengths, cents
