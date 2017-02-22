@@ -1,7 +1,7 @@
 import pandas
 
 
-def load_ori_position(File, ori_type, lengths, coarse):
+def load_ori_position(File, ori_type, lengths, coarse, verbose=True):
 
     Oris = pandas.read_csv(File, comment="#")
 
@@ -19,7 +19,8 @@ def load_ori_position(File, ori_type, lengths, coarse):
         isize = len(l_ori[i])
         l_ori[i] = list(set(l_ori[i]))
         l_ori[i].sort()
-        print(isize, len(l_ori[i]))
+        if verbose:
+            print(isize, len(l_ori[i]))
         while not (max(l_ori[i]) < lengths[i]):
             l_ori[i].remove(max(l_ori[i]))
         # print(max(l_ori[i]),len_chrom[i]*5
@@ -30,7 +31,7 @@ def load_ori_position(File, ori_type, lengths, coarse):
     return l_ori
 
 
-def get_lengths_and_centro(File, coarse=1):
+def load_lengths_and_centro(File, coarse=1, verbose=True):
     gff = pandas.read_csv(File, sep="\t", comment="#", header=None, names=[
                           "chr", "SGD", "info", "start", "end", "m1", "m2", "m3", "comment"])
 
@@ -41,5 +42,6 @@ def get_lengths_and_centro(File, coarse=1):
     cents = [int(end) // int(coarse)
              for inf, end in zip(gff["info"], gff["end"]) if inf == "centromere"]
     # print(cents,len(cents))
-    print(lengths, cents)
+    if verbose:
+        print(lengths, cents)
     return lengths, cents

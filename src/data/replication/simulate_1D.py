@@ -4,7 +4,8 @@ from replication.PMotion import Polymer
 
 class simulate:
 
-    def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False, fork_speed=1, tolerance=0.1):
+    def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
+                 fork_speed=1, dt_speed=1, tolerance=0.1):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -12,7 +13,9 @@ class simulate:
         self.oris = []
         self.only_one = only_one
         self.lengths = lengths
+        self.dt_speed = dt_speed
         self.fork_speed = fork_speed
+
         # print(nori)
 
         assert(len(lengths) == len(nori))
@@ -41,11 +44,71 @@ class simulate:
 
     def simulate(self, n):
 
-        for p in self.polys:
-            p.increment_time(1)  # To start at t == 1 to check for fully replicated
-
         alones = 0
         for time in range(n):
+
+            ended = 0
+            for P in self.polys:
+                bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
+                    dt=self.dt_speed, fork_speed=self.fork_speed)
+
+                if self.only_one:
+                    for k in P.bound_to_origin:
+                        if P.bound_to_origin[k] != []:
+                            print("found an alone diffusing element that should have started")
+                            raise
+
+                if not self.only_one:
+                    for diff1, diff2 in bind_diff:
+                        self.libre[diff1] = 0
+                        self.libre[diff2] = 0
+                        self.origins[diff1] = None
+                        self.origins[diff2] = None
+
+                    for diff1 in alone:
+                        self.libre[diff1] = 0
+                        self.origins[diff1] = None
+                else:
+                    for diff1, diff2 in bind_diff:
+                        for diff_t in range(self.ndiff):
+                            if self.libre[diff_t] == 2:
+                                self.libre[diff_t] = 0
+                                self.origins[diff] = None
+                                break
+
+                    for diff in alone:
+                        alones += 1
+
+                    if alones >= 2:
+                        for diff_t in range(self.ndiff):
+                            if self.libre[diff_t] == 2:
+                                self.libre[diff_t] = 0
+                                self.origins[diff] = None
+                                alones -= 2
+                                break
+
+                # Free the diff that where on origins that are now passivated
+                for p in passivated_origin:
+                    found = 0
+                    for diff_t in range(self.ndiff):
+                        if self.origins[diff_t] is not None and self.origins[diff_t][1] == p:
+                            self.origins[diff_t] = None
+                            self.libre[diff_t] = 0
+                            found += 1
+                    if found == 2:
+                        print("Passivated origins with two diff")
+                        raise
+
+                if P.modules == []:
+                        # np.sum(np.array(P.get_replication_profile()) == 0 ) == 0:
+                    ended += 1
+                    # print("Ended",time)
+                    #print(self.poly.get_replication_profile() == 0 )
+                    # break
+
+            if ended == len(self.lengths):
+                break
+
             order = np.arange(self.ndiff)
             np.random.shuffle(order)
             for diff in order:
@@ -97,79 +160,6 @@ class simulate:
 
                 elif self.libre[diff] == 2:
                     pass
-
-            ended = 0
-            for P in self.polys:
-                bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
-                    self.fork_speed)
-
-                if self.only_one:
-                    for k in P.bound_to_origin:
-                        if P.bound_to_origin[k] != []:
-                            print("found an alone diffusing element that should have started")
-                            raise
-
-                if not self.only_one:
-                    for diff1, diff2 in bind_diff:
-                        self.libre[diff1] = 0
-                        self.libre[diff2] = 0
-                        self.origins[diff1] = None
-                        self.origins[diff2] = None
-
-                    for diff1 in alone:
-                        self.libre[diff1] = 0
-                        self.origins[diff1] = None
-                else:
-                    for diff1, diff2 in bind_diff:
-                        for diff_t in range(self.ndiff):
-                            if self.libre[diff_t] == 2:
-                                self.libre[diff_t] = 0
-                                self.origins[diff] = None
-                                break
-
-                    for diff in alone:
-                        alones += 1
-
-                    if alones >= 2:
-                        for diff_t in range(self.ndiff):
-                            if self.libre[diff_t] == 2:
-                                self.libre[diff_t] = 0
-                                self.origins[diff] = None
-                                alones -= 2
-                                break
-
-                # Free the diff that where on origins that are now passivated
-                for p in passivated_origin:
-                    found = 0
-                    for diff_t in range(self.ndiff):
-                        if self.origins[diff_t] is not None and self.origins[diff_t][1] == p:
-                            self.origins[diff_t] = None
-                            self.libre[diff_t] = 0
-                            found += 1
-                    if found == 2:
-                        print("Passivated origins with two diff")
-                        raise
-
-                """
-                if self.only_one:
-                    activ = 0
-                    for diff_t in range(self.ndiff):
-                        if self.libre[diff_t] == 2:
-                            activ += 1
-                    if not (activ-self.poly.get_n_activ_fork() / 2) <= 1 :
-                        print(activ,self.poly.get_n_activ_fork()/2,alones)
-                        raise
-                """
-
-                if P.modules == []:
-                        # np.sum(np.array(P.get_replication_profile()) == 0 ) == 0:
-                    ended += 1
-                    # print("Ended",time)
-                    #print(self.poly.get_replication_profile() == 0 )
-                    # break
-
-            if ended == len(self.lengths):
-                break
 
 
 if __name__ == "__main__":

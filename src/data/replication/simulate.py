@@ -13,7 +13,7 @@ from scipy.spatial.distance import cdist
 from .PMotion import Polymer
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
-from replication.tools import load_ori_position, get_lengths_and_centro
+from replication.tools import load_ori_position, load_lengths_and_centro
 import time
 import json
 
@@ -31,7 +31,7 @@ def create_initial_configuration(traj):
     p_origins = traj["p_origins"]
 
     if type(len_chrom) != list:
-        len_chrom, _ = get_lengths_and_centro(len_chrom, traj["coarse"])
+        len_chrom, _ = load_lengths_and_centro(len_chrom, traj["coarse"])
 
     if type(Cent) != list:
         _, Cent = get_lengths_and_centro(Cent, traj["coarse"])
@@ -512,6 +512,7 @@ def simulate(traj):
     p_inte = traj["p_inte"]
     sim_dt = traj["sim_dt"]
     fork_speed = traj["fork_speed"]
+    dt_speed = traj["dt_speed"]
     dscale = traj["dscale"]
     # Yeast case
     spb = traj["spb"]
@@ -719,7 +720,7 @@ def simulate(traj):
             #    verbose = True
             bind_diff, diff_diff, shifted_bonds, \
                 passivated_origin, to_release, alone = P.increment_time(
-                    fork_speed, verbose)
+                    dt_speed, fork_speed, verbose)
 
             Change_type(
                 'P_Ori',
