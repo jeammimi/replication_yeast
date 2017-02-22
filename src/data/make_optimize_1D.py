@@ -73,8 +73,8 @@ if __name__ == "__main__":
         if returnv:
             return E
         else:
-            getattr(E, parameters["optimisation"])()
-            return E.error_firing_time()[0]
+
+            return getattr(E, parameters["optimisation"])()
 
     if parameters["only_one"]:
         start = [parameters["rNdiff"], parameters["rp_on"]]
