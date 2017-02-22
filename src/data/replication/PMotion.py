@@ -8,7 +8,7 @@ import numpy as np
 with open("logp.txt", "w"):
     pass
 from collections import namedtuple
-SpaceTime = namedtuple("St", ["pos", "t"])
+SpaceTime = namedtuple("SpaceTime", ["pos", "t"])
 
 
 class Origin:
