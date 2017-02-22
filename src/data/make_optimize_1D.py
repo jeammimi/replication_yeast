@@ -71,7 +71,7 @@ if __name__ == "__main__":
                         dt_speed=parameters["dt_speed"],
                         fork_speed=parameters["fork_speed"],
                         all_same_ori=True)
-        E.run_all(1000)
+        E.run_all(40000)
 
         if returnv:
             return E
