@@ -1,4 +1,4 @@
-{"Nsim":100,
+{"Nsim":5,
  "Nori": "./data/external/oridb.csv",
  "Ndiff": 750,
  "rNdiff": [100,800],
