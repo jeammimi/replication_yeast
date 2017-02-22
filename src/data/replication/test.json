@@ -19,7 +19,7 @@
 "dt_speed": 0.04,
 "p_origins" : [[100,200,300],[100,200,300]],
 "ori_type" : ["None"],
-"coarsed" : 5000,
+"coarse" : 5000,
 
 "spb" : false ,
 "nucleole" : false ,
