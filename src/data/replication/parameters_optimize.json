@@ -1,0 +1,17 @@
+{"Nsim":100,
+ "Nori": "./data/external/oridb.csv",
+ "Ndiff": 750,
+ "rNdiff": [100,800],
+ "lengths": "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
+ "coarse" : 1000,
+ "fork_speed" : 1.0,
+ "dt_speed" : 0.04,
+ "p_on": 0.04,
+ "rp_on":[0.01,1],
+ "p_off": 0.3,
+ "rp_off":[0.01,1],
+ "only_one" : false,
+ "all_same_ori" : true,
+ "ori_type" : ["Confirmed"],
+ "data_folder" : "./data/raw/"
+}
