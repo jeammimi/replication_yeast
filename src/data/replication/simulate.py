@@ -34,7 +34,7 @@ def create_initial_configuration(traj):
         len_chrom, _ = load_lengths_and_centro(len_chrom, traj["coarse"])
 
     if type(Cent) != list:
-        _, Cent = get_lengths_and_centro(Cent, traj["coarse"])
+        _, Cent = load_lengths_and_centro(Cent, traj["coarse"])
 
     if type(p_origins) != list:
         p_origins = load_ori_position(traj["p_origins"],
