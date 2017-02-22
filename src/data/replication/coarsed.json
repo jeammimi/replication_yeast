@@ -12,6 +12,7 @@
 "N_diffu" : 150 ,
 "cut_off_inte" : 2 ,
 "p_inte" : 0.05 ,
+"p_off" : 0.1,
 "sim_dt" : 0.1 ,
 "dscale" : 1.0,
 "fork_speed": 1,

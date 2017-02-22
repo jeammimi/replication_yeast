@@ -9,11 +9,17 @@
 
 "data_folder" : "./data/raw" ,
 
-"N_diffu" : 1000 ,
-"cut_off_inte" : 1.5 ,
+"N_diffu" : 10 ,
+"cut_off_inte" : 2 ,
 "p_inte" : 0.2 ,
-"sim_dt" : 0.01 ,
-"p_origins" : [[4, 9, 51, 98, 136, 161, 188, 193, 200, 277, 329, 350, 372, 393, 444, 448, 453, 466, 489], [4, 9, 51, 98, 136, 161, 188, 193, 200, 277, 329, 350, 372, 393, 444, 448, 453, 466, 489]],
+"p_off" : 0.1,
+"sim_dt" : 0.1,
+"dscale" : 1,
+"fork_speed" :1,
+"dt_speed": 0.04,
+"p_origins" : [[100,200,300],[100,200,300]],
+"ori_type" : ["None"],
+"coarsed" : 5000,
 
 "spb" : false ,
 "nucleole" : false ,
@@ -35,8 +41,11 @@
 
 "replicate_DNA" : false ,
 
-"n_steps" : 10,
+"n_steps" : 1000,
 "length_steps" : 1000 ,
+"warmup" : 10,
+"dcd_period" : 1000,
 "benchmark" : false,
-"soft" : true
+"soft" : true,
+"gauss" : false
 }

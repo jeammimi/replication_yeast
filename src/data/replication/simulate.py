@@ -510,6 +510,7 @@ def simulate(traj):
     # Diffusing elements
     cut_off_inte = traj["cut_off_inte"]
     p_inte = traj["p_inte"]
+    p_off = traj["p_off"]
     sim_dt = traj["sim_dt"]
     fork_speed = traj["fork_speed"]
     dt_speed = traj["dt_speed"]
@@ -740,6 +741,18 @@ def simulate(traj):
                     Change_type("S_Diff", alone, snp)
                     # Change type for pair of diff diff
                     Change_type("Diff", diff_diff, snp)
+
+            # check for releasing alone binded elements
+
+            for ori_not_started in P.get_free_origins():
+                diff = P.get_diff_at_origin(ori_not_started)
+                if diff != []:
+                    if np.random.rand() > p_off:
+                        continue
+                    ptag, bond_tag = diff[0]
+                    P.dettach_one_diff(ptag, ori_not_started)
+                    Release([bond_tag], snp)
+                    Change_type("Diff", [ptag], snp)
 
         group_diffu.force_update()
         group_origin.force_update()
