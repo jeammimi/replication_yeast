@@ -192,8 +192,10 @@ class Polymer():
         #     f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
         self.modules.insert(
             i + 1, RFork(ptags[1], otag, new_btags[1], self.t, diff_diff_tag))
+        self.add_event(ptags[1], "R")
         self.modules.insert(
             i, LFork(ptags[0], otag, new_btags[0], self.t, diff_diff_tag))
+        self.add_event(ptags[0], "R")
 
         if self.modules[i + 1].passivated or self.modules[i + 1].activated:
             print("Warning origin already used")
@@ -386,6 +388,8 @@ class Polymer():
                         bind_diff.append([m.tag, self.modules[im + 1].tag])
                         to_remove.append(im)
                         to_remove.append(im + 1)
+                        self.add_event(m.tag, "E")
+                        self.add_event(self.modules[im + 1].tag, "E")
 
                         if m.path[-1].pos >= self.modules[im + 1].path[-1].pos:
                             m.path.pop(-1)
@@ -414,6 +418,7 @@ class Polymer():
                 elif m.position < self.start or m.position > self.end:
                     # Take care of fork outside of boundaries
                     alone.append(m.tag)
+                    self.add_event(m.tag, "E")
                     # print(alone,m.position)
 
                     to_release.append(m.bond_tag)
