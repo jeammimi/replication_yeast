@@ -7,6 +7,7 @@ import os
 import json
 import _pickle as cPickle
 from skopt import gp_minimize
+from skopt import dump
 
 
 if __name__ == "__main__":
@@ -81,5 +82,7 @@ if __name__ == "__main__":
         start = [parameters["rNdiff"], parameters["rp_on"], parameters["rp_off"]]
     res = gp_minimize(error, start, n_jobs=1)
 
-    with open(os.path.join(data_folder, "ensembleSim_optimisation.pick"), "wb") as f:
-        cPickle.dump([error(res["x"], returnv=True), res], f)
+    with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
+        cPickle.dump(error(res["x"], returnv=True), f)
+
+    dump(res, os.path.join(data_folder, "optimisation.pkl"))

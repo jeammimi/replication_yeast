@@ -103,7 +103,7 @@ class Polymer():
         self.number = number
         self.start = start
         self.end = end  # End is included
-        #print(start, end)
+        # print(start, end)
         origins.sort()
         self.origins = origins
         if self.origins != []:
@@ -118,6 +118,7 @@ class Polymer():
         self.t = 0
         self.ended = []
         self.replicated = {r: False for r in range(start, end + 1)}
+        self.events = {}
 
     def has_origin(self, ptag):
         if ptag in self.origins:
@@ -136,6 +137,12 @@ class Polymer():
                 [m.state for m in self.modules],
                 [m.state for m in self.ended]]
 
+    def add_event(self, ptag, event):
+        if ptag in self.events:
+            self.events[ptag].append([self.t, event])
+        else:
+            self.events[ptag] = [[self.t, event]]
+
     def dettach_one_diff(self, ptag, otag):
         if len(self.bound_to_origin[otag]) == 2:
             print("Dettaching one but should have started")
@@ -143,6 +150,7 @@ class Polymer():
             raise
         if self.bound_to_origin[otag][0][0] == ptag:
             self.bound_to_origin[otag] = []
+            self.add_event(ptag, "D")
 
     def attach_one_diff(self, ptag, otag, new_btag):
         if otag not in self.bound_to_origin:
@@ -150,6 +158,7 @@ class Polymer():
             raise
         else:
             self.bound_to_origin[otag].append([ptag, new_btag])
+            self.add_event(ptag, "A")
 
         if len(self.bound_to_origin[otag]) == 1:
             return False  # Do not start
@@ -185,6 +194,7 @@ class Polymer():
             i + 1, RFork(ptags[1], otag, new_btags[1], self.t, diff_diff_tag))
         self.modules.insert(
             i, LFork(ptags[0], otag, new_btags[0], self.t, diff_diff_tag))
+
         if self.modules[i + 1].passivated or self.modules[i + 1].activated:
             print("Warning origin already used")
             # with open("logp.txt","a") as f:
@@ -203,7 +213,7 @@ class Polymer():
 
             for pos, time in m.path:
                 # i = self.position_index.index(pos)
-                #print(pos, time)
+                # print(pos, time)
                 self.replication_state[pos - self.start] = time
                 # assert(i == pos - self.start)
         return self.replication_state
