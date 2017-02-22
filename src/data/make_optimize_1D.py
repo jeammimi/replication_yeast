@@ -67,7 +67,10 @@ if __name__ == "__main__":
         # print(Ndiff,p_on)
             # print(Ndiff,p_on)
         E = ensembleSim(parameters["Nsim"], l_ori, Ndiff, parameters["lengths"],
-                        p_on=p_on, p_off=p_off, only_one=only_one, all_same_ori=True)
+                        p_on=p_on, p_off=p_off, only_one=only_one,
+                        dt_speed=parameters["dt_speed"],
+                        fork_speed=parameters["fork_speed"],
+                        all_same_ori=True)
         E.run_all(1000)
 
         if returnv:
