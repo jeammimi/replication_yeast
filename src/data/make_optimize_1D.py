@@ -74,7 +74,7 @@ if __name__ == "__main__":
             return E
         else:
 
-            return getattr(E, parameters["optimisation"])()
+            return getattr(E, parameters["optimisation"])()[0]
 
     if parameters["only_one"]:
         start = [parameters["rNdiff"], parameters["rp_on"]]
