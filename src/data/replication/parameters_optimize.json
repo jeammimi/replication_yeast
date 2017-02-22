@@ -13,5 +13,6 @@
  "only_one" : false,
  "all_same_ori" : true,
  "ori_type" : ["Confirmed"],
- "data_folder" : "./data/raw/"
+ "data_folder" : "./data/raw/",
+ "optimisation" : "error_DNA_time"
 }
