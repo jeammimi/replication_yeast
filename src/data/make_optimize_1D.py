@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     if parameters["only_one"]:
         start = [parameters["rNdiff"], parameters["rp_on"]]
-    else
+    else:
         start = [parameters["rNdiff"], parameters["rp_on"], parameters["rp_off"]]
     res = gp_minimize(error, start, n_jobs=1)
 
