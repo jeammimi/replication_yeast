@@ -348,7 +348,7 @@ def force_field(traj, bond_list, plist, tag_spb):
                         d = 0.5 + diameter_nuc / 2.
                         d = r_cut * d
                     if inuc == 2:
-                        d = r_cut * (2 + diameter_nuc)
+                        d = r_cut * diameter_nuc
                         # smaller here
                     if inuc == 0:
                         continue
