@@ -142,13 +142,8 @@ def create_initial_configuration(traj):
                     inuc += 1
 
             snapshot.bonds.group[
-                offset_bond +
-                p] = [
-                offset_particle +
-                p,
-                offset_particle +
-                p +
-                1]
+                offset_bond + p] = [offset_particle + p,
+                                    offset_particle + p + 1]
             if inuc == 0:
                 snapshot.bonds.typeid[offset_bond +
                                       p] = bond_list.index('Mono_Mono')  # polymer_A
