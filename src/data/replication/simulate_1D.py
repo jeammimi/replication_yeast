@@ -69,11 +69,13 @@ class simulate:
                         self.libre[diff1] = 0
                         self.origins[diff1] = None
                 else:
+
                     for diff1, diff2 in bind_diff:
+                        # Release two randoms occupied diffusing element
                         for diff_t in range(self.ndiff):
                             if self.libre[diff_t] == 2:
                                 self.libre[diff_t] = 0
-                                self.origins[diff] = None
+                                self.origins[diff_t] = None
                                 break
 
                     for diff in alone:
@@ -83,7 +85,7 @@ class simulate:
                         for diff_t in range(self.ndiff):
                             if self.libre[diff_t] == 2:
                                 self.libre[diff_t] = 0
-                                self.origins[diff] = None
+                                self.origins[diff_t] = None
                                 alones -= 2
                                 break
 
