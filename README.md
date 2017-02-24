@@ -1,4 +1,4 @@
-projet_yeast_replication : Modeling yeast spatio-temporal replication program
+Modeling yeast spatio-temporal replication program
 ==============================
 
 First report on comparison between 3D and 1D simulations
