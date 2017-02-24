@@ -1,6 +1,13 @@
 projet_yeast_replication
 ==============================
 
+First report on comparison between 3D and 1D simulations
+http://nbviewer.jupyter.org/github/jeammimi/replication_yeast/blob/master/notebooks/report/0.1-Comparison-simu-1D-simu-3D.ipynb
+
+
+
+==============================
+
 Modeling yeast spatiotemporal replication program
 
 Project Organization
