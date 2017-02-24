@@ -14,6 +14,7 @@ from .PMotion import Polymer
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
 from replication.tools import load_ori_position, load_lengths_and_centro
+from replication.tools import load_parameters
 import time
 import json
 
@@ -881,13 +882,6 @@ def simulate(traj):
     logger.disable()
     method.disable()
     dcd.disable()
-
-
-def load_parameters(filename):
-
-    with open(filename, "r") as f:
-        traj = json.load(f)
-    return traj
 
 
 if __name__ == "__main__":
