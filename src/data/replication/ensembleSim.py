@@ -18,6 +18,10 @@ class ensembleSim:
         if type(lengths) == str:
             print("Lengths = %s" % lengths)
             raise
+        if type(lengths[0]) == list:
+            print("lengts = ", lengths)
+            print("But should be a list")
+            raise
         self.p_on = p_on
         self.p_off = p_off
         self.only_one = only_one
@@ -96,11 +100,15 @@ class ensembleSim:
     def get_quant(self, name, shift=0):
         prop = getattr(self, name)
         # print(prop)
-        maxl = max(map(len, prop))
+        times = self.get_times_replication()
+        if -1 in times:
+            maxl = int(max(map(len, prop)))
+        else:
+            maxl = int(max(times))
 
         normed_prop = np.zeros((self.Nsim, maxl))
         for iIt, It in enumerate(prop):
-            normed_prop[iIt, :len(It)] = It
+            normed_prop[iIt, :min(len(It), maxl)] = It[:min(len(It), maxl)]
             if shift != 0:
                 normed_prop[iIt, len(It):] = It[-1]
 
@@ -108,6 +116,18 @@ class ensembleSim:
         y = np.mean(normed_prop, axis=0)
         err = np.std(normed_prop, axis=0)
         return x, y, err, normed_prop
+
+    def get_times_replication(self):
+        times = []
+        for rep in self.aRps:
+            times.append(-1)
+            for c in rep:
+                if None in c:
+                    times[-1] = -1
+                    break
+                else:
+                    times[-1] = max(times[-1], max(c))
+        return times
 
     def get_rep_profile(self):
         rep = []
@@ -121,6 +141,7 @@ class ensembleSim:
         copie = []
         std_copie = []
         for il, l in enumerate(self.lengths):
+            # print(l)
             copie.append(np.ones((self.Nsim, l)))
             for sim in range(self.Nsim):
                 copie[il][sim, np.array(self.aRps[sim][il]) < time] = 2
@@ -187,3 +208,163 @@ class ensembleSim:
         if plot:
             return zip(*point)
         return error, Np
+
+    def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
+                            default_rep="../../data/external/time-coordinate.pick",
+                            experiment=True, profile=False, which="mean", fig=None, warning=True):
+
+        import matplotlib.pyplot as plt
+
+        with open(default_rep, "rb") as f:
+            times, coordinate = cPickle.load(f)
+
+        times.keys()
+        time_p = list(times.keys())
+        time_p.sort()
+        dna = []
+        for t in time_p:
+            dna.append(np.concatenate(times[t]).mean())
+        #plot(time_p, dna)
+
+        result = {"chr": [], "start": [], "end": [], "mean_copie_exp": [], "mean_copie_simu": []}
+        #f = figure(figsize=(20,20))
+        if fig is None:
+            f = plt.figure(figsize=figsize)
+        else:
+            f = fig
+        mean_copie = {}
+        if not profile:
+            k = list(times.keys())
+            k.sort()
+            for ikk, kk in enumerate(k):
+
+                mean_copie[kk] = self.get_mean_copie(int(kk))[0]
+                #print(mean_copie[kk],len(mean_copie[kk][0]) )
+                #print(len( mean_copie[kk]))
+
+        if profile:
+            max_t = self.get_times_replication()
+            if which == "mean":
+
+                max_t = max(max_t)
+            else:
+
+                max_t = max(np.array(max_t)[which])
+        extra = [0, 0, 0, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6]
+        position = [0, 1, 2, 0, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 1]
+        s = 0.03
+        sh = 0.04
+        height = 1 / (7 + 1) - sh
+
+        margin_right = 0.02
+
+        for chro in range(16):
+            #ax = f.add_subplot(4,4,chro + 1)
+            #ax = f.add_subplot(gs[chro])
+
+            column = extra[chro]
+            tot = extra.count(column)
+            p = position[chro]
+
+            row_lengths = [l for l, i in zip(self.lengths, extra) if column == i]
+            crow_length = [0] + np.cumsum(row_lengths).tolist()
+
+            xstart = (p + 1) * s + (1 - margin_right - tot * s) * \
+                crow_length[p] / (sum(row_lengths))
+            ystart = 1 - (column + 1) * (height + sh)
+            w = (1 - margin_right - tot * s) * row_lengths[p] / (sum(row_lengths))
+            h = height
+
+            # print([xstart,ystart,w,h])
+            f.add_axes([xstart, ystart, w, h])
+
+            #chro = 3
+            if profile:
+                if which == "mean":
+                    Prof = self.get_rep_profile()[chro]
+                    plt.plot(Prof)
+                else:
+                    for sim in which:
+                        plt.plot(self.aRps[sim][chro])
+                    top = self.aRps[sim][chro]
+            else:
+                k = list(times.keys())
+                k.sort()
+                for ikk, kk in enumerate(k):
+                    if ikk == 0:
+                        mean_C = mean_copie[kk][chro]
+                    else:
+                        mean_C += mean_copie[kk][chro]
+                plt.plot(mean_C / len(k))
+                top = mean_C / len(k)
+
+            for x in self.l_ori[chro]:
+
+                mini = min(top)
+                maxi = max(top)
+
+                plt.plot([x, x], [mini, maxi], color="k", linewidth=1)
+
+            def get_rep_prof(times, coordinate, ch, profile=True):
+                k = list(times.keys())
+                k.sort()
+
+                # To get all the coordinates
+                m = []
+                for kk in k:
+                    m = list(set(coordinate[kk][ch] + m))
+                m.sort()
+                # print(len(m))
+
+                rep = np.zeros(len(m))  # + 70
+                norm = np.zeros(len(m))
+                for ilocus, locus in enumerate(m):
+                    # print(locus)
+                    for kk in k[::-1]:
+                        if locus in coordinate[kk][ch]:
+                            i = list(coordinate[kk][ch]).index(locus)
+                            if profile:
+                                if times[kk][ch][i] > 1.5:
+                                    rep[ilocus] = min(int(kk), 70)
+
+                            else:
+                                # Mean replication value
+                                rep[ilocus] += times[kk][ch][i]
+                                norm[ilocus] += 1
+                norm[norm == 0] = 1
+                if profile:
+                    rep[rep == 0] = 70
+                # print(times[kk][ch])
+                return m, rep / norm
+            if experiment:
+                locci, p = get_rep_prof(times, coordinate, chro, profile=profile)
+
+                #m = lengths[chro] / len(p)
+                #plot(np.arange(len(p)) * m,p)
+                if not profile:
+                    for loc, copie in zip(locci, p):
+                        result["chr"].append(chro + 1)
+
+                        result["start"].append(loc)
+                        result["end"].append(loc)
+                        result["mean_copie_exp"].append(copie)
+                        try:
+                            result["mean_copie_simu"].append(top[int(loc / coarse)])
+                        except IndexError:
+                            if warning:
+                                print("out of bounds")
+                            result["mean_copie_simu"].append(top[-1])
+
+                plt.plot(np.array(locci) / coarse, p, "-")
+            if profile:
+                plt.ylim(0, max_t)
+
+            else:
+                plt.ylim(1, 2)
+            if extra[chro] == 6:
+                plt.xlabel("Genomic position (5 kb)")
+            if position[chro] == 0:
+                if profile:
+                    plt.ylabel("rep time (min)")
+                else:
+                    plt.ylabel("gene copy number")

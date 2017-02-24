@@ -1,4 +1,6 @@
 import pandas
+import json
+from replication.ensembleSim import ensembleSim
 
 
 def load_ori_position(File, ori_type, lengths, coarse, verbose=True):
@@ -33,7 +35,7 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True):
 
 def load_lengths_and_centro(File, coarse=1, verbose=True):
     gff = pandas.read_csv(File, sep="\t", comment="#", header=None, names=[
-                          "chr", "SGD", "info", "start", "end", "m1", "m2", "m3", "comment"])
+                          "chr", "SGD", "info", "start", "end", "m1", "m2", "m3", "comment"], low_memory=False)
 
     lengths = [int(end) // int(coarse) for inf, end, chro in zip(gff["info"], gff["end"], gff["chr"])
                if inf == "chromosome" and "mt" not in chro]
@@ -45,3 +47,29 @@ def load_lengths_and_centro(File, coarse=1, verbose=True):
     if verbose:
         print(lengths, cents)
     return lengths, cents
+
+
+def load_parameters(filename):
+
+    with open(filename, "r") as f:
+        traj = json.load(f)
+    return traj
+
+
+def load_3D_simus(folder_roots, n=5):
+    parameters = load_parameters(folder_roots + "1/params.json")
+    # pprint.pprint(parameters)
+    lengths, _ = load_lengths_and_centro(
+        "../." + parameters["len_chrom"], parameters["coarse"], verbose=False)
+
+    E = ensembleSim(n, Nori=None,
+                    Ndiff=parameters["N_diffu"] * 2,
+                    lengths=lengths,
+                    p_on=parameters["p_inte"],
+                    p_off=parameters["p_off"],
+                    only_one=False,
+                    all_same_ori=True,
+                    fork_speed=parameters["fork_speed"],
+                    dt_speed=parameters["dt_speed"])
+    E.run_all(load_from_file=folder_roots)
+    return E, lengths, parameters

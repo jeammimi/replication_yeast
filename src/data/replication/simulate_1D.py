@@ -24,7 +24,7 @@ class simulate:
         # print(starts)
 
         for el, length, start in zip(nori, lengths, starts):
-            if type(el) == list:
+            if type(el) in [list, np.ndarray]:
                 self.oris.append(el)
                 continue
             self.oris.append([])
