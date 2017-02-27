@@ -10,6 +10,8 @@ class ensembleSim:
                  p_on, p_off, only_one, all_same_ori=False,
                  dt_speed=1,
                  fork_speed=1,
+                 gindin=True,
+                 p_v=1,
                  l_ori=[], cut=10):
         self.Nsim = Nsim
         self.Nori = Nori
@@ -28,6 +30,8 @@ class ensembleSim:
         self.all_same_ori = all_same_ori
         self.dt_speed = dt_speed
         self.fork_speed = fork_speed
+        self.gindin = gindin
+        self.p_v = p_v
         self.cut = cut
         self.l_ori = l_ori
 
@@ -40,6 +44,7 @@ class ensembleSim:
         self.aDNAs = []
         self.raDNAs = []
         self.aUnrs = []
+        self.aFree_origins = []
         for sim in range(self.Nsim):
             # print(sim)
 
@@ -55,7 +60,9 @@ class ensembleSim:
                              self.p_off,
                              self.only_one,
                              dt_speed=self.dt_speed,
-                             fork_speed=self.fork_speed)
+                             fork_speed=self.fork_speed,
+                             gindin=self.gindin,
+                             p_v=self.p_v)
 
                 S.simulate(run_length)
             else:
@@ -76,6 +83,7 @@ class ensembleSim:
             self.aDNAs.append([])
             self.raDNAs.append([])
             self.aUnrs.append([])
+            self.aFree_origins.append([])
 
             for poly in S.polys:
                 ft, it = poly.get_firing_time_It(normed=False)
@@ -89,11 +97,13 @@ class ensembleSim:
 
                 self.aRps[-1].append(poly.get_replication_profile())
                 self.raDNAs[-1].append(poly.get_DNA_with_time())
+                self.aFree_origins[-1].append(poly.get_free_origins_time(normed=False))
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
             unr[unr == 0] = 1
             self.aIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0) / unr
             self.aFds[-1] = np.sum(np.array(self.aFds[-1]), axis=0) / unr
+            self.aFree_origins[-1] = np.sum(np.array(self.aFree_origins[-1]), axis=0)
             # print(self.raDNAs)
             self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
 
@@ -162,6 +172,9 @@ class ensembleSim:
 
     def DNAs(self):
         return self.get_quant("aDNAs", shift=2)
+
+    def Free_origins(self):
+        return self.get_quant("aFree_origins", shift=2)
 
     def n_activated_oris(self):
         return list(map(len, np.concatenate(self.aFts)))

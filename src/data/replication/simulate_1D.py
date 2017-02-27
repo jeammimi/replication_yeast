@@ -5,7 +5,7 @@ from replication.PMotion import Polymer
 class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
-                 fork_speed=1, dt_speed=1, tolerance=0.1):
+                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -15,6 +15,8 @@ class simulate:
         self.lengths = lengths
         self.dt_speed = dt_speed
         self.fork_speed = fork_speed
+        self.gindin = gindin
+        self.p_v = p_v
 
         # print(nori)
 
@@ -45,6 +47,11 @@ class simulate:
     def simulate(self, n):
 
         alones = 0
+
+        ori_libre = []
+        for ip, p in enumerate(self.polys):
+            ori_libre += [[ip, orip] for orip in list(p.get_free_origins())]
+
         for time in range(n):
 
             ended = 0
@@ -101,6 +108,17 @@ class simulate:
                         print("Passivated origins with two diff")
                         raise
 
+                    for iori, (ip, ori) in enumerate(ori_libre):
+                        found = False
+                        if ori == p:
+                            ori_libre.pop(iori)
+                            found = True
+                            break
+                    if not found:
+                        print(p)
+                        print(ori_libre)
+                        print("Missing origin")
+                        raise
                 if P.modules == []:
                         # np.sum(np.array(P.get_replication_profile()) == 0 ) == 0:
                     ended += 1
@@ -111,47 +129,71 @@ class simulate:
             if ended == len(self.lengths):
                 break
 
+            # Random checks
+            if np.random.random() < 0.01:
+                ori1_libre = []
+                for ip, p in enumerate(self.polys):
+                    ori1_libre += [[ip, orip] for orip in list(p.get_free_origins())]
+                assert(len(ori1_libre) == len(ori_libre))
+
             order = np.arange(self.ndiff)
             np.random.shuffle(order)
+
             for diff in order:
                 #print(self.libre[diff],self.libre[diff] == 0)
                 if self.libre[diff] == 0:
+                    if len(ori_libre) == 0:
+                        continue
+
                     # print(np.random.rand())
-                    if np.random.rand() < self.p_on:
-                        # print("La")
-                        ori_libre = []
-                        for ip, p in enumerate(self.polys):
-                            ori_libre += [[ip, orip] for orip in list(p.get_free_origins())]
-                        if len(ori_libre) == 0:
-                            continue
-                        # print(ori_libre)
-                        choice = np.random.randint(len(ori_libre))
-                        # print("La")
-                        # print(ori_libre[choice],self.poly.bound_to_origin[ori_libre[choice]])
-                        # print(time)
-                        # print(self.poly.state())
-                        what_p, what_ori = ori_libre[choice]
-                        two = self.polys[what_p].attach_one_diff(diff, what_ori, None)
-                        if two:
-                            # print("Start",ori_libre[choice])
-                            # print(self.poly.modules)
-                            [diff1, _], [diff2, _] = self.polys[what_p].get_diff_at_origin(what_ori)
-                            self.polys[what_p].add_fork(
-                                [diff1, diff2], what_ori, [None, None], None)
-                            self.libre[diff1] = 2
-                            self.libre[diff2] = 2
+                    if self.gindin:
+                        if np.random.rand() < self.p_on:
+                            # Interaction
+
+                            pass
 
                         else:
-                            if not self.only_one:
-                                self.libre[diff] = 1
-                                self.origins[diff] = ori_libre[choice]
+                            continue
 
-                            else:
-                                # If only one needed start the fork and reciclate this
-                                self.polys[what_p].add_fork(
-                                    [diff, diff], what_ori, [None, None], None)
-                                self.libre[diff] = 2
-                                self.origins[diff] = ori_libre[choice]
+                    elif not self.gindin:
+
+                        Nori_libre = len(ori_libre)
+                        n_possible_ori = np.random.binomial(Nori_libre, self.p_v)
+
+                        p_one_interaction = 1 - (1 - self.p_on)**n_possible_ori
+                        if np.random.rand() < p_one_interaction:
+                            # Interaction
+                            pass
+                        else:
+                            continue
+
+                    choice = np.random.randint(len(ori_libre))
+                    what_p, what_ori = ori_libre[choice]
+
+                    two = self.polys[what_p].attach_one_diff(diff, what_ori, None)
+                    if two:
+                        # print("Start",ori_libre[choice])
+                        # print(self.poly.modules)
+                        [diff1, _], [diff2, _] = self.polys[what_p].get_diff_at_origin(what_ori)
+                        self.polys[what_p].add_fork(
+                            [diff1, diff2], what_ori, [None, None], None)
+                        self.libre[diff1] = 2
+                        self.libre[diff2] = 2
+
+                        ori_libre.remove(ori_libre[choice])
+
+                    else:
+                        if not self.only_one:
+                            self.libre[diff] = 1
+                            self.origins[diff] = ori_libre[choice]
+
+                        else:
+                            # If only one needed start the fork and reciclate this
+                            self.polys[what_p].add_fork(
+                                [diff, diff], what_ori, [None, None], None)
+                            self.libre[diff] = 2
+                            self.origins[diff] = ori_libre[choice]
+                            ori_libre.remove(ori_libre[choice])
 
                 elif self.libre[diff] == 1:
                     if np.random.rand() < self.p_off:

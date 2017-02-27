@@ -291,6 +291,24 @@ class Polymer():
         # print("Done1")
         return firing_time, It
 
+    def get_free_origins_time(self, normed=True):
+        rep_p = np.array(self.get_replication_profile())
+        free = np.zeros(int(self.t) + 1)
+
+        for m in self.modules + self.ended:
+            if not m.move:
+                if m.activation_time is not None:
+                    free[:int(m.activation_time)] += 1
+
+        if normed:
+            for t in np.arange(int(self.t) + 1):
+                Un_replicated = np.sum(rep_p >= t)
+                if Un_replicated == 0:
+                    Un_replicated = 1
+                free[t] /= Un_replicated
+        # print("Done1")
+        return free
+
         # print(self.modules)
 
     def increment_time(self, dt, fork_speed, verbose=False):

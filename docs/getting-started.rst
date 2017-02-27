@@ -19,8 +19,9 @@ Simulations type
 --------------
 
 To launch a simulation: src/data/make_3D_simulation.py
-example: 
-  smt run -m src/data/make_3D_simulation.py src/data/replication/coarsed.json p_inte=0.01 --label="yeast-5kb/traj1"
+example:
+
+      smt run -m src/data/make_3D_simulation.py src/data/replication/coarsed.json p_inte=0.01 --label="yeast-5kb/traj1"
 
 the main file coupling molecular dynamic and motion of the diffusing elements
 on the polymer is src/data/replication/simulate.py
