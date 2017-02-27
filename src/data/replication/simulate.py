@@ -691,7 +691,7 @@ def simulate(traj):
         # Dump the Hi-Cs
 
         # system.restore_snapshot(snp)
-        hoomd.run(length_steps // 2, profile=False)
+        hoomd.run(length_steps, profile=False)
 
         if dump_hic:
             ph = np.array([p.position for p in group_hic])
@@ -750,7 +750,7 @@ def simulate(traj):
                     Release([bond_tag], snp)
                     Change_type("Diff", [ptag], snp)
 
-        hoomd.run(length_steps // 2, profile=False)
+        #hoomd.run(length_steps // 2, profile=False)
         group_diffu.force_update()
         group_origin.force_update()
         # Update Type because of (Ori to passivated)
