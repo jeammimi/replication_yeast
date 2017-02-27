@@ -295,10 +295,13 @@ class Polymer():
         rep_p = np.array(self.get_replication_profile())
         free = np.zeros(int(self.t) + 1)
 
-        for m in self.modules + self.ended:
+        for m in self.modules:
             if not m.move:
-                if m.activation_time is not None:
-                    free[:int(m.activation_time)] += 1
+                free[:int(self.t)] += 1
+
+        for m in self.ended:
+            if not m.move and m.activated:
+                free[:int(m.activation_time)] += 1
 
         if normed:
             for t in np.arange(int(self.t) + 1):
