@@ -251,7 +251,7 @@ class Polymer():
             # print(not_none)
             # print(rep_p[not_none])
             # print(rep_p)
-            Un_replicated[t] = np.sum(rep_p[not_none] >= t) + len(rep_p) - len(not_none)
+            Un_replicated[t] = np.sum(rep_p[not_none] >= t) + len(rep_p) - np.sum(not_none)
 
         return Un_replicated
 
@@ -270,10 +270,9 @@ class Polymer():
 
     def get_firing_time_It(self, normed=True):
         firing_time = []
-        rep_p = np.array(self.get_replication_profile())
         for m in self.modules + self.ended:
             if not m.move:
-                if m.activation_time is not None:
+                if m.activated and m.activation_time is not None:
                     firing_time.append(m.activation_time)
         firing_time.sort()
         It = np.zeros(int(self.t) + 1)
@@ -283,11 +282,8 @@ class Polymer():
             It[int(el)] += 1
 
         if normed:
-            for t in np.arange(int(self.t) + 1):
-                Un_replicated = np.sum(rep_p >= t)
-                if Un_replicated == 0:
-                    Un_replicated = 1
-                It[t] /= Un_replicated
+            norm = 1.0 * self.get_norm()
+            It /= norm
         # print("Done1")
         return firing_time, It
 
@@ -295,14 +291,25 @@ class Polymer():
         rep_p = np.array(self.get_replication_profile())
         free = np.zeros(int(self.t) + 1)
 
+        #print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
                 free[:int(self.t)] += 1
 
         for m in self.ended:
-            if not m.move and m.activated:
-                free[:int(m.activation_time)] += 1
+            if not m.move:
+                if m.activated:
 
+                    free[:int(m.activation_time)] += 1
+                    # print(m.activation_time)
+                else:
+                    if m.activation_time is None:
+                        print("Warning incorrect calculation free origins")
+                    else:
+                        free[:int(m.activation_time)] += 1
+                    # print("Passivated")
+
+                    # print(free)
         if normed:
             for t in np.arange(int(self.t) + 1):
                 Un_replicated = np.sum(rep_p >= t)
@@ -344,6 +351,7 @@ class Polymer():
                     if self.modules[im + 1].origin:
                         passivated_origin.append(self.modules[im + 1].tag)
                         self.modules[im + 1].passivated = True
+                        self.modules[im + 1].activation_time = self.t
                         self.ended.append(self.modules.pop(im + 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
 
@@ -369,6 +377,8 @@ class Polymer():
                     if self.modules[im - 1].origin:
                         passivated_origin.append(self.modules[im - 1].tag)
                         self.modules[im - 1].passivated = True
+                        self.modules[im - 1].activation_time = self.t
+
                         self.ended.append(self.modules.pop(im - 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
                             alone.append(self.bound_to_origin[

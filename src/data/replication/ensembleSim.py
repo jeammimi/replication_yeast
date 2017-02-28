@@ -127,16 +127,16 @@ class ensembleSim:
         err = np.std(normed_prop, axis=0)
         return x, y, err, normed_prop
 
-    def get_times_replication(self):
+    def get_times_replication(self, finished=True):
         times = []
         for rep in self.aRps:
             times.append(-1)
             for c in rep:
-                if None in c:
+                if finished and None in c:
                     times[-1] = -1
                     break
                 else:
-                    times[-1] = max(times[-1], max(c))
+                    times[-1] = max(times[-1], max(np.array(c)[~np.equal(c, None)]))
         return times
 
     def get_rep_profile(self):
@@ -184,7 +184,7 @@ class ensembleSim:
         # https://academic.oup.com/nar/article/42/1/e3/2437422/The-dynamics-of-genome-replication-using-deep
         point = [(4.3714285714285808, 1.0420168067226889), (9.2571428571428562, 1.0126050420168067), (14.40000000000002, 1.0714285714285714), (17.228571428571435, 1.0420168067226889), (19.800000000000015, 0.97058823529411764), (24.428571428571431, 0.96218487394957974), (30.085714285714289, 0.97478991596638642), (32.657142857142873, 1.0714285714285714), (34.71428571428573, 1.1596638655462184), (37.028571428571425, 1.2983193277310923),
                  (39.85714285714284, 1.3277310924369747), (42.428571428571445, 1.3067226890756303), (44.48571428571428, 1.5462184873949578), (46.800000000000026, 1.588235294117647), (49.371428571428581, 1.6470588235294117), (54.771428571428551, 1.672268907563025), (59.914285714285718, 1.8613445378151261), (69.942857142857122, 1.9957983193277311), (79.971428571428589, 1.9495798319327733), (89.742857142857147, 1.8781512605042017)]
-        #x_exp,y_exp = zip(*point)
+        # x_exp,y_exp = zip(*point)
 
         x, y, std, alls = self.DNAs()
         error = 0
@@ -237,10 +237,10 @@ class ensembleSim:
         dna = []
         for t in time_p:
             dna.append(np.concatenate(times[t]).mean())
-        #plot(time_p, dna)
+        # plot(time_p, dna)
 
         result = {"chr": [], "start": [], "end": [], "mean_copie_exp": [], "mean_copie_simu": []}
-        #f = figure(figsize=(20,20))
+        # f = figure(figsize=(20,20))
         if fig is None:
             f = plt.figure(figsize=figsize)
         else:
@@ -252,8 +252,8 @@ class ensembleSim:
             for ikk, kk in enumerate(k):
 
                 mean_copie[kk] = self.get_mean_copie(int(kk))[0]
-                #print(mean_copie[kk],len(mean_copie[kk][0]) )
-                #print(len( mean_copie[kk]))
+                # print(mean_copie[kk],len(mean_copie[kk][0]) )
+                # print(len( mean_copie[kk]))
 
         if profile:
             max_t = self.get_times_replication()
@@ -263,6 +263,8 @@ class ensembleSim:
             else:
 
                 max_t = max(np.array(max_t)[which])
+            if max_t == -1:
+                max_t = np.max(self.get_times_replication(finished=False))
         extra = [0, 0, 0, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6]
         position = [0, 1, 2, 0, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 1]
         s = 0.03
@@ -272,8 +274,8 @@ class ensembleSim:
         margin_right = 0.02
 
         for chro in range(16):
-            #ax = f.add_subplot(4,4,chro + 1)
-            #ax = f.add_subplot(gs[chro])
+            # ax = f.add_subplot(4,4,chro + 1)
+            # ax = f.add_subplot(gs[chro])
 
             column = extra[chro]
             tot = extra.count(column)
@@ -291,7 +293,7 @@ class ensembleSim:
             # print([xstart,ystart,w,h])
             f.add_axes([xstart, ystart, w, h])
 
-            #chro = 3
+            # chro = 3
             if profile:
                 if which == "mean":
                     Prof = self.get_rep_profile()[chro]
@@ -312,10 +314,11 @@ class ensembleSim:
                 top = mean_C / len(k)
 
             for x in self.l_ori[chro]:
+                # print(np.array(top)[~np.equal(top, None)])
 
-                mini = min(top)
-                maxi = max(top)
-
+                mini = min(np.array(top)[~np.equal(top, None)])
+                maxi = max(np.array(top)[~np.equal(top, None)])
+                #print(mini, maxi)
                 plt.plot([x, x], [mini, maxi], color="k", linewidth=1)
 
             def get_rep_prof(times, coordinate, ch, profile=True):
@@ -333,7 +336,7 @@ class ensembleSim:
                 norm = np.zeros(len(m))
                 for ilocus, locus in enumerate(m):
                     # print(locus)
-                    for kk in k[::-1]:
+                    for kk in k[:: -1]:
                         if locus in coordinate[kk][ch]:
                             i = list(coordinate[kk][ch]).index(locus)
                             if profile:
@@ -352,8 +355,8 @@ class ensembleSim:
             if experiment:
                 locci, p = get_rep_prof(times, coordinate, chro, profile=profile)
 
-                #m = lengths[chro] / len(p)
-                #plot(np.arange(len(p)) * m,p)
+                # m = lengths[chro] / len(p)
+                # plot(np.arange(len(p)) * m,p)
                 if not profile:
                     for loc, copie in zip(locci, p):
                         result["chr"].append(chro + 1)
