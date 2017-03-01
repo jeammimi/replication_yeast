@@ -24,6 +24,8 @@ class ensembleSim:
             print("lengts = ", lengths)
             print("But should be a list")
             raise
+        assert(type(gindin) == bool)
+        assert(type(only_one) == bool)
         self.p_on = p_on
         self.p_off = p_off
         self.only_one = only_one
@@ -34,6 +36,14 @@ class ensembleSim:
         self.p_v = p_v
         self.cut = cut
         self.l_ori = l_ori
+
+    def show_parameters(self):
+        P = ["Nsim", "Nori", "Ndiff", "lengths", "p_on", "p_off",
+             "only_one", "all_same_ori", "dt_speed",
+             "fork_speed", "gindin", "p_v", "cut", "l_ori"]
+
+        for parameter in P:
+            print(parameter, getattr(self, parameter))
 
     def run_all(self, run_length=200, load_from_file=None):
 

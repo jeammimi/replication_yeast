@@ -297,6 +297,8 @@ def force_field(traj, bond_list, plist, tag_spb):
 
     soft = traj["soft"]
     gauss = traj["gauss"]
+    assert(type(soft) == bool)
+    assert(type(gauss) == bool)
 
     harmonic = md.bond.harmonic()
     harmonic.bond_coeff.set(bond_list, k=20.0, r0=1)
@@ -513,6 +515,7 @@ def simulate(traj):
     dscale = traj["dscale"]
     # Yeast case
     spb = traj["spb"]
+    assert(type(spb) == bool)
 
     microtubule_length = traj["microtubule_length"] * micron
     Activ_Origins = traj["Activ_Origins"]
@@ -523,6 +526,9 @@ def simulate(traj):
     diff_alone = traj["diff_alone"]
     diff_bind_when_free = traj["diff_bind_when_free"]
     diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
+    assert(type(diff_alone) == bool)
+    assert(type(diff_bind_when_on_DNA) == bool)
+    assert(type(diff_bind_when_free) == bool)
 
     # Simulation parameters
     n_steps = traj["n_steps"]
