@@ -1,7 +1,7 @@
 {"Nsim":5,
  "Nori": "./data/external/oridb.csv",
  "Ndiff": 750,
- "rNdiff": [100,800],
+ "rNdiff": [10,800],
  "lengths": "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
  "coarse" : 1000,
  "fork_speed" : 1.0,
