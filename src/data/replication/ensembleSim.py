@@ -2,6 +2,7 @@ from .simulate_1D import simulate
 import numpy as np
 import _pickle as cPickle
 from collections import namedtuple
+import os
 
 
 class ensembleSim:
@@ -55,6 +56,7 @@ class ensembleSim:
         self.raDNAs = []
         self.aUnrs = []
         self.aFree_origins = []
+        found = 0
         for sim in range(self.Nsim):
             # print(sim)
 
@@ -75,15 +77,22 @@ class ensembleSim:
                              p_v=self.p_v)
 
                 S.simulate(run_length)
+                found += 1
             else:
                 # print(sim)
                 Simu = namedtuple("Simu", ["polys", "oris"])
-                with open("%s%i/" % (load_from_file, sim + 1) + "polymer_timing.dat", "rb") as f:
-                    polys = cPickle.load(f)
-                    oris = [np.array(p.origins) - p.start for p in polys]
-                    S = Simu(polys, oris)
+                file_to_open = "%s%i/" % (load_from_file, sim + 1) + "polymer_timing.dat"
+                if os.path.exists(file_to_open):
+                    with open(file_to_open, "rb") as f:
+                        polys = cPickle.load(f)
+                        oris = [np.array(p.origins) - p.start for p in polys]
+                        S = Simu(polys, oris)
+                    found += 1
+                else:
+                    print(file_to_open, "does not exist")
+                    continue
 
-            if sim == 0 and self.all_same_ori:
+            if found == 1 and self.all_same_ori:
                 self.l_ori = S.oris
 
             self.aIts.append([])
@@ -126,7 +135,7 @@ class ensembleSim:
         else:
             maxl = int(max(times))
 
-        normed_prop = np.zeros((self.Nsim, maxl))
+        normed_prop = np.zeros((len(prop), maxl))
         for iIt, It in enumerate(prop):
             normed_prop[iIt, :min(len(It), maxl)] = It[:min(len(It), maxl)]
             if shift != 0:

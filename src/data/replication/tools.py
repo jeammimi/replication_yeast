@@ -57,7 +57,16 @@ def load_parameters(filename):
 
 
 def load_3D_simus(folder_roots, n=5):
-    parameters = load_parameters(folder_roots + "1/params.json")
+    found = False
+    for i in range(1, n + 1):
+        try:
+            parameters = load_parameters(folder_roots + "%i/params.json" % i)
+            found = True
+        except:
+            pass
+    if not found:
+        print("Could not find any parameter")
+        raise
     # pprint.pprint(parameters)
     lengths, _ = load_lengths_and_centro(
         "../." + parameters["len_chrom"], parameters["coarse"], verbose=False)
