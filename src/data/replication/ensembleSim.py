@@ -162,8 +162,9 @@ class ensembleSim:
         rep = []
         for il, l in enumerate(self.lengths):
             rep.append(np.zeros(l))
-            for sim in range(self.Nsim):
-                rep[il] += np.array(self.aRps[sim][il]) / self.Nsim
+            Nsim = len(self.aRps)
+            for sim in range(Nsim):
+                rep[il] += np.array(self.aRps[sim][il]) / Nsim
         return rep
 
     def get_mean_copie(self, time):
@@ -171,8 +172,9 @@ class ensembleSim:
         std_copie = []
         for il, l in enumerate(self.lengths):
             # print(l)
-            copie.append(np.ones((self.Nsim, l)))
-            for sim in range(self.Nsim):
+            Nsim = len(self.aRps)
+            copie.append(np.ones((Nsim, l)))
+            for sim in range(Nsim):
                 copie[il][sim, np.array(self.aRps[sim][il]) < time] = 2
 
             std_copie.append(np.std(copie[il], axis=0))

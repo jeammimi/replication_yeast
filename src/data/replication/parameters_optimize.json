@@ -7,7 +7,7 @@
  "fork_speed" : 1.0,
  "dt_speed" : 0.04,
  "gindin" : true,
- "p_v": 0.003,
+ "p_v": 0.0018,
  "p_on": 0.04,
  "rp_on":[0.0001,1],
  "p_off": 0.3,
