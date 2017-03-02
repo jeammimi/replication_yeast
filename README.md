@@ -5,7 +5,8 @@ First report on comparison between 3D and 1D simulations
 
 http://nbviewer.jupyter.org/github/jeammimi/replication_yeast/blob/master/notebooks/report/0.1-Comparison-simu-1D-simu-3D.ipynb
 
-
+Visualisation in 3D:
+https://rawgit.com/jeammimi/replication_yeast/master/notebooks/report/test.html
 
 
 
