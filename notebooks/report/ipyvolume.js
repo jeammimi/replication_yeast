@@ -259,7 +259,7 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	        console.log("create scatter")
 	
 	        this.geo_diamond = new THREE.SphereGeometry(1, 2, 2)
-	        this.geo_sphere = new THREE.SphereGeometry(1, 4*12, 4*12)
+	        this.geo_sphere = new THREE.SphereGeometry(1,3* 12,3* 12)
 	        this.geo_box = new THREE.BoxGeometry(1, 1, 1)
 	        this.geo_cat = new THREE.Geometry(1, 1, 1)
 	        for(var i = 0; i < cat_data.vertices.length; i++) {
@@ -309,9 +309,6 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	                animation_time_vz : { type: "f", value: 1. },
 	                animation_time_size : { type: "f", value: 1. },
 	                animation_time_color : { type: "f", value: 1. },
-	                animation_time_index : { type: "f", value: 1. },
-	
-	
 	            },
 	            vertexShader: __webpack_require__(37),
 	            fragmentShader: __webpack_require__(38)
@@ -324,7 +321,7 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	            })
 	        this.create_mesh()
 	        this.add_to_scene()
-	        this.model.on("change:size change:size_selected change:color change:color_selected change:index change:x change:y change:z change:selected change:vx change:vy change:vz",   this.on_change, this)
+	        this.model.on("change:size change:size_selected change:color change:color_selected change:sequence_index change:x change:y change:z change:selected change:vx change:vy change:vz",   this.on_change, this)
 	        this.model.on("change:geo", this.update, this)
 	    },
 	    set_limits: function(limits) {
@@ -345,31 +342,56 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	        _.mapObject(this.model.changedAttributes(), function(val, key){
 	            console.log("changed " +key)
 	            this.previous_values[key] = this.model.previous(key)
-	            if (key == "index"){
-	              pindex = this.previous_values["index"]
-	              this.previous_values["x"] = this.model.previous("x")[pindex]
-	              this.previous_values["y"] = this.model.previous("y")[pindex]
-	              this.previous_values["z"] = this.model.previous("z")[pindex]
-	              var vx = this.model.previous("vx")
-	              if (vx && typeof vx[0][0] != "undefined" ) {
-	                this.previous_values["vx"] = this.model.previous("vx")[pindex]
-	                this.previous_values["vy"] = this.model.previous("vy")[pindex]
-	                this.previous_values["vz"] = this.model.previous("vz")[pindex]
-	              }
-	
-	            }
-	
 	            // we treat changes in _selected attributes the same
 	            var key_animation = key.replace("_selected", "")
-	            if(key_animation == "geo") {
+	            if (key_animation == "sequence_index"){
+	              pindex = this.model.previous("sequence_index")
+	
+	              if (this.model.get("x") && typeof this.model.get("x")[0][0] != "undefined" ) {
+	                this.previous_values["x"] = this.model.get("x")[pindex]
+	                this.attributes_changed["x"] =["x"]
+	              }
+	              if (this.model.get("y") && typeof this.model.get("y")[0][0] != "undefined" ) {
+	                this.previous_values["y"] = this.model.get("y")[pindex]
+	                this.attributes_changed["y"] =["y"]
+	              }
+	              if (this.model.get("z") && typeof this.model.get("z")[0][0] != "undefined" ) {
+	                this.previous_values["z"] = this.model.get("z")[pindex]
+	                this.attributes_changed["z"] =["z"]
+	              }
+	              if (this.model.get("vx") && typeof this.model.get("vx")[0][0] != "undefined" ) {
+	                this.previous_values["vx"] = this.model.get("vx")[pindex]
+	                this.attributes_changed["vx"] =["vx"]
+	              }
+	              if (this.model.get("vy") && typeof this.model.get("vy")[0][0] != "undefined" ) {
+	                this.previous_values["vy"] = this.model.get("vy")[pindex]
+	                this.attributes_changed["vy"] =["vy"]
+	              }
+	              if (this.model.get("vz") && typeof this.model.get("vz")[0][0] != "undefined" ) {
+	                this.previous_values["vz"] = this.model.get("vz")[pindex]
+	                this.attributes_changed["vz"] =["vz"]
+	              }
+	              if (this.model.get("color") ) {
+	                  color = this.model.get("color")
+	                  if (!(typeof color == "string" || typeof color[0] == "string")){
+	                  //check for 2d
+	                      this.previous_values["color"] = this.model.get("color")[Math.min(pindex,color.length-1)]
+	                      this.attributes_changed["color"] =["color"]
+	                  }
+	              }
+	
+	
+	            }
+		    else if(key_animation == "geo") {
 	                // direct change, no animation
-	            } if(key_animation == "selected") { // and no explicit animation on this one
+	            }
+		    else if(key_animation == "selected") { // and no explicit animation on this one
 	                this.attributes_changed["color"] = [key]
 	                this.attributes_changed["size"] = []
 	            } else {
 	                this.attributes_changed[key_animation] = [key]
 	                // animate the size as well on x y z changes
-	                if(["x", "y", "z", "vx", "vy", "vz","index"].indexOf(key) != -1) {
+	                if(["x", "y", "z", "vx", "vy", "vz","sequence_index"].indexOf(key) != -1) {
 	                    //console.log("adding size to list of changed attributes")
 	                    this.attributes_changed["size"] = []
 	                }
@@ -398,35 +420,28 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	        var vertices = buffer_geo.attributes.position.clone();
 	        instanced_geo.addAttribute( 'position', vertices );
 	
-	        var x = this.model.get("x");
-	        var index = this.model.get("index");
+	        var index = this.model.get("sequence_index");
 	
-	        if (typeof x[0][0] != "undefined") {
-	            // two-dimensional
-	            index = Math.min(index,x.length - 1)
-	            var x = this.model.get("x")[index];
-	            var y = this.model.get("y")[index];
-	            var z = this.model.get("z")[index];
-	
-	            var vx = this.model.get("vx");
-	            if (vx && typeof vx[0][0] != "undefined" ) {
-	              var vx = this.model.get("vx")[index];
-	              var vy = this.model.get("vy")[index];
-	              var vz = this.model.get("vz")[index];
-	
+	        function get_value_index(variable,index){
+	            if ( !variable){
+	              // if undefined
+	              return variable
 	            }
-	            else{
-	              vx = []
+	            if (typeof index != "undefined"  && typeof variable[0][0] != "undefined") {
+	              // if two D
+	              index1 = Math.min(index,variable.length - 1);
+	              return variable[index1]
 	            }
+	            //1D
+	            return variable
+	        }
 	
-	        }
-	        else {
-	            var y = this.model.get("y");
-	            var z = this.model.get("z");
-	            var vx = this.model.get("vx");
-	            var vy = this.model.get("vy");
-	            var vz = this.model.get("vz");
-	        }
+	        var x = get_value_index(this.model.get("x"),index);
+	        var y = get_value_index(this.model.get("y"),index);
+	        var z = get_value_index(this.model.get("z"),index);
+	        var vx = get_value_index(this.model.get("vx"),index);
+	        var vy = get_value_index(this.model.get("vy"),index);
+	        var vz = get_value_index(this.model.get("vz"),index);
 	
 	        //var has_previous_xyz = this.previous_values["x"] && this.previous_values["y"] && this.previous_values["z"]
 	        var count = Math.min(x.length, y.length, z.length);
@@ -546,53 +561,76 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return 
 	            return [color.r, color.g, color.b]
 	        }
 	
-	        var multi_colors = this.model.get("multi_colors")
-	        //console.log("multi",multi_colors)
-	        if( multi_colors){
+	        function get_value_index_color(variable,index,max_count){
+	            //Return a two D array (max_count,3)
+	            if ( typeof variable == "string") {
+	            //OD
+	                color =  to_rgb(variable)
+	                return color
+	            }
+	            else {
+	                var tmp_color = new Array(max_count);
+	                if ( typeof variable[0] == "string") {
+	                    // 1 D
+	                    to_convert = variable
+	                }
+	                else if (typeof index != "undefined"  && typeof variable[0][0] == "string"){
+	                    //Two D
+	                    index1 = Math.min(index,variable.length - 1);
+	                    to_convert = variable[index1]
+	                }
 	
-	          if( (typeof multi_colors[0][0] != "undefined") && (typeof multi_colors[0] === 'string')){
-	            //1D
-	            console.log("1D color")
-	          }
-	          else {
-	            //2D + index
-	            console.log("2D color")
-	            multi_colors = multi_colors[index]
-	          }
+	                for(var i = 0; i < max_count; i++) {
+	                    tmp_color[i] = to_rgb(to_convert[i])
+	                }
+	                return tmp_color
+	            }
+	        }
 	
-	          for(var i = 0; i < max_count; i++) {
-	              var cur_color = to_rgb(multi_colors[i]);
-	              if(selected.indexOf(i) != -1)
-	                  cur_color = color_selected
-	                colors.setXYZ(i, cur_color[0], cur_color[1], cur_color[2]);
+	
+	        var color = get_value_index_color(this.model.get("color"),index,max_count)
+	        var color_d = 0;  //Dimension of color
+	        if (typeof color[0][0] != "undefined"){
+	            color_d = 1
+	        }
+	
+	        var color_previous = "color" in this.previous_values ? get_value_index_color(this.previous_values["color"],this.previous_values["index"],max_count) : color;
+	        if(!color_previous)
+	            color_previous = color;
+	        var color_previous_d = 0;  //Dimension of color_previous
+	        if (typeof color_previous[0][0] != "undefined"){
+	            color_previous_d = 1
+	        }
+	
+	        var color_selected = to_rgb(this.model.get("color_selected"))
+	        var color_selected_previous = "color_selected" in this.previous_values ? to_rgb(this.previous_values["color_selected"]) : color_selected;
+	        if(!color_selected_previous)
+	            color_selected_previous = color_selected;
+	
+	  	    for(var i = 0; i < max_count; i++) {
+	            if (color_d == 0){
+	                var cur_color = color;
+	            }
+	            else{
+	  	            var cur_color = color[i];
 	            }
 	
+	  	        if(selected.indexOf(i) != -1)
+	  	            cur_color = color_selected
 	
-	        }
-	        else {
+	     	      colors.setXYZ(i, cur_color[0], cur_color[1], cur_color[2]);
+	            if (color_previous_d == 0){
+	  	            var cur_color_previous = color_previous;
+	            }
+	            else{
+	                var cur_color_previous = color_previous[i];
+	            }
 	
-	          var color = to_rgb(this.model.get("color"))
-	          var color_previous = "color" in this.previous_values ? to_rgb(this.previous_values["color"]) : color;
-	          if(!color_previous)
-	              color_previous = color;
+	  	        if(selected_previous.indexOf(i) != -1)
+	  	            cur_color_previous = color_selected_previous
+	     	      colors_previous.setXYZ(i, cur_color_previous[0], cur_color_previous[1], cur_color_previous[2]);
+	  	    }
 	
-	          var color_selected = to_rgb(this.model.get("color_selected"))
-	          var color_selected_previous = "color_selected" in this.previous_values ? to_rgb(this.previous_values["color_selected"]) : color_selected;
-	          if(!color_selected_previous)
-	              color_selected_previous = color_selected;
-	
-	    	    for(var i = 0; i < max_count; i++) {
-	    	        var cur_color = color;
-	    	        if(selected.indexOf(i) != -1)
-	    	            cur_color = color_selected
-	       	        colors.setXYZ(i, cur_color[0], cur_color[1], cur_color[2]);
-	
-	    	        var cur_color_previous = color_previous;
-	    	        if(selected_previous.indexOf(i) != -1)
-	    	            cur_color_previous = color_selected_previous
-	       	        colors_previous.setXYZ(i, cur_color_previous[0], cur_color_previous[1], cur_color_previous[2]);
-	    	    }
-	        }
 	
 	        instanced_geo.addAttribute( 'color', colors );
 	        instanced_geo.addAttribute( 'color_previous', colors_previous );
