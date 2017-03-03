@@ -170,16 +170,19 @@ class ensembleSim:
     def get_mean_copie(self, time):
         copie = []
         std_copie = []
+        rep_t = self.get_times_replication()
         for il, l in enumerate(self.lengths):
             # print(l)
-            Nsim = len(self.aRps)
+            Nsim = len(self.aRps) - rep_t.count(-1)
             copie.append(np.ones((Nsim, l)))
-            for sim in range(Nsim):
-                copie[il][sim, np.array(self.aRps[sim][il]) < time] = 2
+            sim = 0
+            for itime, time_rep in enumerate(rep_t):
+                if time_rep != -1:
+                    copie[il][sim, np.array(self.aRps[itime][il]) < time] = 2
+                    sim += 1
 
             std_copie.append(np.std(copie[il], axis=0))
             copie[il] = np.mean(copie[il], axis=0)
-
         return copie, std_copie
 
     def Its(self):

@@ -220,6 +220,13 @@ class Polymer():
                 # assert(i == pos - self.start)
         return self.replication_state
 
+    def get_interacting_particles(self):
+        P = []
+        for m in self.ended + self.modules:
+            if m.move:
+                P.append(m.tag)
+        return P
+
     def get_fork_density(self, cut=0, normed=True):
         fork_number = np.zeros(int(self.t) + 1)
         rep_p = np.array(self.get_replication_profile())
