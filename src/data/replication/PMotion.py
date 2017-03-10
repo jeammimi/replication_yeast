@@ -11,6 +11,68 @@ from collections import namedtuple
 SpaceTime = namedtuple("SpaceTime", ["pos", "t"])
 
 
+class Diffusing:
+    def __init__(self, tag):
+        self.tag = tag
+        self.V = []
+        self.bound = []
+        self.replicating = []
+        self.free = []
+
+    def in_volume_of_interaction(self, ori_list, time):
+        for ori in ori_list:
+            self.V.append(SpaceTime(ori, time))
+
+    def start_replication(self, ori, time):
+        self.replicating.append([SpaceTime(ori, time)])
+
+    def end_replication(self, time):
+        self.replicating[-1].append(time)
+
+    def start_bound(self, ori, time):
+        self.bound.append([SpaceTime(ori, time)])
+
+    def end_bound(self, time):
+        self.bound[-1].append(time)
+
+    def build_time_line(self):
+        #Get max_time
+        maxt = 0
+        for sp in self.V:
+            maxt = max(maxt, sp.t)
+        for event in self.replicating + self.bound:
+            if len(event) == 1:
+                maxt = max(maxt, event[0].t)
+            else:
+                maxt = max(maxt, event[1])
+
+        #print(maxt)
+        time_line = np.zeros(int(maxt) + 1)
+        for inte in self.V:
+            time_line[int(inte.t)] = 1
+
+        for event in self.replicating:
+            if len(event) == 1:
+                if maxt != event[0].t:
+                    print("Unfinished business")
+                    raise
+                time_line[int(event[0].t):] = 2
+            else:
+                time_line[int(event[0].t):int(event[1])] = 2
+
+        for event in self.bound:
+            if len(event) == 1:
+                if maxt != event[0][1]:
+                    print("Unfinished business")
+                    raise
+                time_line[int(event[0].t):] = 3
+            else:
+                time_line[int(event[0].t):int(event[1])] = 3
+        return time_line
+
+
+
+
 class Origin:
 
     def __init__(self, tag):

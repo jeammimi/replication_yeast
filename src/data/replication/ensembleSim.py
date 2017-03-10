@@ -3,6 +3,7 @@ import numpy as np
 import _pickle as cPickle
 from collections import namedtuple
 import os
+from tqdm import tqdm
 
 
 class ensembleSim:
@@ -46,6 +47,19 @@ class ensembleSim:
         for parameter in P:
             print(parameter, getattr(self, parameter))
 
+    def data(self):
+        return [self.aIts,
+                self.aFts,
+                self.aFds,
+                self.aRps,
+                self.aDNAs,
+                self.raDNAs,
+                self.aUnrs,
+                self.aFree_origins]
+
+    def load_data(self,data):
+        self.aIts,self.aFts,self.aFds,self.aRps,self.aDNAs,self.raDNAs,self.aUnrs,self.aFree_origins = data
+
     def run_all(self, run_length=200, load_from_file=None):
 
         self.aIts = []
@@ -57,7 +71,7 @@ class ensembleSim:
         self.aUnrs = []
         self.aFree_origins = []
         found = 0
-        for sim in range(self.Nsim):
+        for sim in tqdm(range(self.Nsim)):
             # print(sim)
 
             ori = self.Nori
@@ -125,7 +139,7 @@ class ensembleSim:
             self.aFree_origins[-1] = np.sum(np.array(self.aFree_origins[-1]), axis=0)
             # print(self.raDNAs)
             self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
-
+        return S
     def get_quant(self, name, shift=0):
         prop = getattr(self, name)
         # print(prop)

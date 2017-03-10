@@ -397,11 +397,12 @@ def force_field(traj, bond_list, plist, tag_spb):
 
     # Spherical confinement
     sphere = md.wall.group()
+    r_extrap = 0.95
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
     # lj much more slower (at least in thu minimisation)
     wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
-                                   r_cut=1.12, mode="shift")
+                                   r_cut=1.12, mode="shift",r_extrap = r_extrap)
 
     if spb:
         wall_force_slj.force_coeff.set("Spb", epsilon=1.0, sigma=1.0,
@@ -414,9 +415,10 @@ def force_field(traj, bond_list, plist, tag_spb):
             'Nuc',
             epsilon=1.0,
             sigma=diameter_nuc,
-            r_cut=diameter_nuc * 1.12, mode="shift")
+            r_cut=diameter_nuc * 1.12, mode="shift",r_extrap = diameter_nuc * r_extrap)
     if telomere:
-        wall_force_slj.force_coeff.set("Telo", epsilon=2.0, sigma=1.5, r_cut=3, mode="shift")
+        wall_force_slj.force_coeff.set("Telo", epsilon=2.0, sigma=1.5,
+                                        r_cut=3, mode="shift", r_extrap = r_extrap)
 
     # Group;
     all_beads = group.all()
