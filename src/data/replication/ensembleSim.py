@@ -48,6 +48,8 @@ class ensembleSim:
             print(parameter, getattr(self, parameter))
 
     def data(self):
+
+
         return [self.aIts,
                 self.aFts,
                 self.aFds,
@@ -59,6 +61,9 @@ class ensembleSim:
 
     def load_data(self,data):
         self.aIts,self.aFts,self.aFds,self.aRps,self.aDNAs,self.raDNAs,self.aUnrs,self.aFree_origins = data
+        unr = np.sum(np.array(self.aUnrs), axis=1)
+        self.anIts = self.aIts * unr
+
 
     def run_all(self, run_length=200, load_from_file=None):
 
@@ -70,6 +75,7 @@ class ensembleSim:
         self.raDNAs = []
         self.aUnrs = []
         self.aFree_origins = []
+        self.anIts = []
         found = 0
         for sim in tqdm(range(self.Nsim)):
             # print(sim)
@@ -110,6 +116,7 @@ class ensembleSim:
                 self.l_ori = S.oris
 
             self.aIts.append([])
+            self.anIts.append([])
             self.aFts.append([])
             self.aFds.append([])
             self.aRps.append([])
@@ -119,50 +126,78 @@ class ensembleSim:
             self.aFree_origins.append([])
 
             for poly in S.polys:
-                ft, it = poly.get_firing_time_It(normed=False)
-                fd = poly.get_fork_density(self.cut, normed=False)
-                norm = poly.get_norm()
-
+                ft, it = poly.get_firing_time_It(fork_speed=self.fork_speed,cut=0, normed=False)  # Cut == 0 because we removed them from all the chromosomes
+                fd = poly.get_fork_density(fork_speed=self.fork_speed,cut=0, normed=False)  # Normed afteward
+                norm = poly.get_norm(fork_speed=self.fork_speed)
                 self.aIts[-1].append(it)
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
-                self.aUnrs[-1].append(norm)
 
                 self.aRps[-1].append(poly.get_replication_profile())
-                self.raDNAs[-1].append(poly.get_DNA_with_time())
-                self.aFree_origins[-1].append(poly.get_free_origins_time(normed=False))
+                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed))
+                len_poly = poly.end + 1 - poly.start
+                self.aUnrs[-1].append(len_poly - self.raDNAs[-1][-1])
+
+                #print (norm.shape,self.aUnrs[-1][-1].shape)
+
+                #raise
+                self.aFree_origins[-1].append(poly.get_free_origins_time(fork_speed=self.fork_speed,normed=False))
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
-            unr[unr == 0] = 1
+            unr[unr==0] = 1
+            self.anIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0)
+
             self.aIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0) / unr
             self.aFds[-1] = np.sum(np.array(self.aFds[-1]), axis=0) / unr
             self.aFree_origins[-1] = np.sum(np.array(self.aFree_origins[-1]), axis=0)
             # print(self.raDNAs)
             self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
         return S
-    def get_quant(self, name, shift=0):
+    def get_quant(self, name, shift=0,n_rep=None):
         prop = getattr(self, name)
         # print(prop)
-        times = self.get_times_replication()
+        times = self.get_times_replication(n_rep=n_rep)
+        #print(times)
+        #print(maxl)
         if -1 in times:
             maxl = int(max(map(len, prop)))
         else:
             maxl = int(max(times))
 
-        normed_prop = np.zeros((len(prop), maxl))
-        for iIt, It in enumerate(prop):
-            normed_prop[iIt, :min(len(It), maxl)] = It[:min(len(It), maxl)]
+        normed_prop = np.zeros((len(prop[:n_rep]), maxl))
+        for iIt, It in enumerate(prop[:n_rep]):
+            #print(len(It), maxl)
+            normed_prop[iIt, :min(len(It), maxl)] =  np.array(It[:min(len(It), maxl)])
+            if self.cut != 0 and name in ["aIts", "anIts", "aFds"]:
+                #Remove last cut:
+                #print("Before", normed_prop[iIt])
+                #print("la")
+                removed = 0
+                for i in range(1, len(normed_prop[iIt])):
+                    while removed != self.cut and normed_prop[iIt][-i] > 0:
+                        #print(i)
+                        normed_prop[iIt][-i] -= 1
+                        removed += 1
+
+                    if removed == self.cut:
+                        break
+                #print("After", normed_prop[iIt])
+
             if shift != 0:
                 normed_prop[iIt, len(It):] = It[-1]
-
+        self.all = normed_prop
         x = np.arange(maxl)
-        y = np.mean(normed_prop, axis=0)
-        err = np.std(normed_prop, axis=0)
+        if n_rep:
+            y = np.mean(normed_prop[:n_rep], axis=0)
+            err = np.std(normed_prop[:n_rep], axis=0)
+        else:
+            y = np.mean(normed_prop, axis=0)
+            err = np.std(normed_prop, axis=0)
         return x, y, err, normed_prop
 
-    def get_times_replication(self, finished=True):
+    def get_times_replication(self, finished=True,n_rep=None):
         times = []
-        for rep in self.aRps:
+        for rep in self.aRps[:n_rep]:
             times.append(-1)
             for c in rep:
                 if finished and None in c:
@@ -199,20 +234,43 @@ class ensembleSim:
             copie[il] = np.mean(copie[il], axis=0)
         return copie, std_copie
 
-    def Its(self):
-        return self.get_quant("aIts")
+    def Its(self,n_rep=None,recompute=False):
+        if recompute:
+            self.get_quant("anIts",n_rep=n_rep)
+            Nori = self.all + 0
+            self.tUNrs =  np.sum(np.array(self.aUnrs), axis=1)
 
-    def Fds(self):
-        return self.get_quant("aFds")
+            x = self.get_quant("tUNrs",n_rep=n_rep)[0]
+            Unr = self.all + 0
+            meanurn =  np.mean(Unr,axis =0)
+            Unr[Unr == 0] = np.nan
+            y = np.nanmean(Nori/Unr,axis = 0)
+            Unr[Unr == np.nan] = 0
+            #Unr[Unr == 0] = 1
+            return x , y  , np.mean(Nori,axis =0) , meanurn , Unr
+        else:
+            return self.get_quant("aIts",n_rep=n_rep)
 
-    def Rps(self):
-        return self.get_quant("aRps")
+    def nIts(self,n_rep=None):
+        return self.get_quant("anIts",n_rep=n_rep)
 
-    def DNAs(self):
-        return self.get_quant("aDNAs", shift=2)
+    def MeanIts(self,n_rep=None):
+        self.tUNrs =  np.sum(np.array(self.aUnrs), axis=1)
+        x,Nori = self.get_quant("anIts",n_rep=n_rep)[:2]
+        x,Unr = self.get_quant("tUNrs",n_rep=n_rep)[:2]
+        return  x, Nori / Unr
 
-    def Free_origins(self):
-        return self.get_quant("aFree_origins", shift=2)
+    def Fds(self,n_rep=None):
+        return self.get_quant("aFds",n_rep=n_rep)
+
+    def Rps(self,n_rep=None):
+        return self.get_quant("aRps",n_rep=n_rep)
+
+    def DNAs(self,n_rep=None):
+        return self.get_quant("aDNAs", shift=2,n_rep=n_rep)
+
+    def Free_origins(self,n_rep=None):
+        return self.get_quant("aFree_origins", shift=2,n_rep=n_rep)
 
     def n_activated_oris(self):
         return list(map(len, np.concatenate(self.aFts)))

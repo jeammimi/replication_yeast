@@ -289,8 +289,10 @@ class Polymer():
                 P.append(m.tag)
         return P
 
-    def get_fork_density(self, cut=0, normed=True):
-        fork_number = np.zeros(int(self.t) + 1)
+    def get_fork_density(self, fork_speed,cut=0, normed=True,):
+        max_t = int(self.t) + int(1 / fork_speed) + 2
+
+        fork_number = np.zeros(max_t)
         rep_p = np.array(self.get_replication_profile())
         for m in self.modules + self.ended:
             if not m.origin:
@@ -301,7 +303,7 @@ class Polymer():
                     fork_number[int(start) - self.start: int(end) - self.start] += 1
 
         if normed:
-            for t in np.arange(int(self.t) + 1):
+            for t in np.arange(max_t):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
                     Un_replicated = 1
@@ -311,12 +313,14 @@ class Polymer():
             fork_number[-cut:] = 0
         return fork_number
 
-    def get_norm(self):
-        Un_replicated = np.zeros(int(self.t) + 1)
+    def get_norm(self,fork_speed):
+        max_t = int(self.t) + int(1 / fork_speed) + 2
+
+        Un_replicated = np.zeros(max_t)
 
         rep_p = np.array(self.get_replication_profile())
         not_none = ~np.equal(rep_p, None)
-        for t in np.arange(int(self.t) + 1):
+        for t in np.arange(max_t):
             # print(not_none)
             # print(rep_p[not_none])
             # print(rep_p)
@@ -324,27 +328,43 @@ class Polymer():
 
         return Un_replicated
 
-    def get_DNA_with_time(self):
+    def get_DNA_with_time(self, fork_speed):
 
-        rep_p = np.array(self.get_replication_profile())
+        max_t = int(self.t) + int(1 / fork_speed) + 2
+        DNA = np.zeros((self.end + 1 - self.start, max_t))
+        for m in self.modules + self.ended:
+            if not m.move:
+                continue
 
-        DNA = np.zeros(int(self.t) + 1)
-        not_none = ~np.equal(rep_p, None)
+            for pos, time in m.path:
+                # i = self.position_index.index(pos)
+                # print(pos, time)
+                nstep = int(1 / fork_speed) + 2  # To be sure we reach 1 Then fill with 1
+                for ctime in range(int(time), int(time) + nstep):
+                    if time > int(time):
+                        DNA[pos - self.start, min(ctime, max_t - 1)] += min((ctime - int(time)) * fork_speed, 1)
+                DNA[pos - self.start, min(ctime, max_t - 1):] = 1
 
-        for t in np.arange(int(self.t) + 1):
-            replicated = np.sum(rep_p[not_none] < t)
-            DNA[t] = replicated
+        #print(DNA[0,::])
+        DNA[DNA > 1] = 1
+        #print(DNA)
+        #raise
+        return np.sum(DNA, axis=0)
 
-        return DNA
+    def get_firing_time_It(self, fork_speed, normed=True, cut=0):
 
-    def get_firing_time_It(self, normed=True):
+        max_t = int(self.t) + int(1 / fork_speed) + 2
+
         firing_time = []
         for m in self.modules + self.ended:
             if not m.move:
                 if m.activated and m.activation_time is not None:
                     firing_time.append(m.activation_time)
         firing_time.sort()
-        It = np.zeros(int(self.t) + 1)
+        It = np.zeros(max_t)
+        if cut != 0:
+            for el in range(cut):
+                firing_time.pop(-1)
         # print(self.t)
         for el in firing_time:
             # print(el,)
@@ -353,17 +373,21 @@ class Polymer():
         if normed:
             norm = 1.0 * self.get_norm()
             It /= norm
+        if cut != 0:
+            It[-cut:] = 0
         # print("Done1")
         return firing_time, It
 
-    def get_free_origins_time(self, normed=True):
+    def get_free_origins_time(self, fork_speed, normed=True):
+        max_t = int(self.t) + int(1 / fork_speed) + 2
+
         rep_p = np.array(self.get_replication_profile())
-        free = np.zeros(int(self.t) + 1)
+        free = np.zeros(max_t)
 
         #print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
-                free[:int(self.t)] += 1
+                free[:max_t - 1] += 1
 
         for m in self.ended:
             if not m.move:
@@ -380,7 +404,7 @@ class Polymer():
 
                     # print(free)
         if normed:
-            for t in np.arange(int(self.t) + 1):
+            for t in np.arange(max_t):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
                     Un_replicated = 1
