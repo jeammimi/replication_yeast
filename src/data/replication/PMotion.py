@@ -35,16 +35,20 @@ class Diffusing:
     def end_bound(self, time):
         self.bound[-1].append(time)
 
-    def build_time_line(self):
+    def build_time_line(self,maxt=None):
         #Get max_time
-        maxt = 0
-        for sp in self.V:
-            maxt = max(maxt, sp.t)
-        for event in self.replicating + self.bound:
-            if len(event) == 1:
-                maxt = max(maxt, event[0].t)
-            else:
-                maxt = max(maxt, event[1])
+        provided = False
+        if maxt is None:
+            maxt = 0
+            for sp in self.V:
+                maxt = max(maxt, sp.t)
+            for event in self.replicating + self.bound:
+                if len(event) == 1:
+                    maxt = max(maxt, event[0].t)
+                else:
+                    maxt = max(maxt, event[1])
+        else:
+            provided = True
 
         #print(maxt)
         time_line = np.zeros(int(maxt) + 1)
@@ -53,7 +57,7 @@ class Diffusing:
 
         for event in self.replicating:
             if len(event) == 1:
-                if maxt != event[0].t:
+                if maxt != event[0].t and not provided:
                     print("Unfinished business")
                     raise
                 time_line[int(event[0].t):] = 2
@@ -329,25 +333,32 @@ class Polymer():
         return Un_replicated
 
     def get_DNA_with_time(self, fork_speed):
-
+        # Quantity of replicated dna
         max_t = int(self.t) + int(1 / fork_speed) + 2
         DNA = np.zeros((self.end + 1 - self.start, max_t))
         for m in self.modules + self.ended:
             if not m.move:
                 continue
-
+            #if self.number == 0:
+        #        print(m.path)
             for pos, time in m.path:
                 # i = self.position_index.index(pos)
                 # print(pos, time)
                 nstep = int(1 / fork_speed) + 2  # To be sure we reach 1 Then fill with 1
                 for ctime in range(int(time), int(time) + nstep):
-                    if time > int(time):
+                    #print(ctime)
+                    if ctime > int(time):
                         DNA[pos - self.start, min(ctime, max_t - 1)] += min((ctime - int(time)) * fork_speed, 1)
                 DNA[pos - self.start, min(ctime, max_t - 1):] = 1
+
+                #print(DNA[pos - self.start])
 
         #print(DNA[0,::])
         DNA[DNA > 1] = 1
         #print(DNA)
+        #if self.number == 0:
+    #        print (DNA[:10])
+#            print (np.sum(DNA, axis=0)[:10])
         #raise
         return np.sum(DNA, axis=0)
 
@@ -377,6 +388,33 @@ class Polymer():
             It[-cut:] = 0
         # print("Done1")
         return firing_time, It
+
+    def get_firing_at_fraction(self, fork_speed, DNA_time, cut=0, bins=100):
+
+
+
+        DNA_time /= max(DNA_time)
+
+        firing_time = []
+        for m in self.modules + self.ended:
+            if not m.move:
+                if m.activated and m.activation_time is not None:
+                    firing_time.append(DNA_time[int(m.activation_time)])
+
+        firing_time.sort()
+
+        It = np.zeros(bins)
+
+        if cut != 0:
+            for el in range(cut):
+                firing_time.pop(-1)
+        # print(self.t)
+        for el in firing_time:
+            # print(el,)
+            It[min(int(el * bins), bins - 1)] += 1
+
+
+        return It
 
     def get_free_origins_time(self, fork_speed, normed=True):
         max_t = int(self.t) + int(1 / fork_speed) + 2

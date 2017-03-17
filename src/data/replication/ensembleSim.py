@@ -68,6 +68,8 @@ class ensembleSim:
     def run_all(self, run_length=200, load_from_file=None):
 
         self.aIts = []
+        self.aIfs = []
+
         self.aFts = []
         self.aFds = []
         self.aRps = []
@@ -116,6 +118,7 @@ class ensembleSim:
                 self.l_ori = S.oris
 
             self.aIts.append([])
+            self.aIfs.append([])
             self.anIts.append([])
             self.aFts.append([])
             self.aFds.append([])
@@ -128,7 +131,7 @@ class ensembleSim:
             for poly in S.polys:
                 ft, it = poly.get_firing_time_It(fork_speed=self.fork_speed,cut=0, normed=False)  # Cut == 0 because we removed them from all the chromosomes
                 fd = poly.get_fork_density(fork_speed=self.fork_speed,cut=0, normed=False)  # Normed afteward
-                norm = poly.get_norm(fork_speed=self.fork_speed)
+
                 self.aIts[-1].append(it)
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
@@ -142,9 +145,20 @@ class ensembleSim:
 
                 #raise
                 self.aFree_origins[-1].append(poly.get_free_origins_time(fork_speed=self.fork_speed,normed=False))
+                #print(it)
+            DNA_time = np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
+            for poly in S.polys:
+                bins=100
+                self.aIfs[-1].append(poly.get_firing_at_fraction(DNA_time=DNA_time,
+                                                                 fork_speed=self.fork_speed,cut=0,bins=bins))
+
+            #print(np.sum(np.array(self.aIfs[-1]), axis=0))
+
+            self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) #/ np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1]
+            #print (np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1])
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
-            unr[unr==0] = 1
+            unr[unr == 0] = 1
             self.anIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0)
 
             self.aIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0) / unr
@@ -156,6 +170,7 @@ class ensembleSim:
     def get_quant(self, name, shift=0,n_rep=None):
         prop = getattr(self, name)
         # print(prop)
+
         times = self.get_times_replication(n_rep=n_rep)
         #print(times)
         #print(maxl)
@@ -163,12 +178,14 @@ class ensembleSim:
             maxl = int(max(map(len, prop)))
         else:
             maxl = int(max(times))
+        if name == "aIfs":
+            maxl = len(prop[0])
 
         normed_prop = np.zeros((len(prop[:n_rep]), maxl))
         for iIt, It in enumerate(prop[:n_rep]):
             #print(len(It), maxl)
-            normed_prop[iIt, :min(len(It), maxl)] =  np.array(It[:min(len(It), maxl)])
-            if self.cut != 0 and name in ["aIts", "anIts", "aFds"]:
+            normed_prop[iIt, :min(len(It), maxl)] = np.array(It[:min(len(It), maxl)])
+            if self.cut != 0 and name in ["anIts", "aFds"]:
                 #Remove last cut:
                 #print("Before", normed_prop[iIt])
                 #print("la")
@@ -250,6 +267,23 @@ class ensembleSim:
             return x , y  , np.mean(Nori,axis =0) , meanurn , Unr
         else:
             return self.get_quant("aIts",n_rep=n_rep)
+
+    def Ifs(self,n_rep=None,recompute=False):
+        if recompute:
+            self.get_quant("anIts",n_rep=n_rep)
+            Nori = self.all + 0
+            self.tUNrs =  np.sum(np.array(self.aUnrs), axis=1)
+
+            x = self.get_quant("tUNrs",n_rep=n_rep)[0]
+            Unr = self.all + 0
+            meanurn =  np.mean(Unr,axis =0)
+            Unr[Unr == 0] = np.nan
+            y = np.nanmean(Nori/Unr,axis = 0)
+            Unr[Unr == np.nan] = 0
+            #Unr[Unr == 0] = 1
+            return x , y  , np.mean(Nori,axis =0) , meanurn , Unr
+        else:
+            return self.get_quant("aIfs",n_rep=n_rep)
 
     def nIts(self,n_rep=None):
         return self.get_quant("anIts",n_rep=n_rep)
