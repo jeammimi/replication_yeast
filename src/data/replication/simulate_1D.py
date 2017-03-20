@@ -49,9 +49,12 @@ class simulate:
 
     def get_free(self, maxt=None):
         V = []
-        for k in S.record_diffusing:
+        maxt = self.time + int(1 / self.fork_speed) + 2
+        #print(maxt)
+        for k in self.record_diffusing:
             V.append(np.array(k.build_time_line(maxt=maxt)))
-        return np.sum( (V==0) + ( V == 1),axis=0)
+        V = np.array(V)
+        return np.sum((V == 0) + (V == 1), axis=0)
 
     def simulate(self, n):
 
@@ -176,7 +179,7 @@ class simulate:
                         # break
 
             if ended == len(self.lengths):
-                self.time = time
+                self.time = time * self.dt_speed
                 break
 
             # Random checks

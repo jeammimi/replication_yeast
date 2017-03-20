@@ -78,6 +78,7 @@ class ensembleSim:
         self.aUnrs = []
         self.aFree_origins = []
         self.anIts = []
+        self.aFree_Diff = []
         found = 0
         for sim in tqdm(range(self.Nsim)):
             # print(sim)
@@ -126,6 +127,7 @@ class ensembleSim:
             self.aDNAs.append([])
             self.raDNAs.append([])
             self.aUnrs.append([])
+            self.aFree_Diff.append([])
             self.aFree_origins.append([])
 
             for poly in S.polys:
@@ -153,8 +155,12 @@ class ensembleSim:
                                                                  fork_speed=self.fork_speed,cut=0,bins=bins))
 
             #print(np.sum(np.array(self.aIfs[-1]), axis=0))
-
-            self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) #/ np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1]
+            try:
+                self.aFree_Diff[-1] = S.get_free()
+                #print(self.aFree_Diff[-1])
+            except:
+                pass
+            self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) / np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1]
             #print (np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1])
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
@@ -182,6 +188,10 @@ class ensembleSim:
             maxl = len(prop[0])
 
         normed_prop = np.zeros((len(prop[:n_rep]), maxl))
+
+        if name in ["aFree_Diff"]:
+            normed_prop += np.nan
+
         for iIt, It in enumerate(prop[:n_rep]):
             #print(len(It), maxl)
             normed_prop[iIt, :min(len(It), maxl)] = np.array(It[:min(len(It), maxl)])
@@ -205,10 +215,10 @@ class ensembleSim:
         self.all = normed_prop
         x = np.arange(maxl)
         if n_rep:
-            y = np.mean(normed_prop[:n_rep], axis=0)
+            y = np.nanmean(normed_prop[:n_rep], axis=0)
             err = np.std(normed_prop[:n_rep], axis=0)
         else:
-            y = np.mean(normed_prop, axis=0)
+            y = np.nanmean(normed_prop, axis=0)
             err = np.std(normed_prop, axis=0)
         return x, y, err, normed_prop
 
@@ -296,6 +306,8 @@ class ensembleSim:
 
     def Fds(self,n_rep=None):
         return self.get_quant("aFds",n_rep=n_rep)
+    def Free_Diff(self,n_rep=None):
+        return self.get_quant("aFree_Diff",n_rep=n_rep)
 
     def Rps(self,n_rep=None):
         return self.get_quant("aRps",n_rep=n_rep)
