@@ -138,9 +138,10 @@ class ensembleSim:
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
 
-                self.aRps[-1].append(poly.get_replication_profile())
-                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed))
+                self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed))
+                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed)[0])
                 len_poly = poly.end + 1 - poly.start
+                #print(self.raDNAs[-1][-1])
                 self.aUnrs[-1].append(len_poly - self.raDNAs[-1][-1])
 
                 #print (norm.shape,self.aUnrs[-1][-1].shape)
@@ -227,7 +228,7 @@ class ensembleSim:
         for rep in self.aRps[:n_rep]:
             times.append(-1)
             for c in rep:
-                if finished and None in c:
+                if finished and np.sum(np.equal(c,None)) != 0:
                     times[-1] = -1
                     break
                 else:

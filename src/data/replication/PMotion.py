@@ -272,19 +272,11 @@ class Polymer():
         self.modules[i + 1].activation_time = self.t
         self.ended.append(self.modules.pop(i + 1))
 
-    def get_replication_profile(self, t=None):
+    def get_replication_profile(self, fork_speed,t=None):
+        prof = self.get_DNA_with_time(fork_speed=fork_speed)[1]
+        return np.argmax(prof,axis=1)
         # self.position_index = range(self.start, self.end + 1)
-        self.replication_state = [None for i in range(self.start, self.end + 1)]
-        for m in self.modules + self.ended:
-            if not m.move:
-                continue
 
-            for pos, time in m.path:
-                # i = self.position_index.index(pos)
-                # print(pos, time)
-                self.replication_state[pos - self.start] = time
-                # assert(i == pos - self.start)
-        return self.replication_state
 
     def get_interacting_particles(self):
         P = []
@@ -297,7 +289,7 @@ class Polymer():
         max_t = int(self.t) + int(1 / fork_speed) + 2
 
         fork_number = np.zeros(max_t)
-        rep_p = np.array(self.get_replication_profile())
+        rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
         for m in self.modules + self.ended:
             if not m.origin:
                 # print(m.path)
@@ -360,7 +352,7 @@ class Polymer():
     #        print (DNA[:10])
 #            print (np.sum(DNA, axis=0)[:10])
         #raise
-        return np.sum(DNA, axis=0)
+        return np.sum(DNA, axis=0),DNA
 
     def get_firing_time_It(self, fork_speed, normed=True, cut=0):
 
@@ -419,7 +411,7 @@ class Polymer():
     def get_free_origins_time(self, fork_speed, normed=True):
         max_t = int(self.t) + int(1 / fork_speed) + 2
 
-        rep_p = np.array(self.get_replication_profile())
+        rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
         free = np.zeros(max_t)
 
         #print("T", int(self.t), self.origins)
@@ -577,11 +569,17 @@ class Polymer():
                                     other_fork.diff_diff_tag = None
 
                         im += 1
-                elif m.position < self.start or m.position > self.end:
+                elif m.position < self.start or m.position > self.end + 0.5:
                     # Take care of fork outside of boundaries
                     alone.append(m.tag)
                     self.add_event(m.tag, "E")
                     # print(alone,m.position)
+                    """
+                    if self.number == 0:
+                        if  m.position > self.end:
+                            print("la")
+                            print(m)
+                            print(self.modules)"""
 
                     to_release.append(m.bond_tag)
 
