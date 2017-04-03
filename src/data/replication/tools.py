@@ -56,7 +56,7 @@ def load_parameters(filename):
     return traj
 
 
-def load_3D_simus(folder_roots, n=5):
+def load_3D_simus(folder_roots, n=5,S=False):
     found = False
     for i in range(1, n + 1):
         try:
@@ -83,5 +83,8 @@ def load_3D_simus(folder_roots, n=5):
                     all_same_ori=True,
                     fork_speed=parameters["fork_speed"],
                     dt_speed=parameters["dt_speed"])
-    E.run_all(load_from_file=folder_roots)
+    s = E.run_all(load_from_file=folder_roots)
+    if S:
+        return E, lengths, parameters,s
+
     return E, lengths, parameters

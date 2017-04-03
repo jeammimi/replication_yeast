@@ -116,7 +116,7 @@ class Fork:
         self.move = True
         self.update_bond = False
         self.origin = False
-        self.path = [SpaceTime(int(self.position), t)]
+        self.path = [SpaceTime(self.position, t)]
         self.t = t
         self.type = "fork"
         self.diff_diff_tag = diff_diff_tag
@@ -132,9 +132,9 @@ class Fork:
 
             self.update_bond = True
             # In case of high fork_speed
-            while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
-                oldp += self.d
-                self.path.append(SpaceTime(oldp, self.t))
+            #while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
+            #    oldp += self.d
+            self.path.append(SpaceTime(self.position, self.t))
 
         else:
             self.update_bond = False
@@ -249,7 +249,7 @@ class Polymer():
                     found = True
                     break
         if not found:
-            print("Warning origin not found")
+            print("Warning origin not found",otag)
             raise
 
         # Not necessary but just for checking elsewhere:
@@ -274,6 +274,7 @@ class Polymer():
 
     def get_replication_profile(self, fork_speed,t=None):
         prof = self.get_DNA_with_time(fork_speed=fork_speed)[1]
+        #print("la")
         return np.argmax(prof,axis=1)
         # self.position_index = range(self.start, self.end + 1)
 
@@ -333,6 +334,7 @@ class Polymer():
                 continue
             #if self.number == 0:
         #        print(m.path)
+
             for pos, time in m.path:
                 # i = self.position_index.index(pos)
                 # print(pos, time)
@@ -340,7 +342,8 @@ class Polymer():
                 for ctime in range(int(time), int(time) + nstep):
                     #print(ctime)
                     if ctime > int(time):
-                        DNA[pos - self.start, min(ctime, max_t - 1)] += min((ctime - int(time)) * fork_speed, 1)
+                        DNA[pos - self.start, min(ctime, max_t - 1)] += min((ctime - time) * fork_speed, 1)
+
                 DNA[pos - self.start, min(ctime, max_t - 1):] = 1
 
                 #print(DNA[pos - self.start])
@@ -411,16 +414,18 @@ class Polymer():
     def get_free_origins_time(self, fork_speed, normed=True):
         max_t = int(self.t) + int(1 / fork_speed) + 2
 
-        rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
         free = np.zeros(max_t)
 
         #print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
+                #print(m.activation_time,m.position)
+
                 free[:max_t - 1] += 1
 
         for m in self.ended:
             if not m.move:
+                #print(m.activation_time,m.position)
                 if m.activated:
 
                     free[:int(m.activation_time)] += 1
@@ -434,6 +439,7 @@ class Polymer():
 
                     # print(free)
         if normed:
+            rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
             for t in np.arange(max_t):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
@@ -545,8 +551,7 @@ class Polymer():
                         self.add_event(m.tag, "E")
                         self.add_event(self.modules[im + 1].tag, "E")
 
-                        if m.path[-1].pos >= self.modules[im + 1].path[-1].pos:
-                            m.path.pop(-1)
+
                         # if m.path[-1].pos <= self.modules[im + 1].path[-1].pos:
                         #      self.modules[im + 1].path.pop(-1)
 
@@ -569,7 +574,7 @@ class Polymer():
                                     other_fork.diff_diff_tag = None
 
                         im += 1
-                elif m.position < self.start or m.position > self.end + 0.5:
+                elif m.position < self.start or m.position > self.end + 1:
                     # Take care of fork outside of boundaries
                     alone.append(m.tag)
                     self.add_event(m.tag, "E")
@@ -610,7 +615,6 @@ class Polymer():
 
         for im in to_remove[::-1]:
             m = self.modules.pop(im)
-            # print(m)
             if m.path != []:
                 if m.path[-1][0] < self.start:
                     m.path.pop(-1)

@@ -322,7 +322,7 @@ class ensembleSim:
     def n_activated_oris(self):
         return list(map(len, np.concatenate(self.aFts)))
 
-    def error_DNA_time(self, plot=False):
+    def error_DNA_time(self, plot=False,shift=0):
 
         # https://academic.oup.com/nar/article/42/1/e3/2437422/The-dynamics-of-genome-replication-using-deep
         point = [(4.3714285714285808, 1.0420168067226889), (9.2571428571428562, 1.0126050420168067), (14.40000000000002, 1.0714285714285714), (17.228571428571435, 1.0420168067226889), (19.800000000000015, 0.97058823529411764), (24.428571428571431, 0.96218487394957974), (30.085714285714289, 0.97478991596638642), (32.657142857142873, 1.0714285714285714), (34.71428571428573, 1.1596638655462184), (37.028571428571425, 1.2983193277310923),
@@ -332,7 +332,6 @@ class ensembleSim:
         x, y, std, alls = self.DNAs()
         error = 0
         Np = 0
-        shift = 0
         for xe, ye in point:
             if xe >= shift:
                 i = np.argmin((x - xe + shift)**2)
@@ -344,13 +343,67 @@ class ensembleSim:
 
         return error, Np
 
-    def error_firing_time(self, plot=False):
+    def error_firing_time(self, plot=False,specie="yeast"):
 
-        # https://academic.oup.com/nar/article/42/1/e3/2437422/The-dynamics-of-genome-replication-using-deep
+        # Universal Temporal Prrofile of Replication Origin (Goldar)
+        if not specie in ["yeast","xenope"]:
+            raise
         point = [(5, 0.01), (13, 0.02), (16, 0.04), (20, 0.07), (25, 0.02),
-                 (30, 0.01)] + [(i, 0) for i in range(31, 70, 2)]
+                 (30, 0.01)] + [(i, 0) for i in range(31, 70, 2)] #xenoput
         unity = 1  # we want it by minutes
         point = [(time, value * unity) for time, value in point]
+        if specie == "yeast":
+            point=[11.104005791505799, 0.00018581081081081065,
+            12.066008316008308, 0.00020270270270270323,
+            13.165837540837543, 0.00023648648648648667,
+            13.990477427977439, 0.0002533783783783784,
+            15.0921629046629, 0.0003547297297297296,
+            16.05787793287793, 0.0005067567567567568,
+            17.161883724383713, 0.0006925675675675674,
+            18.127134689634687, 0.0008277027027027029,
+            19.092849717849717, 0.0009797297297297301,
+            20.19592738342739, 0.0011317567567567573,
+            21.159786159786165, 0.001216216216216216,
+            22.1227168102168, 0.001266891891891892,
+            23.22393822393822, 0.0013513513513513514,
+            24.191509504009503, 0.001570945945945946,
+            25.298763736263723, 0.001875,
+            26.407410157410155, 0.0022297297297297295,
+            27.233442233442233, 0.0022972972972972973,
+            28.46970596970597, 0.0022972972972972973,
+            29.431244431244423, 0.0022972972972972973,
+            30.402528215028198, 0.0026520270270270273,
+            31.514887139887136, 0.0031418918918918915,
+            32.35437704187704, 0.003699324324324324,
+            33.59156890406891, 0.003733108108108108,
+            34.55125111375111, 0.0036655405405405404,
+            35.50907707157708, 0.003530405405405405,
+            36.614475051975035, 0.0037668918918918916,
+            37.723121473121466, 0.004121621621621621,
+            38.69208494208493, 0.004391891891891891,
+            39.65640778140778, 0.004493243243243243,
+            40.747419809919805, 0.004206081081081081,
+            41.696892634392626, 0.0037668918918918916,
+            42.666320166320176, 0.004054054054054054,
+            43.775894713394706, 0.004442567567567567,
+            44.73279254529254, 0.004273648648648648,
+            45.82380457380458, 0.003986486486486486,
+            46.62338506088507, 0.003091216216216216,
+            47.83180501930502, 0.0020777027027027027,
+            48.78591847341846, 0.0018074324324324326,
+            49.72425378675379, 0.0009628378378378375,
+            50.65934065934067, 0,
+            51.75824175824175, 0,
+            52.85760692010692, 0.000016891891891892587,
+            53.81914538164537, 0.000016891891891892587,
+            54.780219780219795, 0,
+            56.15384615384616, 0,
+            57.11538461538461, 0,
+            57.93956043956044, 0 ]
+            point = np.array(point)
+            point = point.reshape(-1,2)
+
+
         x, y, std, alls = self.Its()
         error = 0
         Np = 0
@@ -367,7 +420,7 @@ class ensembleSim:
 
     def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
                             default_rep="../../data/external/time-coordinate.pick",
-                            experiment=True, profile=False, which="mean", fig=None, warning=True):
+                            experiment=True, profile=False, which="mean", fig=None, warning=True,ori=True,shift=0):
 
         import matplotlib.pyplot as plt
 
@@ -394,7 +447,7 @@ class ensembleSim:
             k.sort()
             for ikk, kk in enumerate(k):
 
-                mean_copie[kk] = self.get_mean_copie(int(kk))[0]
+                mean_copie[kk] = self.get_mean_copie(max(0,int(kk) - shift))[0]
                 # print(mean_copie[kk],len(mean_copie[kk][0]) )
                 # print(len( mean_copie[kk]))
 
@@ -440,11 +493,15 @@ class ensembleSim:
             if profile:
                 if which == "mean":
                     Prof = self.get_rep_profile()[chro]
-                    plt.plot(Prof)
+                    x = np.arange(len(Prof)) * coarse / 1000.
+                    plt.plot(x, Prof)
+                    plt.xlim(-10,x[-1]+10)
                 else:
                     for sim in which:
-                        plt.plot(self.aRps[sim][chro])
+                        x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
+                        plt.plot(x, self.aRps[sim][chro])
                     top = self.aRps[sim][chro]
+                    plt.xlim(-10,x[-1]+10)
             else:
                 k = list(times.keys())
                 k.sort()
@@ -453,16 +510,19 @@ class ensembleSim:
                         mean_C = mean_copie[kk][chro]
                     else:
                         mean_C += mean_copie[kk][chro]
-                plt.plot(mean_C / len(k))
+                x = np.arange(len(mean_C)) * coarse / 1000.
+                plt.plot(np.arange(len(mean_C)) * coarse / 1000., mean_C / len(k))
+                plt.xlim(-10,x[-1]+10)
+
                 top = mean_C / len(k)
+            if ori:
+                for x in self.l_ori[chro]:
+                    # print(np.array(top)[~np.equal(top, None)])
 
-            for x in self.l_ori[chro]:
-                # print(np.array(top)[~np.equal(top, None)])
-
-                mini = min(np.array(top)[~np.equal(top, None)])
-                maxi = max(np.array(top)[~np.equal(top, None)])
-                #print(mini, maxi)
-                plt.plot([x, x], [mini, maxi], color="k", linewidth=1)
+                    mini = min(np.array(top)[~np.equal(top, None)])
+                    maxi = max(np.array(top)[~np.equal(top, None)])
+                    #print(mini, maxi)
+                    plt.plot([x * coarse / 1000., x * coarse / 1000], [mini , maxi],"--", color="k", linewidth=1)
 
             def get_rep_prof(times, coordinate, ch, profile=True):
                 k = list(times.keys())
@@ -514,14 +574,14 @@ class ensembleSim:
                                 print("out of bounds")
                             result["mean_copie_simu"].append(top[-1])
 
-                plt.plot(np.array(locci) / coarse, p, "-")
+                plt.plot(np.array(locci) / 1000., p, "-")
             if profile:
-                plt.ylim(0, max_t)
+                plt.ylim(max_t,0)
 
             else:
-                plt.ylim(1, 2)
+                plt.ylim(2,1)
             if extra[chro] == 6:
-                plt.xlabel("Genomic position (5 kb)")
+                plt.xlabel("Genomic position (kb)")
             if position[chro] == 0:
                 if profile:
                     plt.ylabel("rep time (min)")
