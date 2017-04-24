@@ -12,6 +12,7 @@ SpaceTime = namedtuple("SpaceTime", ["pos", "t"])
 
 
 class Diffusing:
+
     def __init__(self, tag):
         self.tag = tag
         self.V = []
@@ -35,8 +36,8 @@ class Diffusing:
     def end_bound(self, time):
         self.bound[-1].append(time)
 
-    def build_time_line(self,maxt=None):
-        #Get max_time
+    def build_time_line(self, maxt=None):
+        # Get max_time
         provided = False
         if maxt is None:
             maxt = 0
@@ -50,7 +51,7 @@ class Diffusing:
         else:
             provided = True
 
-        #print(maxt)
+        # print(maxt)
         time_line = np.zeros(int(maxt) + 1)
         for inte in self.V:
             time_line[int(inte.t)] = 1
@@ -73,8 +74,6 @@ class Diffusing:
             else:
                 time_line[int(event[0].t):int(event[1])] = 3
         return time_line
-
-
 
 
 class Origin:
@@ -123,16 +122,15 @@ class Fork:
 
     def update_position(self, dt, fork_speed, maxi):
 
-        oldp = int(self.position)
-
         self.position += self.d * fork_speed * dt
         self.t += dt
 
-        if oldp != int(self.position):
+        if abs(self.position - round(self.position, 0)) - 0.5 < -1e-5:  # oldp != int(self.position):
+                    # if oldp != int(self.position) or:
 
             self.update_bond = True
             # In case of high fork_speed
-            #while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
+            # while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
             #    oldp += self.d
             self.path.append(SpaceTime(self.position, self.t))
 
@@ -249,7 +247,7 @@ class Polymer():
                     found = True
                     break
         if not found:
-            print("Warning origin not found",otag)
+            print("Warning origin not found", otag)
             raise
 
         # Not necessary but just for checking elsewhere:
@@ -272,12 +270,11 @@ class Polymer():
         self.modules[i + 1].activation_time = self.t
         self.ended.append(self.modules.pop(i + 1))
 
-    def get_replication_profile(self, fork_speed,t=None):
+    def get_replication_profile(self, fork_speed, t=None):
         prof = self.get_DNA_with_time(fork_speed=fork_speed)[1]
-        #print("la")
-        return np.argmax(prof,axis=1)
+        # print("la")
+        return np.argmax(prof, axis=1)
         # self.position_index = range(self.start, self.end + 1)
-
 
     def get_interacting_particles(self):
         P = []
@@ -286,7 +283,7 @@ class Polymer():
                 P.append(m.tag)
         return P
 
-    def get_fork_density(self, fork_speed,cut=0, normed=True,):
+    def get_fork_density(self, fork_speed, cut=0, normed=True,):
         max_t = int(self.t) + int(1 / fork_speed) + 2
 
         fork_number = np.zeros(max_t)
@@ -310,7 +307,7 @@ class Polymer():
             fork_number[-cut:] = 0
         return fork_number
 
-    def get_norm(self,fork_speed):
+    def get_norm(self, fork_speed):
         max_t = int(self.t) + int(1 / fork_speed) + 2
 
         Un_replicated = np.zeros(max_t)
@@ -332,30 +329,46 @@ class Polymer():
         for m in self.modules + self.ended:
             if not m.move:
                 continue
-            #if self.number == 0:
+            # if self.number == 0:
         #        print(m.path)
+            """
+            spos, stime = m.path[0]
+            epos, etime = m.path[-1]
+            dp = (epos -spos)/(len(m.path) - 1) / 2
+            path = np.arange(spos, epos + dp, dp)
 
-            for pos, time in m.path:
+
+            dt = (etime - stime) / (len(path)-1)
+            path_t = np.arange(stime, etime + dt, dt)
+
+            for p,t in zip(path,path_t):
+                DNA[int(p)-self.start,min(int(t),max_t-1):] += 0.5
+            """
+            pos = m.path[0].pos - m.d
+            for _, time in m.path:
+                pos += m.d
                 # i = self.position_index.index(pos)
                 # print(pos, time)
                 nstep = int(1 / fork_speed) + 2  # To be sure we reach 1 Then fill with 1
                 for ctime in range(int(time), int(time) + nstep):
-                    #print(ctime)
+                    # print(ctime)
                     if ctime > int(time):
-                        DNA[pos - self.start, min(ctime, max_t - 1)] += min((ctime - time) * fork_speed, 1)
+                        DNA[min(int(pos) - self.start, self.end - self.start),
+                            min(ctime, max_t - 1)] += min((ctime - time) * fork_speed, 1)
+                    #print(pos,DNA[pos - self.start])
+                DNA[min(int(pos) - self.start, self.end - self.start), min(ctime, max_t - 1):] = 1
 
-                DNA[pos - self.start, min(ctime, max_t - 1):] = 1
-
+            # raise
                 #print(DNA[pos - self.start])
 
-        #print(DNA[0,::])
+        # print(DNA[0,::])
         DNA[DNA > 1] = 1
-        #print(DNA)
-        #if self.number == 0:
+        # print(DNA)
+        # if self.number == 0:
     #        print (DNA[:10])
 #            print (np.sum(DNA, axis=0)[:10])
-        #raise
-        return np.sum(DNA, axis=0),DNA
+        # raise
+        return np.sum(DNA, axis=0), DNA
 
     def get_firing_time_It(self, fork_speed, normed=True, cut=0):
 
@@ -386,8 +399,6 @@ class Polymer():
 
     def get_firing_at_fraction(self, fork_speed, DNA_time, cut=0, bins=100):
 
-
-
         DNA_time /= max(DNA_time)
 
         firing_time = []
@@ -408,7 +419,6 @@ class Polymer():
             # print(el,)
             It[min(int(el * bins), bins - 1)] += 1
 
-
         return It
 
     def get_free_origins_time(self, fork_speed, normed=True):
@@ -419,22 +429,25 @@ class Polymer():
         #print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
-                #print(m.activation_time,m.position)
+                # print(m.activation_time,m.position)
 
                 free[:max_t - 1] += 1
 
         for m in self.ended:
             if not m.move:
-                #print(m.activation_time,m.position)
-                if m.activated:
+                # print(m.activation_time,m.position)
 
+                if m.activated:
                     free[:int(m.activation_time)] += 1
-                    # print(m.activation_time)
+                    # print(m.activation_time,m.activated,m.passivated)
                 else:
+                    # Passivated origins
                     if m.activation_time is None:
                         print("Warning incorrect calculation free origins")
                     else:
                         free[:int(m.activation_time)] += 1
+                        # print(m.activation_time,m.activated,m.passivated)
+
                     # print("Passivated")
 
                     # print(free)
@@ -476,11 +489,11 @@ class Polymer():
             # Take care of passivated Origin Left to right
             m = self.modules[im]
             if m.move:
-                if im != N_mod - 1 and m.position >= self.modules[im + 1].position:
+                if im != N_mod - 1 and m.position > self.modules[im + 1].position:
                     if self.modules[im + 1].origin:
                         passivated_origin.append(self.modules[im + 1].tag)
                         self.modules[im + 1].passivated = True
-                        self.modules[im + 1].activation_time = self.t
+                        self.modules[im + 1].activation_time = self.t - dt   # To take care of 1/ dt
                         self.ended.append(self.modules.pop(im + 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
 
@@ -502,11 +515,11 @@ class Polymer():
             # Take care of passivated Origin Right to left
             m = self.modules[im]
             if m.move:
-                if im != 0 and m.position <= self.modules[im - 1].position:
+                if im != 0 and m.position < self.modules[im - 1].position:
                     if self.modules[im - 1].origin:
                         passivated_origin.append(self.modules[im - 1].tag)
                         self.modules[im - 1].passivated = True
-                        self.modules[im - 1].activation_time = self.t
+                        self.modules[im - 1].activation_time = self.t - dt  # To take care of 1/ dt
 
                         self.ended.append(self.modules.pop(im - 1))
                         if self.bound_to_origin[self.ended[-1].tag] != []:
@@ -538,7 +551,7 @@ class Polymer():
             # Take care of fork collision and bond motion
             m = self.modules[im]
             if m.move:
-                if im != N_mod - 1 and m.position >= self.modules[im + 1].position:
+                if im != N_mod - 1 and m.position > self.modules[im + 1].position:
                     if self.modules[im + 1].move:
                         # Collision
                         to_release.append(m.bond_tag)
@@ -550,7 +563,6 @@ class Polymer():
                         to_remove.append(im + 1)
                         self.add_event(m.tag, "E")
                         self.add_event(self.modules[im + 1].tag, "E")
-
 
                         # if m.path[-1].pos <= self.modules[im + 1].path[-1].pos:
                         #      self.modules[im + 1].path.pop(-1)

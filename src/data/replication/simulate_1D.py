@@ -17,6 +17,7 @@ class simulate:
         self.fork_speed = fork_speed
         self.gindin = gindin
         self.p_v = p_v
+        self.Ndiff_libre_t = []
 
         # print(nori)
 
@@ -35,14 +36,26 @@ class simulate:
                 self.oris[-1] = [np.random.randint(length) for ori in range(el)]
                 self.oris[-1] = list(set(self.oris[-1]))
         # print(self.oris)
-            #print(len(self.oris),(nori-len(self.oris)) / nori)
+            # print(len(self.oris),(nori-len(self.oris)) / nori)
         self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start) for i, (start, length, oris) in
                       enumerate(zip(starts, lengths, self.oris))]
+
+        class MyD(dict):
+
+            def __init__(self, *args):
+                dict.__init__(self, *args)
+                self.set = 0
+
+            def __setitem__(self, key, value):
+                if key == 0 and value == 0:
+                    self.set += 1
+                if self.set == 1:
+                    raise
+                dict.__setitem__(self, key, value)
 
         self.libre = {d: 0 for d in np.arange(ndiff)}
         self.origins = {d: None for d in np.arange(ndiff)}
         self.record_diffusing = [Diffusing(d) for d in np.arange(ndiff)]
-
 
         # print(self.oris)
         # print(self.poly.modules)
@@ -50,8 +63,9 @@ class simulate:
     def get_free(self, maxt=None):
         V = []
         maxt = self.time + int(1 / self.fork_speed) + 2
-        #print(maxt)
+        # print(maxt)
         for k in self.record_diffusing:
+            # print(k)
             V.append(np.array(k.build_time_line(maxt=maxt)))
         V = np.array(V)
         return np.sum((V == 0) + (V == 1), axis=0)
@@ -61,16 +75,22 @@ class simulate:
         alones = []
 
         ori_libre = []
+        dt_speed_d2 = self.dt_speed / 2.
+
         for ip, p in enumerate(self.polys):
             ori_libre += [[ip, orip] for orip in list(p.get_free_origins())]
 
         for time in range(n):
 
+            #print(time // 2, len(ori_libre))
             ended = 0
-            if time != 0:
+            #print("Start", len(ori_libre))
+            if True:
+                #print("Mv fork")
                 for P in self.polys:
+                    # events =
                     bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
-                        dt=self.dt_speed, fork_speed=self.fork_speed)
+                        dt=dt_speed_d2, fork_speed=self.fork_speed)
                     if self.only_one:
                         for k in P.bound_to_origin:
                             if P.bound_to_origin[k] != []:
@@ -83,20 +103,29 @@ class simulate:
                             self.libre[diff2] = 0
                             self.origins[diff1] = None
                             self.origins[diff2] = None
-                            self.record_diffusing[diff1].end_replication(time * self.dt_speed)
-                            self.record_diffusing[diff2].end_replication(time * self.dt_speed)
-
+                            self.record_diffusing[diff1].end_replication(time * dt_speed_d2)
+                            self.record_diffusing[diff2].end_replication(time * dt_speed_d2)
 
                         for diff1 in alone:
                             # or it was at the end of a chromosome or on an origin passivated
+                            if self.libre[diff1] == 2:
+                                self.record_diffusing[diff1].end_replication(time * dt_speed_d2)
+                            elif self.libre[diff1] == 1:
+                                self.record_diffusing[diff1].end_bound(time * dt_speed_d2)
+                            else:
+                                print("Very strange (simulate_1D)")
+                                raise
+
                             self.libre[diff1] = 0
                             self.origins[diff1] = None
+                            """
                             if self.record_diffusing[diff1].replicating != []:
                                 if len(self.record_diffusing[diff1].replicating[-1]) == 2:
                                     pass
                                 else:
-                                    self.record_diffusing[diff1].end_replication(time * self.dt_speed)
-
+                                    self.record_diffusing[diff1].end_replication(
+                                        time * dt_speed_d2)
+                            """
                     else:
 
                         for diff1, diff2 in bind_diff:
@@ -116,7 +145,8 @@ class simulate:
                                 if self.libre[diff] == 2:
                                     self.libre[diff] = 0
                                     self.origins[diff] = None
-                                    self.record_diffusing[diff].end_replication(time * self.dt_speed)
+                                    self.record_diffusing[diff].end_replication(
+                                        time * dt_speed_d2)
 
                                 else:
                                     print("Problem")
@@ -133,10 +163,9 @@ class simulate:
 
                                 diff = np.array(alones)[~isnone][0]
 
-
                                 self.libre[diff] = 0
                                 self.origins[diff] = None
-                                self.record_diffusing[diff].end_replication(time * self.dt_speed)
+                                self.record_diffusing[diff].end_replication(time * dt_speed_d2)
                                 diff1 = alones.pop(alones.index(diff))
                                 diff2 = alones.pop(alones.index(None))
                                 print("Freed", diff1, diff2)
@@ -144,7 +173,6 @@ class simulate:
                                     print(diff1, diff2, alones)
                                     print("Strange")
                                     raise
-
 
                     # Free the diff that where on origins that are now passivated
 
@@ -154,7 +182,7 @@ class simulate:
                             if self.origins[diff_t] is not None and self.origins[diff_t][1] == p:
                                 self.origins[diff_t] = None
                                 self.libre[diff_t] = 0
-                                self.record_diffusing[diff_t].end_bound(time * self.dt_speed)
+                                self.record_diffusing[diff_t].end_bound(time * dt_speed_d2)
                                 found += 1
                         if found == 2:
                             print("Passivated origins with two diff")
@@ -174,13 +202,6 @@ class simulate:
                     if P.modules == []:
                             # np.sum(np.array(P.get_replication_profile()) == 0 ) == 0:
                         ended += 1
-                        # print("Ended",time)
-                        #print(self.poly.get_replication_profile() == 0 )
-                        # break
-
-            if ended == len(self.lengths):
-                self.time = time * self.dt_speed
-                break
 
             # Random checks
             if np.random.random() < 0.01:
@@ -195,13 +216,20 @@ class simulate:
                     print(self.polys[0].ended)
 
                     raise
-
-
+            # print(time)
+            if time % 2 == 1:
+                continue
+            # print("starting")
             order = np.arange(self.ndiff)
             np.random.shuffle(order)
-
+            self.Ndiff_libre_t.append(
+                np.sum([1 for tmp_diff in order if self.libre[tmp_diff] == 0]))
+            #Nori_libre = len(ori_libre)
+            # print("Middle")
+            # print(len(ori_libre))
+            #print("Start ori", len(ori_libre))
             for diff in order:
-                #print(self.libre[diff],self.libre[diff] == 0)
+                # print(self.libre[diff],self.libre[diff] == 0)
                 if self.libre[diff] == 0:
                     if len(ori_libre) == 0:
                         continue
@@ -217,14 +245,23 @@ class simulate:
                             continue
 
                     elif not self.gindin:
-
                         Nori_libre = len(ori_libre)
+
+                        """
                         n_possible_ori = np.random.binomial(Nori_libre, self.p_v)
                         if n_possible_ori >= 1:
-                            self.record_diffusing[diff].in_volume_of_interaction([ori for ori in range(n_possible_ori)], time * self.dt_speed)
+                            self.record_diffusing[diff].in_volume_of_interaction(
+                                [ori for ori in range(n_possible_ori)], time * dt_speed_d2)
 
                         p_one_interaction = 1 - (1 - self.p_on)**n_possible_ori
                         if np.random.rand() < p_one_interaction:
+                            # Interaction
+                            pass
+                        else:
+                            continue
+                        """
+                        ln_no_interaction = Nori_libre * np.log(1 - self.p_on * self.p_v)
+                        if np.log(np.random.rand()) > ln_no_interaction:
                             # Interaction
                             pass
                         else:
@@ -242,8 +279,16 @@ class simulate:
                             [diff1, diff2], what_ori, [None, None], None)
                         self.libre[diff1] = 2
                         self.libre[diff2] = 2
-                        self.record_diffusing[diff1].start_replication(what_ori, time * self.dt_speed)
-                        self.record_diffusing[diff2].start_replication(what_ori, time * self.dt_speed)
+                        if diff == diff1:
+                            self.record_diffusing[diff2].end_bound(time * dt_speed_d2)
+                        else:
+
+                            self.record_diffusing[diff1].end_bound([time * dt_speed_d2, "TH"])
+
+                        self.record_diffusing[diff1].start_replication(
+                            what_ori, time * dt_speed_d2)
+                        self.record_diffusing[diff2].start_replication(
+                            what_ori, time * dt_speed_d2)
 
                         ori_libre.remove(ori_libre[choice])
 
@@ -251,7 +296,7 @@ class simulate:
                         if not self.only_one:
                             self.libre[diff] = 1
                             self.origins[diff] = ori_libre[choice]
-                            self.record_diffusing[diff].start_bound(what_ori, time * self.dt_speed)
+                            self.record_diffusing[diff].start_bound(what_ori, time * dt_speed_d2)
 
                         else:
                             # If only one needed start the fork and reciclate this
@@ -259,7 +304,8 @@ class simulate:
                                 [diff, None], what_ori, [None, None], None)
                             self.libre[diff] = 2
                             self.origins[diff] = ori_libre[choice]
-                            self.record_diffusing[diff].start_replication(what_ori, time * self.dt_speed)
+                            self.record_diffusing[diff].start_replication(
+                                what_ori, time * dt_speed_d2)
 
                             ori_libre.remove(ori_libre[choice])
 
@@ -269,11 +315,14 @@ class simulate:
                         what_p, what_ori = self.origins[diff]
                         self.polys[what_p].dettach_one_diff(diff, what_ori)
                         self.origins[diff] = None
-                        self.record_diffusing[diff].end_bound(time * self.dt_speed)
-
+                        self.record_diffusing[diff].end_bound(time * dt_speed_d2)
 
                 elif self.libre[diff] == 2:
                     pass
+
+            if ended == len(self.lengths):
+                self.time = time * dt_speed_d2
+                break
 
 
 if __name__ == "__main__":
