@@ -10,7 +10,7 @@ import numpy as np
 
 import copy
 import sys
-sys.path.append("/src/data")
+sys.path.append("src/data")
 from replication.PMotion import Polymer
 from replication.simulate_1D import simulate
 
