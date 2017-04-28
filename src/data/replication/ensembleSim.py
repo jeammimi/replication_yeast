@@ -9,12 +9,12 @@ from tqdm import tqdm
 class ensembleSim:
 
     def __init__(self, Nsim, Nori, Ndiff, lengths,
-                 p_on, p_off, only_one, all_same_ori=False,
+                 p_on, p_off, only_one, all_same_ori=True,
                  dt_speed=1,
                  fork_speed=1,
                  gindin=True,
                  p_v=1,
-                 l_ori=[], cut=10):
+                 l_ori=[], cut=10, random=False, one_minute=False):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -38,6 +38,8 @@ class ensembleSim:
         self.p_v = p_v
         self.cut = cut
         self.l_ori = l_ori
+        self.random = random
+        self.one_minute = one_minute
 
     def show_parameters(self):
         P = ["Nsim", "Nori", "Ndiff", "lengths", "p_on", "p_off",
@@ -96,7 +98,8 @@ class ensembleSim:
                              dt_speed=self.dt_speed,
                              fork_speed=self.fork_speed,
                              gindin=self.gindin,
-                             p_v=self.p_v)
+                             p_v=self.p_v,
+                             random=self.random)
 
                 S.simulate(run_length)
                 found += 1
@@ -131,17 +134,22 @@ class ensembleSim:
             self.aFree_Diff_bis.append([])
 
             for poly in S.polys:
+                if self.one_minute:
+                    dt = 1
+                else:
+                    dt = self.dt_speed
                 # Cut == 0 because we removed them from all the chromosomes
-                ft, it = poly.get_firing_time_It(fork_speed=self.fork_speed, cut=0, normed=False)
+                ft, it = poly.get_firing_time_It(
+                    fork_speed=self.fork_speed, cut=0, normed=False, dt=dt)
                 fd = poly.get_fork_density(fork_speed=self.fork_speed,
-                                           cut=0, normed=False)  # Normed afteward
+                                           cut=0, normed=False, dt=dt)  # Normed afteward
 
                 self.aIts[-1].append(it)
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
 
-                self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed))
-                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed)[0])
+                self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
+                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed, dt=dt)[0])
 
                 """
                 All the following line to be able to compute No(t-1)
@@ -151,13 +159,13 @@ class ensembleSim:
                 # print(self.raDNAs[-1][-1][-1])
 
                 Free_o = poly.get_free_origins_time(
-                    fork_speed=self.fork_speed, normed=False).tolist()
+                    fork_speed=self.fork_speed, normed=False, dt=dt).tolist()
                 assert (Free_o[-1] == 0)
 
                 self.aFree_origins[-1].append(np.array([len(poly.origins)] + Free_o[:-1]))
                 # self.aFree_origins[-1].append(Free_o)
                 # print(self.aFree_origins[-1])
-                #assert(1 == 0)
+                # assert(1 == 0)
 
                 """
                 len_poly = poly.end + 1 - poly.start
@@ -170,13 +178,13 @@ class ensembleSim:
                 self.raDNAs[-1][-1] = np.array(self.raDNAs[-1][-1])
 
                 # print(self.raDNAs[-1][-1])
-                #self.aUnrs[-1][-1] = self.aUnrs[-1][-1]
+                # self.aUnrs[-1][-1] = self.aUnrs[-1][-1]
 """
                 len_poly = poly.end + 1 - poly.start
 
                 self.aUnrs[-1].append(len_poly - self.raDNAs[-1][-1])
 
-                #print (norm.shape,self.aUnrs[-1][-1].shape)
+                # print (norm.shape,self.aUnrs[-1][-1].shape)
 
                 # raise
 
@@ -184,27 +192,25 @@ class ensembleSim:
             DNA_time = np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
             # try:
             for t in range(len(DNA_time)):
-                tp = int(t / self.dt_speed)
+                tp = int(t * dt / self.dt_speed)
                 if tp > len(S.Ndiff_libre_t) - 1:
                     break
                 self.aFree_Diff_bis[-1].append(S.Ndiff_libre_t[tp])
-            # except:
-            #        print("Free_Diff_bis not availabel")
+            """
+            try:
+                self.aFree_Diff[-1] = S.get_free()
+                # print(self.aFree_Diff[-1])
+            except:
+                pass"""
 
             bins = 100
             for poly in S.polys:
                 self.aIfs[-1].append(poly.get_firing_at_fraction(DNA_time=DNA_time,
                                                                  fork_speed=self.fork_speed, cut=0, bins=bins))
 
-            #print(np.sum(np.array(self.aIfs[-1]), axis=0))
-            try:
-                self.aFree_Diff[-1] = S.get_free()
-                # print(self.aFree_Diff[-1])
-            except:
-                pass
             self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) / \
                 (np.array(np.arange(0, 1, 1 / bins) + 1 / 100.) * np.sum(self.lengths))[::-1]
-            #print (np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1])
+            # print (np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1])
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
             unr[unr == 0] = np.nan
@@ -238,12 +244,12 @@ class ensembleSim:
         normed_prop += np.nan
 
         for iIt, It in enumerate(prop[:n_rep]):
-            #print(len(It), maxl)
+            # print(len(It), maxl)
             normed_prop[iIt, :min(len(It), maxl)] = np.array(It[:min(len(It), maxl)])
 
             if cut != 0 and name in ["anIts", "aFds"]:
                 # Remove last cut:
-                #print("Before", normed_prop[iIt])
+                # print("Before", normed_prop[iIt])
                 # print("la")
                 removed = 0
                 if cut != 0:
@@ -257,7 +263,7 @@ class ensembleSim:
                             normed_prop[iIt][-i:] = np.nan
                             break
 
-            #print("After", normed_prop[iIt])
+            # print("After", normed_prop[iIt])
 
             if shift != 0:
                 normed_prop[iIt, len(It):] = It[-1]
@@ -269,7 +275,11 @@ class ensembleSim:
         else:
             y = np.nanmean(normed_prop, axis=0)
             err = np.std(normed_prop, axis=0)
-        return x, y, err, normed_prop
+        if self.one_minute:
+            dt = 1
+        else:
+            dt = self.dt_speed
+        return x * dt, y, err, normed_prop
 
     def get_times_replication(self, finished=True, n_rep=None):
         times = []
@@ -296,9 +306,9 @@ class ensembleSim:
 
     def It_Mean_field_simplified(self, n_rep=None):
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
-
-        nori = np.sum(list(map(len, self.l_ori)))
-
+        nori = 1.0 * np.sum(list(map(len, self.l_ori)))
+        if nori == 0:
+            print("Warning, no origins ")
         return x, y * nori / np.sum(self.lengths) * self.p_on * self.p_v / self.dt_speed
 
     def get_rep_profile(self):
@@ -341,11 +351,13 @@ class ensembleSim:
             x, _, _, Unr = self.get_quant("tUNrs", n_rep=n_rep)
             Unr[Unr == 0] = np.nan
             y = np.nanmean(NF / Unr, axis=0)
-            #Unr[Unr == 0] = 1
+            # Unr[Unr == 0] = 1
 
-            return x, y, np.mean(NF, axis=0), np.nanmean(NF, axis=0) / np.nanmean(Unr, axis=0)
+            return x, y / self.dt_speed, np.mean(NF, axis=0) / self.dt_speed, np.nanmean(NF, axis=0) / np.nanmean(Unr, axis=0) / self.dt_speed
         else:
-            return self.get_quant("aIts", n_rep=n_rep)
+            x, y, std, alls = self.get_quant("aIts", n_rep=n_rep)
+            # As this are cumulative properties, this scale for one minute
+            return x, y / self.dt_speed, std / self.dt_speed, alls / self.dt_speed
 
     def Ifs(self, n_rep=None, recompute=False, cut=0):
         if recompute == True:
@@ -367,7 +379,7 @@ class ensembleSim:
             Unr[Unr == 0] = np.nan
             y = np.nanmean(Nori / Unr, axis=0)
             Unr[Unr == np.nan] = 0
-            #Unr[Unr == 0] = 1
+            # Unr[Unr == 0] = 1
             return x, y, np.mean(Nori, axis=0), meanurn, Unr
         else:
             return self.get_quant("aIfs", n_rep=n_rep)
@@ -379,13 +391,13 @@ class ensembleSim:
         self.tUNrs = np.sum(np.array(self.aUnrs), axis=1)
         x, Nf, std, alls = self.get_quant("anIts", n_rep=n_rep, cut=cut)
         x, Unr, std, allsu = self.get_quant("tUNrs", n_rep=n_rep)
-        #allsu[allsu == 0] = np.nan
+        # allsu[allsu == 0] = np.nan
         print(np.nansum(alls[np.isnan(allsu)]))
-        #alls[np.isnan(allsu)] = np.nan
+        # alls[np.isnan(allsu)] = np.nan
         allsu[np.isnan(allsu)] = 0
         alls[np.isnan(alls)] = 0
 
-        return x, Nf / Unr, np.nanmean(alls / allsu, axis=0), np.nanmean(alls, axis=0) / np.nanmean(allsu, axis=0)
+        return x, Nf / Unr / self.dt_speed, np.nanmean(alls / allsu, axis=0) / self.dt_speed, np.nanmean(alls, axis=0) / np.nanmean(allsu, axis=0) / self.dt_speed
 
     def ItsDifferentWay(self, cut=0):
         pass
@@ -609,7 +621,7 @@ class ensembleSim:
 
                     mini = min(np.array(top)[~np.equal(top, None)])
                     maxi = max(np.array(top)[~np.equal(top, None)])
-                    #print(mini, maxi)
+                    # print(mini, maxi)
                     plt.plot([x * coarse / 1000., x * coarse / 1000],
                              [mini, maxi], "--", color="k", linewidth=1)
 

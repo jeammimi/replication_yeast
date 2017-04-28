@@ -5,7 +5,7 @@ from replication.PMotion import Polymer, Diffusing
 class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
-                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1):
+                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1, random=False):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -37,7 +37,7 @@ class simulate:
                 self.oris[-1] = list(set(self.oris[-1]))
         # print(self.oris)
             # print(len(self.oris),(nori-len(self.oris)) / nori)
-        self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start) for i, (start, length, oris) in
+        self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random) for i, (start, length, oris) in
                       enumerate(zip(starts, lengths, self.oris))]
 
         class MyD(dict):
@@ -71,11 +71,17 @@ class simulate:
         return np.sum((V == 0) + (V == 1), axis=0)
 
     def simulate(self, n):
-
+        """
+        for P in self.polys:
+            # events =
+            bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
+                dt=self.dt_speed / 2, fork_speed=self.fork_speed)
+        """
         alones = []
+        extra = 0
 
         ori_libre = []
-        dt_speed_d2 = self.dt_speed / 2.
+        dt_speed_d2 = self.dt_speed  # / 2.
 
         for ip, p in enumerate(self.polys):
             ori_libre += [[ip, orip] for orip in list(p.get_free_origins())]
@@ -85,7 +91,7 @@ class simulate:
             #print(time // 2, len(ori_libre))
             ended = 0
             #print("Start", len(ori_libre))
-            if True:
+            if time != 0:
                 #print("Mv fork")
                 for P in self.polys:
                     # events =
@@ -217,8 +223,8 @@ class simulate:
 
                     raise
             # print(time)
-            if time % 2 == 1:
-                continue
+            # if time % 2 == 1:
+            #    continue
             # print("starting")
             order = np.arange(self.ndiff)
             np.random.shuffle(order)
@@ -321,8 +327,12 @@ class simulate:
                     pass
 
             if ended == len(self.lengths):
+                extra += 1
                 self.time = time * dt_speed_d2
-                break
+
+                if extra > 10:
+                    # print(extra)
+                    break
 
 
 if __name__ == "__main__":
