@@ -7,6 +7,7 @@ from replication.tools import load_ori_position, load_lengths_and_centro
 import os
 import json
 import _pickle as cPickle
+import numpy as np
 
 
 if __name__ == "__main__":
@@ -33,6 +34,7 @@ if __name__ == "__main__":
     if type(parameters["lengths"]) == str:
         lengths, _ = load_lengths_and_centro(parameters["lengths"], parameters["coarse"])
         parameters["lengths"] = lengths
+        parameters.pop("coarse")
 
     if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
         l_ori = load_ori_position(parameters["Nori"],
@@ -49,7 +51,6 @@ if __name__ == "__main__":
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
     parameters.pop("ori_type")
-    parameters.pop("coarse")
 
     parameters["Nori"] = l_ori
     E = ensembleSim(**parameters)
