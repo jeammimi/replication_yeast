@@ -381,7 +381,7 @@ class Polymer():
                 if m.path != []:
                     start = m.path[0].time / dt
                     end = m.path[-1].time / dt
-                    fork_number[int(start) - self.start: int(end) - self.start] += 1
+                    fork_number[int(start): int(end)] += 1
 
         if normed:
             for t in np.arange(max_t):
@@ -393,6 +393,29 @@ class Polymer():
         if cut != 0:
             fork_number[-cut:] = 0
         return fork_number
+
+    def get_dist_between_activated_origins(self, fork_speed, time=None, dt=1):
+
+        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
+
+        firing_time = []
+        for m in self.modules + self.ended:
+            if not m.move:
+                if m.activated and m.activation_time is not None:
+                    if time is not None and m.activation_time / 1.0 / dt > time:
+                        continue
+                    firing_time.append([m.activation_time / 1.0 / dt, m.position])
+        firing_time.sort(key=lambda x: x[1])
+
+        firing_position = np.array(firing_time)
+
+        Dist = []
+        for time in range(max_t):
+            fired = firing_position[::, 0] <= time
+            dist = firing_position[fired][::, 1]
+            dist = dist[1:] - dist[:-1]
+            Dist.append(dist)
+        return Dist, firing_position
 
     def get_norm(self, fork_speed):
         max_t = int(self.t) + int(1 / fork_speed) + 2
@@ -483,7 +506,7 @@ class Polymer():
         # print(self.t)
         for el in firing_time:
             # print(el,)
-            It[int(el)] += 1
+            It[int(round(el, 0))] += 1
 
         if normed:
             norm = 1.0 * self.get_norm()

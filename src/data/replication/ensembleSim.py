@@ -80,6 +80,7 @@ class ensembleSim:
         self.aFree_Diff_bis = []
         self.anIts = []
         self.aFree_Diff = []
+        self.aFiring_Position = []
         found = 0
         for sim in tqdm(range(self.Nsim)):
             # print(sim)
@@ -132,6 +133,7 @@ class ensembleSim:
             self.aFree_Diff.append([])
             self.aFree_origins.append([])
             self.aFree_Diff_bis.append([])
+            self.aFiring_Position.append([])
 
             for poly in S.polys:
                 if self.one_minute:
@@ -184,6 +186,10 @@ class ensembleSim:
 
                 self.aUnrs[-1].append(len_poly - self.raDNAs[-1][-1])
 
+                ftime, firing_position = poly.get_dist_between_activated_origins(
+                    fork_speed=self.fork_speed, dt=dt)
+                self.aFiring_Position[-1].append(firing_position)
+
                 # print (norm.shape,self.aUnrs[-1][-1].shape)
 
                 # raise
@@ -209,7 +215,7 @@ class ensembleSim:
                                                                  fork_speed=self.fork_speed, cut=0, bins=bins))
 
             self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) / \
-                (np.array(np.arange(0, 1, 1 / bins) + 1 / 100.) * np.sum(self.lengths))[::-1]
+                (np.array(np.arange(0, 1, 1 / bins) + 1 / 100.) * self.length)[::-1]
             # print (np.array(np.arange(0,1,1/bins) * np.sum(self.lengths))[::-1])
 
             unr = np.sum(np.array(self.aUnrs[-1]), axis=0)
@@ -217,10 +223,10 @@ class ensembleSim:
             self.anIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0)
 
             self.aIts[-1] = np.sum(np.array(self.aIts[-1]), axis=0) / unr
-            self.aFds[-1] = np.sum(np.array(self.aFds[-1]), axis=0) / unr
+            self.aFds[-1] = np.sum(np.array(self.aFds[-1]), axis=0) / self.length
             self.aFree_origins[-1] = np.sum(np.array(self.aFree_origins[-1]), axis=0)
             # print(self.raDNAs)
-            self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
+            self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / self.length
         return S
 
     def get_quant(self, name, shift=0, n_rep=None, cut=0):
@@ -235,7 +241,7 @@ class ensembleSim:
         if -1 in times:
             maxl = int(max(map(len, prop)))
         else:
-            maxl = int(max(times))
+            maxl = int(max(times / self.dte))
         if name == "aIfs":
             maxl = len(prop[0])
 
@@ -275,11 +281,8 @@ class ensembleSim:
         else:
             y = np.nanmean(normed_prop, axis=0)
             err = np.std(normed_prop, axis=0)
-        if self.one_minute:
-            dt = 1
-        else:
-            dt = self.dt_speed
-        return x * dt, y, err, normed_prop
+
+        return x * self.dte, y, err, normed_prop
 
     def get_times_replication(self, finished=True, n_rep=None):
         times = []
@@ -291,7 +294,55 @@ class ensembleSim:
                     break
                 else:
                     times[-1] = max(times[-1], max(np.array(c)[~np.equal(c, None)]))
-        return times
+
+        return np.array(times) * self.dte
+
+    @property
+    def nori(self):
+        nori = 1.0 * np.sum(list(map(len, self.l_ori)))
+        if nori == 0:
+            print("Warning, no origins ")
+        return nori
+
+    @property
+    def length(self):
+        return np.sum(self.lengths)
+
+    @property
+    def dte(self):
+        if self.one_minute:
+            return 1
+        else:
+            return self.dt_speed
+
+    def get_dist_between_activated_origins(self, time=None):
+        """Time in minutes"""
+
+        Dist = []
+        if time is None:
+            time = 1e8
+        else:
+            time = time / self.dte
+        print(time)
+        for fps in self.aFiring_Position:
+            for fp in fps:
+
+                fired = fp[::, 0] <= time
+                dist = fp[fired][::, 1]
+                dist = dist[1:] - dist[:-1]
+                Dist.extend(dist)
+        return Dist
+
+    def get_time_at_fraction(self, frac=1, bead=True):
+        if bead:
+            dna = (self.length - frac) / self.length + 1
+        else:
+            dna += 1
+        x, DNA = self.DNAs()[:2]
+        for iid, d in enumerate(DNA):
+            if d >= dna:
+                return x[iid]
+        return x[-1]
 
     def It_Mean_field_origins(self, n_rep=None):
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
@@ -300,16 +351,14 @@ class ensembleSim:
 
         x, DNA = self.DNAs(n_rep=n_rep)[:2]
 
-        Unr = (2 - DNA) * np.sum(self.lengths)
+        Unr = (2 - DNA) * self.length
 
         return x, y * y1 / Unr * self.p_on * self.p_v / self.dt_speed
 
     def It_Mean_field_simplified(self, n_rep=None):
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
-        nori = 1.0 * np.sum(list(map(len, self.l_ori)))
-        if nori == 0:
-            print("Warning, no origins ")
-        return x, y * nori / np.sum(self.lengths) * self.p_on * self.p_v / self.dt_speed
+
+        return x, y * self.nori / np.sum(self.lengths) * self.p_on * self.p_v / self.dt_speed
 
     def get_rep_profile(self):
         rep = []
