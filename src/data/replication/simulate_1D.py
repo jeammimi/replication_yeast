@@ -5,7 +5,7 @@ from replication.PMotion import Polymer, Diffusing
 class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
-                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1, random=False):
+                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1, random=False, positions=None):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -18,6 +18,7 @@ class simulate:
         self.gindin = gindin
         self.p_v = p_v
         self.Ndiff_libre_t = []
+        self.positions = positions
 
         # print(nori)
 
@@ -37,8 +38,13 @@ class simulate:
                 self.oris[-1] = list(set(self.oris[-1]))
         # print(self.oris)
             # print(len(self.oris),(nori-len(self.oris)) / nori)
-        self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random) for i, (start, length, oris) in
-                      enumerate(zip(starts, lengths, self.oris))]
+
+        if positions is None:
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random) for i, (start, length, oris) in
+                          enumerate(zip(starts, lengths, self.oris))]
+        else:
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=position) for i, (start, length, oris, position) in
+                          enumerate(zip(starts, lengths, self.oris, self.positions))]
 
         class MyD(dict):
 

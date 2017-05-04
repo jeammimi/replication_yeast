@@ -96,12 +96,16 @@ class Diffusing:
 
 class Origin:
 
-    def __init__(self, tag, random=False):
+    def __init__(self, tag, random=False, position=None):
         self.tag = tag
-        if random:
-            self.position = self.tag + 0.0001 + 0.9997 * np.random.rand()
+        if position is not None:
+            self.position = position
         else:
-            self.position = self.tag + 0.5
+            if random:
+                self.position = self.tag + 0.0001 + 0.9997 * np.random.rand()
+            else:
+                self.position = self.tag + 0.5
+        # print(tag,self.position,position)
         self.move = False
         self.origin = True
         self.passivated = False
@@ -249,7 +253,7 @@ class LFork(Fork):
 
 class Polymer():
 
-    def __init__(self, number, start, end, origins, random=False):
+    def __init__(self, number, start, end, origins, random=False, positions=None):
         self.number = number
         self.start = start
         self.end = end  # End is included
@@ -261,7 +265,15 @@ class Polymer():
             assert(np.min(self.origins) >= self.start)
             # print(self.end,np.max(self.origins))
             assert(np.max(self.origins) <= self.end)
-        self.modules = [Origin(tag, random=random) for tag in origins]
+
+        if positions is not None:
+            if len(positions) != len(origins):
+                print("Error on position,PMotion.py")
+                raise
+            self.modules = [Origin(tag, random=random, position=position)
+                            for tag, position in zip(origins, positions)]
+        else:
+            self.modules = [Origin(tag, random=random) for tag in origins]
         # to keep track of the diff attached in case we attach them one by one
         self.bound_to_origin = {tag: [] for tag in origins}
         self.DNA_state = np.arange(self.start, self.end + 1)
@@ -379,8 +391,8 @@ class Polymer():
             if not m.origin:
                 # print(m.path)
                 if m.path != []:
-                    start = m.path[0].time / dt
-                    end = m.path[-1].time / dt
+                    start = int(round(m.path[0].time / dt, 0))
+                    end = int(round(m.path[-1].time / dt, 0))
                     fork_number[int(start): int(end)] += 1
 
         if normed:
@@ -404,7 +416,7 @@ class Polymer():
                 if m.activated and m.activation_time is not None:
                     if time is not None and m.activation_time / 1.0 / dt > time:
                         continue
-                    firing_time.append([m.activation_time / 1.0 / dt, m.position])
+                    firing_time.append([int(round(m.activation_time / 1.0 / dt, 0)), m.position])
         firing_time.sort(key=lambda x: x[1])
 
         firing_position = np.array(firing_time)
@@ -460,7 +472,7 @@ class Polymer():
                 outtime /= dt
                 # print(outtime)
                 times = [time, outtime]
-                t = int(time) + 1
+                t = int(round(time, 0)) + 1
                 # print
                 while t < times[-1]:
                     times.insert(-1, t)
@@ -470,7 +482,7 @@ class Polymer():
                 for t, tp1 in zip(times[:-1], times[1:]):
                     #rt = int(t)
                     # if abs(int(t)-t) < 1e-5:
-                    rt = int(t) + 1
+                    rt = int(round(t, 0)) + 1
                     # print(rt)
                     DNA[bead - self.start, rt:] += (tp1 - t) * fork_speed * dt
 
@@ -496,7 +508,7 @@ class Polymer():
         for m in self.modules + self.ended:
             if not m.move:
                 if m.activated and m.activation_time is not None:
-                    firing_time.append(m.activation_time / 1.0 / dt)
+                    firing_time.append(int(round(m.activation_time / 1.0 / dt, 0)))
         firing_time.sort()
         # print(firing_time)
         It = np.zeros(max_t)
@@ -557,14 +569,14 @@ class Polymer():
                 # print(m.activation_time,m.position)
 
                 if m.activated:
-                    free[:int(m.activation_time / dt)] += 1
+                    free[:int(round(m.activation_time / dt, 0))] += 1
                     # print(m.activation_time,m.activated,m.passivated)
                 else:
                     # Passivated origins
                     if m.activation_time is None:
                         print("Warning incorrect calculation free origins")
                     else:
-                        free[:int(m.activation_time / dt)] += 1
+                        free[:int(round(m.activation_time / dt, 0))] += 1
                         # print(m.activation_time,m.activated,m.passivated)
 
                     # print("Passivated")

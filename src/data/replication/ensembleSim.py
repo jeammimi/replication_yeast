@@ -14,7 +14,7 @@ class ensembleSim:
                  fork_speed=1,
                  gindin=True,
                  p_v=1,
-                 l_ori=[], cut=10, random=False, one_minute=False):
+                 l_ori=[], cut=10, random=False, one_minute=False, positions=None):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -40,6 +40,7 @@ class ensembleSim:
         self.l_ori = l_ori
         self.random = random
         self.one_minute = one_minute
+        self.positions = positions
 
     def show_parameters(self):
         P = ["Nsim", "Nori", "Ndiff", "lengths", "p_on", "p_off",
@@ -100,7 +101,8 @@ class ensembleSim:
                              fork_speed=self.fork_speed,
                              gindin=self.gindin,
                              p_v=self.p_v,
-                             random=self.random)
+                             random=self.random,
+                             positions=self.positions)
 
                 S.simulate(run_length)
                 found += 1
@@ -198,7 +200,7 @@ class ensembleSim:
             DNA_time = np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
             # try:
             for t in range(len(DNA_time)):
-                tp = int(t * dt / self.dt_speed)
+                tp = int(round(t * dt / self.dt_speed, 0))
                 if tp > len(S.Ndiff_libre_t) - 1:
                     break
                 self.aFree_Diff_bis[-1].append(S.Ndiff_libre_t[tp])
@@ -357,8 +359,8 @@ class ensembleSim:
 
     def It_Mean_field_simplified(self, n_rep=None):
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
-
-        return x, y * self.nori / np.sum(self.lengths) * self.p_on * self.p_v / self.dt_speed
+        print(self.nori, self.length)
+        return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
 
     def get_rep_profile(self):
         rep = []

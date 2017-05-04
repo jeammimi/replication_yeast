@@ -48,11 +48,22 @@ if __name__ == "__main__":
         for i in range(int((1 - sub_sample_ori) * len(l_ori[0]))):
             l_ori[0].pop(np.random.randint(len(l_ori[0])))
 
+        positions = [[]]
+        if parameters["homogeneous"]:
+            interval = parameters["lengths"][0] / 1.0 / len((l_ori[0]))
+            for i in range(len((l_ori[0]))):
+                positions[-1].append(i * interval + interval * np.random.uniform())
+        else:
+            for i in range(len((l_ori[0]))):
+                positions[-1].append(parameters["lengths"][0] * np.random.uniform())
+        parameters["positions"] = positions
+
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
     parameters.pop("ori_type")
 
     parameters["Nori"] = l_ori
+
     E = ensembleSim(**parameters)
     E.run_all(20000)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
