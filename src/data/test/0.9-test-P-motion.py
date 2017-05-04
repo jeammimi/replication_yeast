@@ -275,8 +275,8 @@ def test_jump2():
     for t in range(3):
         #print([m.path for m in P.modules if m.move])
 
-        P.increment_time(dt=1,fork_speed=2.6)
-    assert( np.all(P.get_replication_profile(2.6) ==[1,1,1]))
+        P.increment_time(dt=1,fork_speed=3)
+    assert( np.all(P.get_replication_profile(3) ==[1,1,1]))
 
 
 # In[11]:
@@ -289,9 +289,9 @@ def test_jump():
     for t in range(3):
         #print([m.path for m in P.modules if m.move])
 
-        P.increment_time(dt=1,fork_speed=2.6)
+        P.increment_time(dt=1,fork_speed=3)
     #print(P.get_DNA_with_time())
-    assert( np.all(P.get_replication_profile(2.6) ==[1,1,1]))
+    assert( np.all(P.get_replication_profile(3) ==[1,1,1]))
 
 
 # In[12]:
