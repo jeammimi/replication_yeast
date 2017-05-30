@@ -34,13 +34,14 @@ if __name__ == "__main__":
     if type(parameters["lengths"]) == str:
         lengths, _ = load_lengths_and_centro(parameters["lengths"], parameters["coarse"])
         parameters["lengths"] = lengths
-        parameters.pop("coarse")
 
     if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
         l_ori = load_ori_position(parameters["Nori"],
                                   parameters["ori_type"],
                                   parameters["lengths"],
                                   parameters["coarse"])
+    if "coarse" in parameters:
+        parameters.pop("coarse")
 
     if parameters["Nori"] == "xenope":
         l_ori = [list(range(parameters["lengths"][0]))]
