@@ -377,12 +377,12 @@ class ensembleSim:
         rep_t = self.get_times_replication()
         for il, l in enumerate(self.lengths):
             # print(l)
-            Nsim = len(self.aRps) - rep_t.count(-1)
+            Nsim = len(self.aRps) - rep_t.tolist().count(-1)
             copie.append(np.ones((Nsim, l)))
-            sim = 0
-            for itime, time_rep in enumerate(rep_t):
+            for sim, time_rep in enumerate(rep_t):
                 if time_rep != -1:
-                    copie[il][sim, np.array(self.aRps[itime][il]) < time] = 2
+                    # print("th")
+                    copie[il][sim, np.array(self.aRps[sim][il] * self.dte) < time] = 2
                     sim += 1
 
             std_copie.append(np.std(copie[il], axis=0))
@@ -645,12 +645,12 @@ class ensembleSim:
                 if which == "mean":
                     Prof = self.get_rep_profile()[chro]
                     x = np.arange(len(Prof)) * coarse / 1000.
-                    plt.plot(x, Prof)
+                    plt.plot(x, Prof * self.dte)
                     plt.xlim(-10, x[-1] + 10)
                 else:
                     for sim in which:
                         x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
-                        plt.plot(x, self.aRps[sim][chro])
+                        plt.plot(x, self.aRps[sim][chro] * self.dte)
                     top = self.aRps[sim][chro]
                     plt.xlim(-10, x[-1] + 10)
             else:
