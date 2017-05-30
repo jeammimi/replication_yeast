@@ -19,7 +19,9 @@ ToDO list
  * Compute 3D correlation
  * Rescale different sizes of genomes
  * Explore in Yeast the differences between simulated curve and experimental
-    - Need for more origins
+    - Need for more origins ?
+    - find phase diagram ?
+
 
 
 

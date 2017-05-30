@@ -8,7 +8,17 @@ import os
 import json
 import _pickle as cPickle
 import numpy as np
+import time
+import os
+import errno
 
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
 if __name__ == "__main__":
     param_file = sys.argv[1]
@@ -25,6 +35,7 @@ if __name__ == "__main__":
     parameters["filename"] = param_file
 
     print(parameters["data_folder"])
+    make_sure_path_exists(parameters["data_folder"])
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
         f.write(s)
