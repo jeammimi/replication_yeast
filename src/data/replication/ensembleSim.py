@@ -66,7 +66,7 @@ class ensembleSim:
         unr = np.sum(np.array(self.aUnrs), axis=1)
         self.anIts = self.aIts * unr
 
-    def run_all(self, run_length=200, load_from_file=None):
+    def run_all(self, run_length=200, load_from_file=None, correlation=True):
 
         self.aIts = []
         self.aIfs = []
@@ -82,6 +82,10 @@ class ensembleSim:
         self.anIts = []
         self.aFree_Diff = []
         self.aFiring_Position = []
+        self.aIODs = []
+        self.aIRTDs = []
+        self.aTLs = []
+
         found = 0
         for sim in tqdm(range(self.Nsim)):
             # print(sim)
@@ -136,6 +140,9 @@ class ensembleSim:
             self.aFree_origins.append([])
             self.aFree_Diff_bis.append([])
             self.aFiring_Position.append([])
+            self.aIODs.append([])
+            self.aIRTDs.append([])
+            self.aTLs.append([])
 
             for poly in S.polys:
                 if self.one_minute:
@@ -154,6 +161,12 @@ class ensembleSim:
 
                 self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
                 self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed, dt=dt)[0])
+                if correlation:
+                    iods, irtds, tls = poly.get_correlations(
+                        fork_speed=self.fork_speed, dt=dt, thresh=0.99)
+                    self.aIODs[-1].append(iods)
+                    self.aIRTDs[-1].append(irtds)
+                    self.aTLs[-1].append(tls)
 
                 """
                 All the following line to be able to compute No(t-1)
@@ -230,6 +243,122 @@ class ensembleSim:
             # print(self.raDNAs)
             self.aDNAs[-1] = 1 + np.sum(np.array(self.raDNAs[-1]), axis=0) / self.length
         return S
+
+    def get_what(self, what, fraction=[0, 1], max_track_length=None):
+        """return an array which contain a concatenation by sim
+        for each sim it is an array which contain a list of the given quantity for evey time step
+        IOD, IRTD, or TL
+        """
+
+        def recompute(what, tl, max_track_length):
+            res = []
+            for ich, ch in enumerate(what):
+                res.append([])
+
+                for ipos, spos in enumerate(ch):
+                    # Go throug time
+                    # print(spos)
+                    # print(spos,)
+
+                    if type(spos) is not list:
+                        spos = [] + spos.tolist()
+                    else:
+                        spos = [] + spos
+                    if spos == []:
+                        res[-1].append([])
+                        continue
+
+                    spos.insert(0, 0)
+                    pos = np.cumsum(spos)
+                    # print(tl[ich][ipos])
+                    keep = np.array(tl[ich][ipos]) < max_track_length
+                    kpos = pos[np.array(keep, np.bool)]
+                    pos = kpos[1:] - kpos[:-1]
+                    res[-1].append(pos)
+
+                    """
+                    if np.any(keep == False):
+                        print(pos.shape, keep.shape, pos[keep].shape)
+                        print(len(res[-1][-1]), len(ch[ipos]))
+                        #print(spos, pos, keep, tl[ich][ipos])
+                        print(res[-1][-1])
+
+                        raise"""
+                    # return
+            return np.array(res).T
+
+        iod3 = []
+        for sim in range(self.Nsim):
+            def get_by_time(what=what):
+                # print(sim)
+                iods = np.array(getattr(self, "a" + what + "s")[sim])
+                if max_track_length is not None:
+                    tl = np.array(getattr(self, "aTLs")[sim])
+                    tl = tl.T
+                iods = iods.T
+                iods2 = []
+                fraction_time = np.array(self.raDNAs[sim]).copy()
+
+                for ichl, chl in enumerate(self.lengths):
+                    # Normalise to 1 by dividing by chromosome length
+                    fraction_time[ichl] /= chl
+
+                to_keep = iods
+
+                if max_track_length is not None:
+                    # print(tl[ich].shape)
+                    to_keep = recompute(iods.T, tl.T, max_track_length)
+
+                # print(fraction_time.shape)
+                for ich, (ch_what, ch_fraction) in enumerate(zip(to_keep, fraction_time.T)):
+                    # We go throug time and
+                    # By chromosomes select where they match the selected fraction:
+                    select = (ch_fraction >= fraction[0]) * (ch_fraction <= fraction[1])
+                    # print(select)
+                    # return
+                    if np.sum(select) >= 2:
+
+                        iods2.append(np.concatenate(ch_what[select]))
+
+                    if np.sum(select) == 1:
+                        # print(ch_what)
+                        iods2.append(np.array(ch_what[select][0]))
+                        """
+                        print(iods2[-1])
+                        print(iods2[-2])
+                        print(np.concatenate([[], []]).shape)
+                        print(np.array([]).shape)
+                        return"""
+                    if np.sum(select) == 0:
+                        iods2.append(np.array([]))
+                return iods2
+            iod3 += get_by_time()
+        return iod3
+
+    def get_cum_sum_hist(self, what, bins=100, fraction=[0, 1], max_track_length=None):
+        """Cumulative histogram in a combing like fashion
+        as the time steps are all used and added together"""
+
+        if what != "ori":
+            data = self.get_what(what, fraction=fraction, max_track_length=max_track_length)
+        elif what == "ori":
+            data = [np.array(io)[1:] - np.array(io)[:-1] for io in self.l_ori]
+
+        m = []
+        for i in data:
+            m += i.tolist()  # np.mean(i) for i in iod3 if i != [] ]
+        self.m = m
+        y, x = np.histogram(m, bins=bins, normed=True)
+        # hist(m,bins=100,normed=True,cumulative=-1,histtype='step')
+
+        y = np.array([0] + np.cumsum(y).tolist())
+
+        y /= y[-1]
+        # print(y[0], y[-1])
+
+        y = 1 - y
+        # plot( 5*(x[1:]/2+x[:-1]/2),y)
+        return x, y
 
     def get_quant(self, name, shift=0, n_rep=None, cut=0):
         if shift != 0:

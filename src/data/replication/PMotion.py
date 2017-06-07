@@ -262,13 +262,15 @@ class Polymer():
         self.origins = origins
         if self.origins != []:
             # print(number,start,np.min(self.origins))
-            assert(np.min(self.origins) >= self.start)
+            #assert(np.min(self.origins) >= self.start)
             # print(self.end,np.max(self.origins))
-            assert(np.max(self.origins) <= self.end)
+            #assert(np.max(self.origins) <= self.end)
+            pass
 
         if positions is not None:
             if len(positions) != len(origins):
-                print("Error on position,PMotion.py")
+
+                print("Error on position,PMotion.py", len(positions), len(origins))
                 raise
             self.modules = [Origin(tag, random=random, position=position)
                             for tag, position in zip(origins, positions)]
@@ -444,8 +446,72 @@ class Polymer():
 
         return Un_replicated
 
+    def get_correlations(self, fork_speed, dt=1, thresh=1, merge=0):
+
+        DNA_time = self.get_DNA_with_time(fork_speed=fork_speed, dt=dt)[1]
+        # print(DNA_time.shape)
+        # axis0 = length axis1 = time
+
+        def return_connected_slow(a):
+            # print(a)
+            l = [[]]
+            for i, el in enumerate(a):
+                if (el is False or el == 0) and l[-1] != []:
+                    l.append([])
+                if (el is True or el == 1):
+                    l[-1].append(i)
+            if l[-1] == []:
+                l.pop(-1)
+            return l
+
+        def return_connected(a):
+            boo = np.array(a, dtype=np.bool)
+            indices = np.nonzero(boo[1:] != boo[:-1])[0] + 1
+            # print(indices)
+            b = np.split(np.arange(len(a)), indices)
+            b = b[0::2] if boo[0] else b[1::2]
+            return b
+
+        def IOD_IRTD_TL(a, thresh=1):
+            # IOD = inter origin distance
+            # IRTD = inter replication track distance
+            # TL = track length
+            toa = a >= thresh
+
+            connected = return_connected(toa)
+            # print(connected)
+
+            TL = [len(component) for component in connected]
+            IRTD = []
+            IOD = []
+            if len(connected) > 2:
+                for c1, c2 in zip(connected[:-1], connected[1:]):
+                    IRTD.append(c2[0] - c1[-1])
+
+                CM = np.array([np.mean(component) for component in connected])
+                # for c1, c2 in zip(CM[:-1], CM[1:]):
+                #    IOD.append(c2 - c1)
+                IOD = CM[1:] - CM[:-1]
+            return IOD, IRTD, TL
+
+        IODs = []
+        IRTDs = []
+        TLs = []
+
+        for struct in DNA_time.T:
+            # print(struct.shape)
+            # print(struct)
+            iod, irtd, tl = IOD_IRTD_TL(struct, thresh=thresh)
+            IODs.append(iod)
+            IRTDs.append(irtd)
+            TLs.append(tl)
+        return IODs, IRTDs, TLs
+
     def get_DNA_with_time(self, fork_speed, dt=1):
         # Quantity of replicated dna
+        if hasattr(self, "cache"):
+            if int(self.t / dt) + int(1 / fork_speed / dt) + 2 == self.max_t:
+                return self.sDNA, self.DNA
         max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
         DNA = np.zeros((self.end + 1 - self.start, max_t))
         for m in self.modules + self.ended:
@@ -498,7 +564,11 @@ class Polymer():
     #        print (DNA[:10])
 #            print (np.sum(DNA, axis=0)[:10])
         # raise
-        return np.sum(DNA, axis=0), DNA
+        self.cache = True
+        self.max_t = max_t
+        self.sDNA = np.sum(DNA, axis=0)
+        self.DNA = DNA
+        return self.sDNA, DNA
 
     def get_firing_time_It(self, fork_speed, normed=False, cut=0, dt=1):
 
