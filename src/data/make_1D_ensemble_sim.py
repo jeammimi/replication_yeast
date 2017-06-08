@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     if parameters["Nori"] == "xenope":
         sub_sample_ori = parameters.pop("sub_sample_ori")
-        l_ori = [list(range(parameters["lengths"][0] * sub_sample_ori))]
+        l_ori = [list(range(int(parameters["lengths"][0] * sub_sample_ori)))]
 
         positions = [[]]
         if parameters["homogeneous"]:
