@@ -55,10 +55,8 @@ if __name__ == "__main__":
         parameters.pop("coarse")
 
     if parameters["Nori"] == "xenope":
-        l_ori = [list(range(parameters["lengths"][0]))]
         sub_sample_ori = parameters.pop("sub_sample_ori")
-        for i in range(int((1 - sub_sample_ori) * len(l_ori[0]))):
-            l_ori[0].pop(np.random.randint(len(l_ori[0])))
+        l_ori = [list(range(parameters["lengths"][0] * sub_sample_ori))]
 
         positions = [[]]
         if parameters["homogeneous"]:
