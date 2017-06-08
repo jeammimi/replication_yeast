@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     correlation = parameters.get("correlation", True)
     if "correlation" in parameters:
-        paramteres.pop("correlation")
+        parameters.pop("correlation")
     E = ensembleSim(**parameters)
     E.run_all(20000, correlation=correlation)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
