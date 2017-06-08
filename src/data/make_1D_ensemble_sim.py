@@ -76,7 +76,10 @@ if __name__ == "__main__":
 
     parameters["Nori"] = l_ori
 
+    correlation = parameters.get("correlation", True)
+    if "correlation" in parameters:
+        paramteres.pop("correlation")
     E = ensembleSim(**parameters)
-    E.run_all(20000, correlation=parameters.get("correlation", True))
+    E.run_all(20000, correlation=)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(E, f)
