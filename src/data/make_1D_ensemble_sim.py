@@ -80,6 +80,6 @@ if __name__ == "__main__":
     if "correlation" in parameters:
         paramteres.pop("correlation")
     E = ensembleSim(**parameters)
-    E.run_all(20000, correlation=)
+    E.run_all(20000, correlation=correlation)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(E, f)
