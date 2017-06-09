@@ -778,7 +778,7 @@ class ensembleSim:
                 if which == "mean":
                     Prof = self.get_rep_profile()[chro]
                     x = np.arange(len(Prof)) * coarse / 1000.
-                    plt.plot(x, Prof * self.dte)
+                    plt.plot(x, Prof * self.dte, label="Simulated")
                     plt.xlim(-10, x[-1] + 10)
                 else:
                     for sim in which:
@@ -859,7 +859,7 @@ class ensembleSim:
                                 print("out of bounds")
                             result["mean_copie_simu"].append(top[-1])
 
-                plt.plot(np.array(locci) / 1000., p, "-")
+                plt.plot(np.array(locci) / 1000., p, "-", label="simulated")
             if profile:
                 plt.ylim(max_t, 0)
 
