@@ -700,7 +700,8 @@ class ensembleSim:
 
     def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
                             default_rep="../../data/external/time-coordinate.pick",
-                            experiment=True, profile=False, which="mean", fig=None, warning=True, ori=True, shift=0, N_chrom=16):
+                            experiment=True, profile=False, which="mean", fig=None,
+                            warning=True, ori=True, shift=0, N_chrom=range(16)):
 
         import matplotlib.pyplot as plt
 
@@ -719,6 +720,8 @@ class ensembleSim:
         # f = figure(figsize=(20,20))
         if fig is None:
             f = plt.figure(figsize=figsize)
+        elif fig == "other":
+            pass
         else:
             f = fig
         mean_copie = {}
@@ -749,7 +752,7 @@ class ensembleSim:
 
         margin_right = 0.02
 
-        for chro in range(N_chrom):
+        for chro in N_chrom:
             # ax = f.add_subplot(4,4,chro + 1)
             # ax = f.add_subplot(gs[chro])
 
@@ -767,7 +770,8 @@ class ensembleSim:
             h = height
 
             # print([xstart,ystart,w,h])
-            f.add_axes([xstart, ystart, w, h])
+            if fig != "other":
+                f.add_axes([xstart, ystart, w, h])
 
             # chro = 3
             if profile:
@@ -860,7 +864,7 @@ class ensembleSim:
                 plt.ylim(max_t, 0)
 
             else:
-                plt.ylim(2, 1)
+                plt.ylim(1, 2)
             if extra[chro] == 6:
                 plt.xlabel("Genomic position (kb)")
             if position[chro] == 0:
