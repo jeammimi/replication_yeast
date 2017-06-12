@@ -5,6 +5,14 @@ import os
 import json
 import copy
 
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
 if __name__ == "__main__":
     param_file = sys.argv[1]
     parameters = load_parameters(param_file)
@@ -24,6 +32,7 @@ if __name__ == "__main__":
     parameters["filename"] = param_file
 
     print(parameters["data_folder"])
+    make_sure_path_exists(parameters["data_folder"])
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters)
         f.write(s)
