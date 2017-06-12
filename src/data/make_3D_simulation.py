@@ -32,4 +32,4 @@ if __name__ == "__main__":
     parameters["visu"] = True
     simulate(parameters)  # generate files for visualisation
     parameters["visu"] = original
-    simulate(parameters)
+    #simulate(parameters)
