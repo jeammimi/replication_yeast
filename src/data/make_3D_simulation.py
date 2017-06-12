@@ -30,6 +30,6 @@ if __name__ == "__main__":
 
     original = copy.deepcopy(parameters["visu"])
     parameters["visu"] = True
-    #simulate(parameters)  # generate files for visualisation
+    simulate(parameters)  # generate files for visualisation
     parameters["visu"] = original
-    #simulate(parameters)
+    simulate(parameters)
