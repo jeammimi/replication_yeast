@@ -4,6 +4,7 @@ from replication.simulate import simulate, load_parameters
 import os
 import json
 import copy
+import errno
 
 
 def make_sure_path_exists(path):
