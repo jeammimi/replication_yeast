@@ -72,6 +72,7 @@ if __name__ == "__main__":
                         fork_speed=parameters["fork_speed"],
                         gindin=parameters["gindin"],
                         p_v=parameters["p_v"],
+                        random=True,
                         all_same_ori=True)
         E.run_all(40000)
 

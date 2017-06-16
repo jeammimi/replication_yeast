@@ -211,12 +211,15 @@ class ensembleSim:
 
                 # print(it)
             DNA_time = np.sum(np.array(self.raDNAs[-1]), axis=0) / np.sum(self.lengths)
-            # try:
-            for t in range(len(DNA_time)):
-                tp = int(round(t * dt / self.dt_speed, 0))
-                if tp > len(S.Ndiff_libre_t) - 1:
-                    break
-                self.aFree_Diff_bis[-1].append(S.Ndiff_libre_t[tp])
+            try:
+                for t in range(len(DNA_time)):
+                    tp = int(round(t * dt / self.dt_speed, 0))
+                    if tp > len(S.Ndiff_libre_t) - 1:
+                        break
+                    self.aFree_Diff_bis[-1].append(S.Ndiff_libre_t[tp])
+            except:
+                # Not available in 3D
+                pass
             """
             try:
                 self.aFree_Diff[-1] = S.get_free()
@@ -465,11 +468,9 @@ class ensembleSim:
         return Dist
 
     def get_time_at_fraction(self, frac=1, bead=True):
-        if bead:
-            dna = (self.length - frac) / self.length + 1
-        else:
-            dna += 1
+        dna = frac + 1
         x, DNA = self.DNAs()[:2]
+        # print(DNA)
         for iid, d in enumerate(DNA):
             if d >= dna:
                 return x[iid]
