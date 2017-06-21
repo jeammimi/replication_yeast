@@ -5,7 +5,8 @@ from replication.PMotion import Polymer, Diffusing
 class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
-                 fork_speed=1, dt_speed=1, tolerance=0.1, gindin=True, p_v=1, random=False, positions=None):
+                 fork_speed=1, dt_speed=1, tolerance=0.1,
+                 gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -19,6 +20,8 @@ class simulate:
         self.p_v = p_v
         self.Ndiff_libre_t = []
         self.positions = positions
+        self.ramp = ramp
+        self.max_ramp = max_ramp
 
         # print(nori)
 
@@ -233,6 +236,14 @@ class simulate:
             #    continue
             # print("starting")
             order = np.arange(self.ndiff)
+
+            if self.ramp:
+                order = int(self.ramp * time * self.dt_speed)
+                if self.max_ramp:
+                    order = min(order, self.max_ramp)
+                # print()
+                order = np.arange(int(order))
+
             np.random.shuffle(order)
             self.Ndiff_libre_t.append(
                 np.sum([1 for tmp_diff in order if self.libre[tmp_diff] == 0]))

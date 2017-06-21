@@ -14,7 +14,8 @@ class ensembleSim:
                  fork_speed=1,
                  gindin=True,
                  p_v=1,
-                 l_ori=[], cut=10, random=False, one_minute=False, positions=None):
+                 l_ori=[], cut=10, random=False, one_minute=False,
+                 positions=None, ramp=None, max_ramp=None):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -41,13 +42,18 @@ class ensembleSim:
         self.random = random
         self.one_minute = one_minute
         self.positions = positions
+        self.ramp = ramp
+        self.max_ramp = max_ramp
 
-    def show_parameters(self):
+    def show_parameters(self, show_ori=True):
         P = ["Nsim", "Nori", "Ndiff", "lengths", "p_on", "p_off",
              "only_one", "all_same_ori", "dt_speed",
-             "fork_speed", "gindin", "p_v", "cut", "l_ori"]
+             "fork_speed", "gindin", "p_v", "cut", "l_ori", "ramp", "max_ramp"]
 
         for parameter in P:
+            if parameter == "l_ori" and not show_ori:
+                print(parameter, self.nori)
+                continue
             print(parameter, getattr(self, parameter))
 
     def data(self):
@@ -66,7 +72,7 @@ class ensembleSim:
         unr = np.sum(np.array(self.aUnrs), axis=1)
         self.anIts = self.aIts * unr
 
-    def run_all(self, run_length=200, load_from_file=None, correlation=True):
+    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[]):
 
         self.aIts = []
         self.aIfs = []
@@ -106,11 +112,17 @@ class ensembleSim:
                              gindin=self.gindin,
                              p_v=self.p_v,
                              random=self.random,
-                             positions=self.positions)
+                             positions=self.positions,
+                             ramp=self.ramp,
+                             max_ramp=self.max_ramp)
 
                 S.simulate(run_length)
                 found += 1
             else:
+                #print("Sim", sim)
+                if sim in skip:
+                    #print("skip", skip)
+                    continue
                 # print(sim)
                 Simu = namedtuple("Simu", ["polys", "oris"])
                 file_to_open = "%s%i/" % (load_from_file, sim + 1) + "polymer_timing.dat"
@@ -489,7 +501,7 @@ class ensembleSim:
 
     def It_Mean_field_simplified(self, n_rep=None):
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
-        print(self.nori, self.length)
+        #print(self.nori, self.length)
         return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
 
     def get_rep_profile(self):
@@ -612,6 +624,26 @@ class ensembleSim:
         # x_exp,y_exp = zip(*point)
 
         x, y, std, alls = self.DNAs()
+        error = 0
+        Np = 0
+        for xe, ye in point:
+            if xe >= shift:
+                i = np.argmin((x - xe + shift)**2)
+                # print(x[i],xe)
+                error += (ye - y[i])**2
+                Np += 1
+        if plot:
+            return zip(*point)
+
+        return error, Np
+
+    def error_FD_time(self, plot=False, shift=0):
+
+        point = [(250, 0.025), (500, 0.1), (1000, 0.2), (1250, 0.13),
+                 (1500, 0.09), (2000, 0.01)]  # Goldar 2008 (/kb)
+        point = [(time / 60, value) for time, value in point]
+
+        x, y, std, alls = self.Fds()
         error = 0
         Np = 0
         for xe, ye in point:
@@ -865,7 +897,7 @@ class ensembleSim:
                 plt.ylim(max_t, 0)
 
             else:
-                plt.ylim(1, 2)
+                plt.ylim(1.2, 1.8)
             if extra[chro] == 6:
                 plt.xlabel("Genomic position (kb)")
             if position[chro] == 0:

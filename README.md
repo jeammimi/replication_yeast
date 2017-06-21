@@ -12,15 +12,18 @@ https://rawgit.com/jeammimi/replication_yeast/master/notebooks/report/test.html
 Done:
   * Hi-C computation
   * Calibration of MSDs curves
+  * Check that 3D - 1D still works
+  * Rescale different sizes of genomes
+
 
 ToDO list
 
- * Check that 3D - 1D still works
  * Compute 3D correlation
- * Rescale different sizes of genomes
  * Explore in Yeast the differences between simulated curve and experimental
     - Need for more origins ?
     - find phase diagram ?
+
+* Validity for the law?
 
 
 
