@@ -880,7 +880,7 @@ def simulate(traj):
 
                                 for diff in ptags:
                                     record_diffusing[
-                                        diff - offset_diff].start_replication(i * dt_speed)
+                                        diff - offset_diff].start_replication(particular_origin, i * dt_speed)
 
                             else:
                                 Change_type(
@@ -905,12 +905,12 @@ def simulate(traj):
                                                [p1[1], p2[1]], btag)
 
                                     record_diffusing[
-                                        p1[0] - offset_diff].start_replication(i * dt_speed)
+                                        p1[0] - offset_diff].start_replication(particular_origin, i * dt_speed)
                                     record_diffusing[
-                                        p2[0] - offset_diff].start_replication(i * dt_speed)
+                                        p2[0] - offset_diff].start_replication(particular_origin, i * dt_speed)
                                 else:
                                     record_diffusing[ptags[0] -
-                                                     offset_diff].start_bound(i * dt_speed)
+                                                     offset_diff].start_bound(particular_origin, i * dt_speed)
 
                         else:
                             # start when touched and release
