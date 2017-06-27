@@ -8,7 +8,7 @@ import numpy as np
 with open("logp.txt", "w"):
     pass
 from collections import namedtuple
-SpaceTime = namedtuple("SpaceTime", ["pos", "t"])
+SpaceTime = namedtuple("SpaceTime", ["ori", "t", "pos"])
 
 
 class SpaceTimeB:
@@ -37,22 +37,35 @@ class Diffusing:
         self.bound = []
         self.replicating = []
         self.free = []
+        self.free = True
+        self.replicating = False
+        self.bound = False
+
+    def change_state(self, name):
+        names = ["free", "replicating", "bound"]
+        for inames in names:
+            setattr(self, inames, False)
+        setattr(self, name, True)
 
     def in_volume_of_interaction(self, ori_list, time):
         for ori in ori_list:
             self.V.append(SpaceTime(ori, time))
 
-    def start_replication(self, ori, time):
-        self.replicating.append([SpaceTime(ori, time)])
+    def start_replication(self, ori, time, pos=None):
+        self.change_state("replicating")
+        self.replicating.append([SpaceTime(ori, time, pos=pos)])
 
-    def end_replication(self, time):
-        self.replicating[-1].append(time)
+    def end_replication(self, time, pos=None):
+        self.change_state("free")
+        self.replicating[-1].append(SpaceTime(self.replicating[-1][0].ori, time, pos=pos))
 
-    def start_bound(self, ori, time):
-        self.bound.append([SpaceTime(ori, time)])
+    def start_bound(self, ori, time, pos=None):
+        self.change_state("bound")
+        self.bound.append([SpaceTime(ori, time, pos=pos)])
 
-    def end_bound(self, time):
-        self.bound[-1].append(time)
+    def end_bound(self, time, pos=None):
+        self.change_state("free")
+        self.bound[-1].append(SpaceTime(self.bound[-1][0].ori, time, pos=pos))
 
     def build_time_line(self, maxt=None):
         # Get max_time
@@ -81,16 +94,16 @@ class Diffusing:
                     raise
                 time_line[int(event[0].t):] = 2
             else:
-                time_line[int(event[0].t):int(event[1])] = 2
+                time_line[int(event[0].t):int(event[1].t)] = 2
 
         for event in self.bound:
             if len(event) == 1:
-                if maxt != event[0][1]:
+                if maxt != event[0].t:
                     print("Unfinished business")
                     raise
                 time_line[int(event[0].t):] = 3
             else:
-                time_line[int(event[0].t):int(event[1])] = 3
+                time_line[int(event[0].t):int(event[1].t)] = 3
         return time_line
 
 
@@ -219,7 +232,7 @@ class Fork:
                 time = self.t + (self.position - entrance) / fork_speed
                 bead = entrance - 1
             # In case of high fork_speed
-            #while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
+            # while oldp != int(self.position) and oldp >= 0 and oldp <= maxi:
             #    oldp += self.d
             self.path[-1].outpos = entrance
             self.path.append(SpaceTimeB(entrance,time,None,bead))"""
@@ -262,9 +275,9 @@ class Polymer():
         self.origins = origins
         if self.origins != []:
             # print(number,start,np.min(self.origins))
-            #assert(np.min(self.origins) >= self.start)
+            # assert(np.min(self.origins) >= self.start)
             # print(self.end,np.max(self.origins))
-            #assert(np.max(self.origins) <= self.end)
+            # assert(np.max(self.origins) <= self.end)
             pass
 
         if positions is not None:
@@ -388,7 +401,7 @@ class Polymer():
         max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
 
         fork_number = np.zeros(max_t)
-        #rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
+        # rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
         for m in self.modules + self.ended:
             if not m.origin:
                 # print(m.path)
@@ -520,7 +533,7 @@ class Polymer():
             # if self.number == 0:
         #        print(m.path)
 
-            #pos = m.path[0].pos - m.d
+            # pos = m.path[0].pos - m.d
         #    print(m.path)
             # print(m.path)
 
@@ -546,7 +559,7 @@ class Polymer():
                 # print("t",times)
 
                 for t, tp1 in zip(times[:-1], times[1:]):
-                    #rt = int(t)
+                    # rt = int(t)
                     # if abs(int(t)-t) < 1e-5:
                     rt = int(round(t, 0)) + 1
                     # print(rt)
@@ -555,7 +568,7 @@ class Polymer():
                 # print
                 # print(DNA)
             # raise
-                #print(DNA[pos - self.start])
+                # print(DNA[pos - self.start])
 
         # print(DNA[0,::])
         DNA[DNA > 1] = 1
@@ -627,7 +640,7 @@ class Polymer():
 
         free = np.zeros(max_t)
 
-        #print("T", int(self.t), self.origins)
+        # print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
                 # print(m.activation_time,m.position)
@@ -829,7 +842,7 @@ class Polymer():
                     if m.position >= self.end + 1:
                         if m.path[-1].bead >= self.end + 1:
                             # pass
-                            #print(m.path, self.end+1)
+                            # print(m.path, self.end+1)
                             # print("la")
                             m.path.pop(-1)
                         else:

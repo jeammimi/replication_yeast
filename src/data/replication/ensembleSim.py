@@ -124,12 +124,18 @@ class ensembleSim:
                     #print("skip", skip)
                     continue
                 # print(sim)
-                Simu = namedtuple("Simu", ["polys", "oris"])
+                Simu = namedtuple("Simu", ["polys", "oris", "Ndiff_libre_t"])
                 file_to_open = "%s%i/" % (load_from_file, sim + 1) + "polymer_timing.dat"
                 if os.path.exists(file_to_open):
                     with open(file_to_open, "rb") as f:
                         polys = cPickle.load(f)
                         oris = [np.array(p.origins) - p.start for p in polys]
+
+                    if os.path.exists("%s%i/" % (load_from_file, sim + 1) + "Ndiff_libre_t.dat"):
+                        with open("%s%i/" % (load_from_file, sim + 1) + "Ndiff_libre_t.dat", "rb") as f:
+                            Ndiff_libre_t = cPickle.load(f)
+                        S = Simu(polys, oris, Ndiff_libre_t)
+                    else:
                         S = Simu(polys, oris)
                     found += 1
                 else:

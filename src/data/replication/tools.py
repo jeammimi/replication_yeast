@@ -68,12 +68,16 @@ def load_3D_simus(folder_roots, n=5, S=False, skip=[]):
         print("Could not find any parameter")
         raise
     # pprint.pprint(parameters)
-    lengths, _ = load_lengths_and_centro(
-        "../." + parameters["len_chrom"], parameters["coarse"], verbose=False)
+    if type(parameters["len_chrom"]) == str:
+        lengths, _ = load_lengths_and_centro(
+            "../." + parameters["len_chrom"], parameters["coarse"], verbose=False)
+    else:
+        lengths = parameters["len_chrom"]
 
     fact = 1
     if not parameters["diff_bind_when_free"]:
         fact = 2
+        print("Doubling number of diff")
     E = ensembleSim(n, Nori=None,
                     Ndiff=parameters["N_diffu"] * fact,
                     lengths=lengths,

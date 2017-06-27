@@ -10,7 +10,7 @@ from hoomd import data, init, md, group, dump, deprecated, analyze
 import numpy as np
 import scipy.linalg as linalg
 from scipy.spatial.distance import cdist
-from .PMotion import Polymer
+from .PMotion import Polymer, Diffusing
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
 from replication.tools import load_ori_position, load_lengths_and_centro
@@ -402,7 +402,7 @@ def force_field(traj, bond_list, plist, tag_spb):
     # lj much more slower (at least in thu minimisation)
     wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
     wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
-                                   r_cut=1.12, mode="shift",r_extrap = r_extrap)
+                                   r_cut=1.12, mode="shift", r_extrap=r_extrap)
 
     if spb:
         wall_force_slj.force_coeff.set("Spb", epsilon=1.0, sigma=1.0,
@@ -415,10 +415,10 @@ def force_field(traj, bond_list, plist, tag_spb):
             'Nuc',
             epsilon=1.0,
             sigma=diameter_nuc,
-            r_cut=diameter_nuc * 1.12, mode="shift",r_extrap = diameter_nuc * r_extrap)
+            r_cut=diameter_nuc * 1.12, mode="shift", r_extrap=diameter_nuc * r_extrap)
     if telomere:
         wall_force_slj.force_coeff.set("Telo", epsilon=2.0, sigma=1.5,
-                                        r_cut=3, mode="shift", r_extrap = r_extrap)
+                                       r_cut=3, mode="shift", r_extrap=r_extrap)
 
     # Group;
     all_beads = group.all()
@@ -681,6 +681,13 @@ def simulate(traj):
     r_hic = []
     if dump_hic:
         group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
+    Ndiff_libre_t = []
+
+    N_diffu = traj["N_diffu"]
+
+    offset_diff = min([p.tag for p in group_diffu])
+
+    record_diffusing = [Diffusing(d) for d in np.arange(N_diffu * 2)]
 
     for i in range(n_steps):
 
@@ -727,6 +734,30 @@ def simulate(traj):
                 passivated_origin, to_release, alone = P.increment_time(
                     dt_speed, fork_speed, verbose)
 
+            ###################################################################
+            # Only to keep track of the diffusing elements
+            for diff1, diff2 in bind_diff:
+
+                record_diffusing[
+                    diff1 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff1 - offset_diff].position)
+                record_diffusing[
+                    diff2 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff2 - offset_diff].position)
+
+            for diff in alone:
+                if record_diffusing[diff].bound:
+                    record_diffusing[
+                        diff - offset_diff].end_bound(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
+                elif record_diffusing[diff].replicating:
+                    record_diffusing[
+                        diff - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
+                else:
+                    print(diff, record_diffusing[diff - offset_diff].free)
+                    raise
+
+            ###################################################################
+
+            ###################################################################
+            # take care of the bondings
             Change_type(
                 'P_Ori',
                 passivated_origin,
@@ -774,6 +805,8 @@ def simulate(traj):
 
         p_origin = np.array([p.position for p in group_origin])
         tag_origin = [p.tag for p in group_origin]
+
+        Ndiff_libre_t.appenfd(len(tag_diffu))
 
         if tag_diffu != [] and tag_origin != []:
             distances = cdist(p_diffu, p_origin)
@@ -845,6 +878,10 @@ def simulate(traj):
                                 P.add_fork(
                                     ptags, particular_origin, new_btags, btag)
 
+                                for diff in ptags:
+                                    record_diffusing[
+                                        diff - offset_diff].start_replication(i * dt_speed)
+
                             else:
                                 Change_type(
                                     'F_Diff', ptags, snp)  # Diffusive element attached
@@ -867,6 +904,14 @@ def simulate(traj):
                                     P.add_fork([p1[0], p2[0]], particular_origin,
                                                [p1[1], p2[1]], btag)
 
+                                    record_diffusing[
+                                        p1[0] - offset_diff].start_replication(i * dt_speed)
+                                    record_diffusing[
+                                        p2[0] - offset_diff].start_replication(i * dt_speed)
+                                else:
+                                    record_diffusing[ptags[0] -
+                                                     offset_diff].start_bound(i * dt_speed)
+
                         else:
                             # start when touched and release
                             particular_origin = tag_origin[iorigin]
@@ -883,6 +928,8 @@ def simulate(traj):
         # t0 = time.time()
         with open(data_folder + "polymer_timing.dat", "wb") as f:
             cPickle.dump(lPolymers, f, protocol=2)
+        with open(data_folder + "Ndiff_libre_t.dat", "wb") as f:
+            cPickle.dump(Ndiff_libre_t, f, protocol=2)
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin
 
