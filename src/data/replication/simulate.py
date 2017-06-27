@@ -930,6 +930,9 @@ def simulate(traj):
             cPickle.dump(lPolymers, f, protocol=2)
         with open(data_folder + "Ndiff_libre_t.dat", "wb") as f:
             cPickle.dump(Ndiff_libre_t, f, protocol=2)
+
+        with open(data_folder + "record_diffusing.dat", "wb") as f:
+            cPickle.dump(record_diffusing, f, protocol=2)
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin
 
