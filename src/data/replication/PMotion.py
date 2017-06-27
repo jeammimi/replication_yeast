@@ -37,15 +37,15 @@ class Diffusing:
         self.bound = []
         self.replicating = []
         self.free = []
-        self.free = True
-        self.replicating = False
-        self.bound = False
+        self.isfree = True
+        self.isreplicating = False
+        self.isbound = False
 
     def change_state(self, name):
-        names = ["free", "replicating", "bound"]
+        names = ["isfree", "isreplicating", "isbound"]
         for inames in names:
             setattr(self, inames, False)
-        setattr(self, name, True)
+        setattr(self, "is" + name, True)
 
     def in_volume_of_interaction(self, ori_list, time):
         for ori in ori_list:
