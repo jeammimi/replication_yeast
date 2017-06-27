@@ -806,7 +806,7 @@ def simulate(traj):
         p_origin = np.array([p.position for p in group_origin])
         tag_origin = [p.tag for p in group_origin]
 
-        Ndiff_libre_t.appenfd(len(tag_diffu))
+        Ndiff_libre_t.append(len(tag_diffu))
 
         if tag_diffu != [] and tag_origin != []:
             distances = cdist(p_diffu, p_origin)
