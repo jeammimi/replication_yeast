@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     parameters["Nori"] = l_ori
 
-    def error(x, returnv=False):
+    def error(x, returnv=False, c=c):
         if len(x) == 2:
             only_one = True
         else:
