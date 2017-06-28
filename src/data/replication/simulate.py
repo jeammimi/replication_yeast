@@ -744,10 +744,10 @@ def simulate(traj):
                     diff2 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff2 - offset_diff].position)
 
             for diff in alone:
-                if record_diffusing[diff].bound:
+                if record_diffusing[diff - offset_diff].bound:
                     record_diffusing[
                         diff - offset_diff].end_bound(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
-                elif record_diffusing[diff].replicating:
+                elif record_diffusing[diff - offset_diff].replicating:
                     record_diffusing[
                         diff - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
                 else:
