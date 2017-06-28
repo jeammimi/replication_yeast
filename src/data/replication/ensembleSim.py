@@ -72,7 +72,7 @@ class ensembleSim:
         unr = np.sum(np.array(self.aUnrs), axis=1)
         self.anIts = self.aIts * unr
 
-    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[]):
+    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False):
 
         self.aIts = []
         self.aIfs = []
@@ -124,19 +124,24 @@ class ensembleSim:
                     #print("skip", skip)
                     continue
                 # print(sim)
-                Simu = namedtuple("Simu", ["polys", "oris", "Ndiff_libre_t"])
-                file_to_open = "%s%i/" % (load_from_file, sim + 1) + "polymer_timing.dat"
+                Simu = namedtuple("Simu", ["polys", "oris", "Ndiff_libre_t", "record_diffusing"])
+                troot = "%s%i/" % (load_from_file, sim + 1)
+                if single:
+                    troot = load_from_file
+                file_to_open = troot + "polymer_timing.dat"
                 if os.path.exists(file_to_open):
                     with open(file_to_open, "rb") as f:
                         polys = cPickle.load(f)
                         oris = [np.array(p.origins) - p.start for p in polys]
 
-                    if os.path.exists("%s%i/" % (load_from_file, sim + 1) + "Ndiff_libre_t.dat"):
-                        with open("%s%i/" % (load_from_file, sim + 1) + "Ndiff_libre_t.dat", "rb") as f:
+                    if os.path.exists(troot + "Ndiff_libre_t.dat"):
+                        with open(troot + "Ndiff_libre_t.dat", "rb") as f:
                             Ndiff_libre_t = cPickle.load(f)
-                        S = Simu(polys, oris, Ndiff_libre_t)
-                    else:
-                        S = Simu(polys, oris)
+                    if os.path.exists(troot + "record_diffusing.dat"):
+                        with open(troot + "record_diffusing.dat", "rb") as f:
+                            record_diffusing = cPickle.load(f)
+
+                    S = Simu(polys, oris, Ndiff_libre_t, record_diffusing)
                     found += 1
                 else:
                     print(file_to_open, "does not exist")

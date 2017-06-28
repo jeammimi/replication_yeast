@@ -67,6 +67,14 @@ class Diffusing:
         self.change_state("free")
         self.bound[-1].append(SpaceTime(self.bound[-1][0].ori, time, pos=pos))
 
+    def distance_between_boundings(self):
+        # sort events then get distances
+        merged = sorted(self.bound + self.replicating, key=lambda x: x[0].t)
+        dists = []
+        for event2, event1 in zip(merged[1:], merged[:-1]):
+            dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
+        return np.array(dists)
+
     def build_time_line(self, maxt=None):
         # Get max_time
         provided = False
@@ -435,7 +443,7 @@ class Polymer():
         firing_time.sort(key=lambda x: x[1])
 
         firing_position = np.array(firing_time)
-
+        print(firing_position)
         Dist = []
         for time in range(max_t):
             fired = firing_position[::, 0] <= time

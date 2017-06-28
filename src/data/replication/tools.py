@@ -56,14 +56,18 @@ def load_parameters(filename):
     return traj
 
 
-def load_3D_simus(folder_roots, n=5, S=False, skip=[]):
+def load_3D_simus(folder_roots, n=5, S=False, skip=[], single=False):
     found = False
-    for i in range(1, n + 1):
-        try:
-            parameters = load_parameters(folder_roots + "%i/params.json" % i)
-            found = True
-        except:
-            pass
+    if single:
+        parameters = load_parameters(folder_roots + "/params.json")
+        found = True
+    else:
+        for i in range(1, n + 1):
+            try:
+                parameters = load_parameters(folder_roots + "%i/params.json" % i)
+                found = True
+            except:
+                pass
     if not found:
         print("Could not find any parameter")
         raise
@@ -87,7 +91,7 @@ def load_3D_simus(folder_roots, n=5, S=False, skip=[]):
                     all_same_ori=True,
                     fork_speed=parameters["fork_speed"],
                     dt_speed=parameters["dt_speed"])
-    s = E.run_all(load_from_file=folder_roots, skip=skip)
+    s = E.run_all(load_from_file=folder_roots, skip=skip, single=single)
     if S:
         return E, lengths, parameters, s
 
