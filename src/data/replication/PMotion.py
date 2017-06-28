@@ -67,13 +67,19 @@ class Diffusing:
         self.change_state("free")
         self.bound[-1].append(SpaceTime(self.bound[-1][0].ori, time, pos=pos))
 
-    def distance_between_boundings(self):
+    def distance_between_boundings(self, time=False, only_replicating=False):
         # sort events then get distances
-        merged = sorted(self.bound + self.replicating, key=lambda x: x[0].t)
+        if only_replicating:
+            merged = sorted(self.replicating, key=lambda x: x[0].t)
+        else:
+            merged = sorted(self.bound + self.replicating, key=lambda x: x[0].t)
         dists = []
-        print(merged)
-        for event2, event1 in zip(merged[1:], merged[:-1]):
-            dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
+        if len(merged) >= 2:
+            for event2, event1 in zip(merged[1:], merged[:-1]):
+                if time:
+                    dists.append(event2[0].t - event1[1].t)
+                else:
+                    dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
         return np.array(dists)
 
     def build_time_line(self, maxt=None):
