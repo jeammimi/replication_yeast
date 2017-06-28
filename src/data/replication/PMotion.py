@@ -71,6 +71,7 @@ class Diffusing:
         # sort events then get distances
         merged = sorted(self.bound + self.replicating, key=lambda x: x[0].t)
         dists = []
+        print(merged)
         for event2, event1 in zip(merged[1:], merged[:-1]):
             dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
         return np.array(dists)
@@ -86,7 +87,7 @@ class Diffusing:
                 if len(event) == 1:
                     maxt = max(maxt, event[0].t)
                 else:
-                    maxt = max(maxt, event[1])
+                    maxt = max(maxt, event[1].t)
         else:
             provided = True
 
@@ -443,7 +444,7 @@ class Polymer():
         firing_time.sort(key=lambda x: x[1])
 
         firing_position = np.array(firing_time)
-        print(firing_position)
+
         Dist = []
         for time in range(max_t):
             fired = firing_position[::, 0] <= time
