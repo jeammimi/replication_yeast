@@ -47,7 +47,7 @@ if __name__ == "__main__":
     parameters.pop("filename")
     data_folder = parameters.pop("data_folder")
     parameters.pop("ori_type")
-    parameters.pop("coarse")
+    c = parameters.pop("coarse")
 
     parameters["Nori"] = l_ori
 
@@ -79,8 +79,11 @@ if __name__ == "__main__":
         if returnv:
             return E
         else:
-
-            return getattr(E, parameters["optimisation"])()[0]
+            if xenope:
+                c = 1
+            else:
+                c = c / 1000
+            return getattr(E, parameters["optimisation"])(coarse=c)[0]
 
     if parameters["only_one"]:
         start = [parameters["rNdiff"], parameters["rp_on"]]

@@ -54,7 +54,10 @@ class ensembleSim:
             if parameter == "l_ori" and not show_ori:
                 print(parameter, self.nori)
                 continue
-            print(parameter, getattr(self, parameter))
+            if hasattr(self, parameter):
+                print(parameter, getattr(self, parameter))
+            else:
+                print(parameter, "Not defined")
 
     def data(self):
 
@@ -133,10 +136,11 @@ class ensembleSim:
                     with open(file_to_open, "rb") as f:
                         polys = cPickle.load(f)
                         oris = [np.array(p.origins) - p.start for p in polys]
-
+                    Ndiff_libre_t = []
                     if os.path.exists(troot + "Ndiff_libre_t.dat"):
                         with open(troot + "Ndiff_libre_t.dat", "rb") as f:
                             Ndiff_libre_t = cPickle.load(f)
+                    record_diffusing = []
                     if os.path.exists(troot + "record_diffusing.dat"):
                         with open(troot + "record_diffusing.dat", "rb") as f:
                             record_diffusing = cPickle.load(f)
@@ -668,7 +672,7 @@ class ensembleSim:
 
         return error, Np
 
-    def error_firing_time(self, plot=False, specie="yeast"):
+    def error_firing_time(self, plot=False, specie="yeast", coarse=1):
 
         # Universal Temporal Prrofile of Replication Origin (Goldar)
         if not specie in ["yeast", "xenope"]:
@@ -736,7 +740,7 @@ class ensembleSim:
             if xe >= shift:
                 i = np.argmin((x - xe + shift)**2)
                 # print(x[i],xe)
-                error += (ye - y[i])**2
+                error += (ye - y[i] / coarse)**2
                 Np += 1
         if plot:
             return zip(*point)
