@@ -79,7 +79,7 @@ if __name__ == "__main__":
         if returnv:
             return E
         else:
-            if xenope:
+            if parameters["Nori"] == "xenope":
                 c = 1
             else:
                 c = c / 1000
