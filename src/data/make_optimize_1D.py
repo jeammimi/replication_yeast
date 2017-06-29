@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 c = 1
             else:
                 c = c / 1000
-            print(c)
+            # print(c)
             return getattr(E, parameters["optimisation"])(coarse=c)[0]
 
     if parameters["only_one"]:
