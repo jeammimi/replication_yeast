@@ -118,11 +118,11 @@ if __name__ == "__main__":
         else:
             only_one = False
         if only_one:
-            Ndiff = x[0]
+            Ndiff = int(x[0])
             p_on = x[1]
             p_off = 0.2
         else:
-            Ndiff = x[0]
+            Ndiff = int(x[0])
             p_on = x[1]
             p_off = x[2]
         # print(Ndiff,p_on)
