@@ -8,7 +8,68 @@ import json
 import _pickle as cPickle
 from skopt import gp_minimize
 from skopt import dump
+import numpy as np
 
+
+def latin(n, ranges, save=False):
+    """
+    Build latin hypercube.
+    Parameters
+    ----------
+    n : int
+        Number of points.
+    d : int
+        Size of space.
+    Returns
+    -------
+    pts : ndarray
+        Array of points uniformly placed in d-dimensional unit cube.
+    """
+    # starting with diagonal shape
+    d = len(ranges)
+    pts = np.ones((n, d))
+
+    for i in range(n):
+        pts[i] = pts[i] * i / (n - 1.)
+
+    # spread function
+    def spread(p):
+        s = 0.
+        for i in range(n):
+            for j in range(n):
+                if i > j:
+                    s = s + 1. / np.linalg.norm(np.subtract(p[i], p[j]))
+        return s
+
+    # minimizing spread function by shuffling
+    currminspread = spread(pts)
+    if save:
+        Save = [pts]
+
+    for m in range(1000):
+
+        p1 = np.random.randint(n)
+        p2 = np.random.randint(n)
+        k = np.random.randint(d)
+
+        newpts = np.copy(pts)
+        newpts[p1, k], newpts[p2, k] = newpts[p2, k], newpts[p1, k]
+        newspread = spread(newpts)
+
+        if newspread < currminspread:
+            pts = np.copy(newpts)
+            currminspread = newspread
+            if save:
+                Save.append(np.copy(newpts))
+
+    for ir, r in enumerate(ranges):
+        print(r)
+        pts[::, ir] = (r[1] - r[0]) * pts[::, ir] + r[0]
+
+    if save:
+        return pts, Save
+
+    return pts
 
 if __name__ == "__main__":
     param_file = sys.argv[1]
@@ -90,7 +151,7 @@ if __name__ == "__main__":
         start = [parameters["rNdiff"], parameters["rp_on"]]
     else:
         start = [parameters["rNdiff"], parameters["rp_on"], parameters["rp_off"]]
-    res = gp_minimize(error, start, n_jobs=1, n_calls=100, n_random_starts=10)
+    res = gp_minimize(error, start, n_jobs=1, n_calls=100, n_random_starts=0, x0=latin(10, start))
 
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(error(res["x"], returnv=True), f)
