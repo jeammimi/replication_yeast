@@ -1,4 +1,4 @@
-{"Nsim":30,
+{"Nsim":10,
  "Nori": "./data/external/oridb.csv",
  "Ndiff": 150,
  "rNdiff": [100,400],
@@ -12,6 +12,7 @@
  "rp_on":[0.01,100],
  "p_off": 0.3,
  "rp_off":[0.0001,1],
+ "n_calls":1000,
  "only_one" : true,
  "all_same_ori" : true,
  "ori_type" : ["Confirmed","Likely"],
