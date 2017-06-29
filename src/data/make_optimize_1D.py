@@ -90,7 +90,7 @@ if __name__ == "__main__":
         start = [parameters["rNdiff"], parameters["rp_on"]]
     else:
         start = [parameters["rNdiff"], parameters["rp_on"], parameters["rp_off"]]
-    res = gp_minimize(error, start, n_jobs=1, n_calls=12, n_random_starts=10)
+    res = gp_minimize(error, start, n_jobs=1, n_calls=100, n_random_starts=10)
 
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
         cPickle.dump(error(res["x"], returnv=True), f)
