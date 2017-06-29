@@ -14,7 +14,7 @@
  "rp_off":[0.0001,1],
  "only_one" : true,
  "all_same_ori" : true,
- "ori_type" : ["Confirmed","Likely"],
+ "ori_type" : ["Confirmed","Likely","Dubious"],
  "data_folder" : "./data/raw/",
  "optimisation" : "error_firing_time"
 }
