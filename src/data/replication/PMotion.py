@@ -52,19 +52,23 @@ class Diffusing:
             self.V.append(SpaceTime(ori, time))
 
     def start_replication(self, ori, time, pos=None):
-        self.change_state("replicating")
+        if hasattr(self, "change_state"):
+            self.change_state("replicating")
         self.replicating.append([SpaceTime(ori, time, pos=pos)])
 
     def end_replication(self, time, pos=None):
-        self.change_state("free")
+        if hasattr(self, "change_state"):
+            self.change_state("free")
         self.replicating[-1].append(SpaceTime(self.replicating[-1][0].ori, time, pos=pos))
 
     def start_bound(self, ori, time, pos=None):
-        self.change_state("bound")
+        if hasattr(self, "change_state"):
+            self.change_state("bound")
         self.bound.append([SpaceTime(ori, time, pos=pos)])
 
     def end_bound(self, time, pos=None):
-        self.change_state("free")
+        if hasattr(self, "change_state"):
+            self.change_state("free")
         self.bound[-1].append(SpaceTime(self.bound[-1][0].ori, time, pos=pos))
 
     def distance_between_boundings(self, time=False, only_replicating=False):
