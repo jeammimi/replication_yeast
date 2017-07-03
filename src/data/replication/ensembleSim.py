@@ -51,7 +51,7 @@ class ensembleSim:
              "fork_speed", "gindin", "p_v", "cut", "l_ori", "ramp", "max_ramp"]
 
         for parameter in P:
-            if parameter == "l_ori" and not show_ori:
+            if (parameter == "l_ori" or parameter == "Nori") and not show_ori:
                 print(parameter, self.nori)
                 continue
             if hasattr(self, parameter):
