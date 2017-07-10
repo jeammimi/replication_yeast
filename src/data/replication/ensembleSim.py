@@ -570,6 +570,10 @@ class ensembleSim:
         return x[-1]
 
     def It_Mean_field_origins(self, n_rep=None):
+        v = self.try_load_property("It_Mean_field_origins")
+        if v is not None:
+            return v
+
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
 
         x, y1 = self.Free_origins(n_rep=n_rep)[:2]
@@ -581,6 +585,9 @@ class ensembleSim:
         return x, y * y1 / Unr * self.p_on * self.p_v / self.dt_speed
 
     def It_Mean_field_simplified(self, n_rep=None):
+        v = self.try_load_property("It_Mean_field_simplified")
+        if v is not None:
+            return v
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
         #print(self.nori, self.length)
         return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
@@ -1049,12 +1056,15 @@ class ensembleSimAnalysis(ensembleSim):
         with open(json_file, "r") as f:
             self.parameters = json.load(f)
 
+        sub_sample_ori = self.parameters.pop("sub_sample_ori")
+        l_ori = [list(range(int(self.parameters["lengths"][0] * sub_sample_ori)))]
+
         ensembleSim.__init__(self, Nsim=self.parameters["Nsim"],
-                             Nori=None, Ndiff=None,
-                             lengths=None,
+                             Nori=None, Ndiff=self.parameters["Ndiff"],
+                             lengths=self.parameters["lengths"],
                              p_on=self.parameters["p_on"],
                              p_v=self.parameters["p_v"],
                              dt_speed=self.parameters["dt_speed"],
                              fork_speed=self.parameters["fork_speed"],
-                             p_off=None, only_one=True)
+                             p_off=None, only_one=True, l_ori=l_ori)
         self.hdf5_file = hdf5_file
