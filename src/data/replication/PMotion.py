@@ -303,6 +303,9 @@ class Polymer():
             # assert(np.max(self.origins) <= self.end)
             pass
 
+        if strengths is None:
+            strengths = np.ones_like(self.origins)
+
         if positions is not None:
             if len(positions) != len(origins):
 
