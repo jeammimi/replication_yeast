@@ -33,4 +33,8 @@ if __name__ == "__main__":
         tmp_simu.add_precomputed("get_dist_between_activated_origins",
                                  root + "/" + simu + "/" + "analysis.hdf5")
         tmp_simu.add_precomputed("MeanIts", root + "/" + simu + "/" + "analysis.hdf5", two=two)
+        tmp_simu.add_precomputed("It_Mean_field_origins", root + "/" + simu + "/" + "analysis.hdf5")
+        tmp_simu.add_precomputed("It_Mean_field_simplified", root + "/" +
+                                 simu + "/" + "analysis.hdf5")
+
         tmp_simu.add_precomputed("DNAs", root + "/" + simu + "/" + "analysis.hdf5", two=two)

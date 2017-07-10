@@ -844,7 +844,7 @@ class ensembleSim:
                 A[1] = pd.rolling_mean(A[1], window=smooth) * 10
                 point = np.array(A)
 
-        x, y, std, alls = self.Its()
+        x, y = self.Its()[:2]
         error = 0
         Np = 0
         shift = 0
@@ -1049,6 +1049,12 @@ class ensembleSimAnalysis(ensembleSim):
         with open(json_file, "r") as f:
             self.parameters = json.load(f)
 
-        ensembleSim.__init__(self, Nsim=None, Nori=None, Ndiff=None,
-                             lengths=None, p_on=None, p_off=None, only_one=True)
+        ensembleSim.__init__(self, Nsim=self.parameters["Nsim"],
+                             Nori=None, Ndiff=None,
+                             lengths=None,
+                             p_on=self.parameters["p_on"],
+                             p_v=self.parameters["p_v"],
+                             dt_speed=self.parameters["dt_speed"],
+                             fork_speed=self.parameters["fork_speed"],
+                             p_off=None, only_one=True)
         self.hdf5_file = hdf5_file
