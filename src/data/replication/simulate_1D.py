@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from replication.PMotion import Polymer, Diffusing
 
 
@@ -6,7 +7,7 @@ class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
                  fork_speed=1, dt_speed=1, tolerance=0.1,
-                 gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None):
+                 gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None, strengths=None):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -22,6 +23,8 @@ class simulate:
         self.positions = positions
         self.ramp = ramp
         self.max_ramp = max_ramp
+        self.strengths = copy.deepcopy(strengths)
+        self.uniform_strength = False
 
         # print(nori)
 
@@ -41,13 +44,16 @@ class simulate:
                 self.oris[-1] = list(set(self.oris[-1]))
         # print(self.oris)
             # print(len(self.oris),(nori-len(self.oris)) / nori)
+        if strengths is None:
+            self.uniform_strength = True
+            self.strengths = [[1] * len(o) for o in self.oris]
 
         if positions is None:
-            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random) for i, (start, length, oris) in
-                          enumerate(zip(starts, lengths, self.oris))]
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, strengths=strengths) for i, (start, length, oris, strengths) in
+                          enumerate(zip(starts, lengths, self.oris, self.strengths))]
         else:
-            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=position) for i, (start, length, oris, position) in
-                          enumerate(zip(starts, lengths, self.oris, self.positions))]
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=position, strengths=strengths) for i, (start, length, oris, position, strengths) in
+                          enumerate(zip(starts, lengths, self.oris, self.positions, self.strengths))]
 
         class MyD(dict):
 
@@ -283,15 +289,27 @@ class simulate:
                         else:
                             continue
                         """
-                        ln_no_interaction = Nori_libre * np.log(1 - self.p_on * self.p_v)
-                        if np.log(np.random.rand()) > ln_no_interaction:
-                            # Interaction
-                            pass
+                        if self.uniform_strength:
+                            ln_no_interaction = Nori_libre * np.log(1 - self.p_on * self.p_v)
+                            if np.log(np.random.rand()) > ln_no_interaction:
+                                # Interaction
+                                pass
+                            else:
+                                continue
                         else:
-                            continue
+                            ln_no_interaction = Nori_libre * np.log(1 - self.p_v)
+                            if np.log(np.random.rand()) > ln_no_interaction:
+                                # Interaction
+                                pass
+                            else:
+                                continue
 
                     choice = np.random.randint(len(ori_libre))
                     what_p, what_ori = ori_libre[choice]
+
+                    if not self.uniform_strength:
+                        if not (np.random.rand() < self.p_on * self.polys[what_p].o_strength[what_ori]):
+                            continue
 
                     two = self.polys[what_p].attach_one_diff(diff, what_ori, None)
                     if two:

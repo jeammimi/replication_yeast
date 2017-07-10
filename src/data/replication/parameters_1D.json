@@ -1,4 +1,4 @@
-{"Nsim":50,
+{"Nsim":2000,
  "Nori": "./data/external/oridb.csv",
  "Ndiff": 112,
  "lengths": "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",

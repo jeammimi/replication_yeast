@@ -128,7 +128,7 @@ class Diffusing:
 
 class Origin:
 
-    def __init__(self, tag, random=False, position=None):
+    def __init__(self, tag, random=False, position=None, strength=1):
         self.tag = tag
         if position is not None:
             self.position = position
@@ -145,6 +145,7 @@ class Origin:
         self.path = [[self.position, 0]]
         self.type = "origin"
         self.activation_time = None
+        self.strength = strength
 
     def state(self):
         add = "O"
@@ -153,6 +154,9 @@ class Origin:
         if self.activated:
             add = "A"
         return add, self.tag, self.path
+
+    def get_strength(self):
+        return self.strength
 
     def __repr__(self):
         add = ""
@@ -285,7 +289,7 @@ class LFork(Fork):
 
 class Polymer():
 
-    def __init__(self, number, start, end, origins, random=False, positions=None):
+    def __init__(self, number, start, end, origins, random=False, positions=None, strengths=None):
         self.number = number
         self.start = start
         self.end = end  # End is included
@@ -304,10 +308,13 @@ class Polymer():
 
                 print("Error on position,PMotion.py", len(positions), len(origins))
                 raise
-            self.modules = [Origin(tag, random=random, position=position)
-                            for tag, position in zip(origins, positions)]
+            self.modules = [Origin(tag, random=random, position=position, strength=strength)
+                            for tag, position, strength in zip(origins, positions, strengths)]
         else:
-            self.modules = [Origin(tag, random=random) for tag in origins]
+            self.modules = [Origin(tag, random=random, strength=strength)
+                            for tag, strength in zip(origins, strengths)]
+        #print(origins, strengths)
+        self.o_strength = {tag: strength for tag, strength in zip(origins, strengths)}
         # to keep track of the diff attached in case we attach them one by one
         self.bound_to_origin = {tag: [] for tag in origins}
         self.DNA_state = np.arange(self.start, self.end + 1)

@@ -3,16 +3,20 @@ import json
 from replication.ensembleSim import ensembleSim
 
 
-def load_ori_position(File, ori_type, lengths, coarse, verbose=True):
+def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=None):
 
     Oris = pandas.read_csv(File, comment="#")
 
     l_ori = [[] for i in range(len(lengths))]
+    strengths = [[] for i in range(len(lengths))]
 
     # Filters ori:
+    istrength = [[] for i in range(len(lengths))]
     for ch, p, status in zip(Oris["chr"], Oris["start"], Oris["status"]):
         if status in ori_type:  # ,"Likely"]:
             l_ori[ch - 1].append(int(p / coarse))
+            strengths[ch - 1].append(strength[status])
+            istrength[ch - 1].append(status)
 
     # Then remove duplicate (/kb ) and outside of boundaries
 
@@ -30,6 +34,8 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True):
         tot += len(l_ori[i])
         assert(max(l_ori[i]) < lengths[i])
 
+    if strength is not None:
+        return l_ori, strengths, istrength
     return l_ori
 
 

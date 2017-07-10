@@ -4,6 +4,9 @@ import _pickle as cPickle
 from collections import namedtuple
 import os
 from tqdm import tqdm
+import pandas as pd
+import h5py
+import json
 
 
 class ensembleSim:
@@ -15,7 +18,7 @@ class ensembleSim:
                  gindin=True,
                  p_v=1,
                  l_ori=[], cut=10, random=False, one_minute=False,
-                 positions=None, ramp=None, max_ramp=None):
+                 positions=None, ramp=None, max_ramp=None, strengths=[], hdf5_file=None):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -23,7 +26,7 @@ class ensembleSim:
         if type(lengths) == str:
             print("Lengths = %s" % lengths)
             raise
-        if type(lengths[0]) == list:
+        if lengths and type(lengths[0]) == list:
             print("lengts = ", lengths)
             print("But should be a list")
             raise
@@ -44,6 +47,38 @@ class ensembleSim:
         self.positions = positions
         self.ramp = ramp
         self.max_ramp = max_ramp
+        self.strengths = strengths
+        self.hdf5_file = None
+
+    def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
+        qt = getattr(self, name)()
+        with h5py.File(file_hdf5, 'a') as myfile:
+
+            quant = myfile.get("analysis")
+            if myfile.get("analysis") is None:
+                quant = myfile.create_group("analysis")
+
+            if quant.get(name) is not None:
+                print(name, "Allready computed")
+                return
+            # print(quant.get(name))
+            # print(type(qt[0]))
+            if qt != [] and type(qt[0]) in[list, np.ndarray]:
+
+                prop = quant.create_group(name)
+                if precision:
+                    prop.create_dataset("precision", data=precision)
+                maxi = None
+                if two:
+                    maxi = 2
+                for i in range(len(qt[:maxi])):
+                    if precision:
+                        prop.create_dataset(str(i), data=list(
+                            map(lambda x: int(x * precision), qt[i])))
+                    else:
+                        prop.create_dataset(str(i), data=np.array(qt[i]))
+            else:
+                prop = quant.create_dataset(name, data=qt)
 
     def show_parameters(self, show_ori=True):
         P = ["Nsim", "Nori", "Ndiff", "lengths", "p_on", "p_off",
@@ -74,6 +109,11 @@ class ensembleSim:
         self.aIts, self.aFts, self.aFds, self.aRps, self.aDNAs, self.raDNAs, self.aUnrs, self.aFree_origins = data
         unr = np.sum(np.array(self.aUnrs), axis=1)
         self.anIts = self.aIts * unr
+
+    def remove_correlations(self):
+        del self.aIODs
+        del self.aIRTDs
+        del self.aTLs
 
     def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False):
 
@@ -117,7 +157,8 @@ class ensembleSim:
                              random=self.random,
                              positions=self.positions,
                              ramp=self.ramp,
-                             max_ramp=self.max_ramp)
+                             max_ramp=self.max_ramp,
+                             strengths=self.strengths)
 
                 S.simulate(run_length)
                 found += 1
@@ -446,6 +487,10 @@ class ensembleSim:
         return x * self.dte, y, err, normed_prop
 
     def get_times_replication(self, finished=True, n_rep=None):
+        v = self.try_load_property("get_times_replication")
+        if v is not None:
+            return v
+
         times = []
         for rep in self.aRps[:n_rep]:
             times.append(-1)
@@ -476,15 +521,36 @@ class ensembleSim:
         else:
             return self.dt_speed
 
+    def try_load_property(self, name):
+        # print(name)
+        if hasattr(self, "hdf5_file") and self.hdf5_file is not None:
+            with h5py.File(self.hdf5_file, 'r') as myfile:
+
+                quant = myfile.get("analysis")
+                if quant is not None:
+                    prop = quant.get(name)
+                    #print(prop, hasattr(prop, "shape"))
+
+                    if hasattr(prop, "shape"):
+                        return prop.value
+                    #print(prop, dir(prop))
+                    if prop is not None:
+                        return [prop[str(i)].value for i in range(len(prop))]
+        return None
+
     def get_dist_between_activated_origins(self, time=None):
         """Time in minutes"""
+
+        v = self.try_load_property("get_dist_between_activated_origins")
+        if v is not None:
+            return v
 
         Dist = []
         if time is None:
             time = 1e8
         else:
             time = time / self.dte
-        print(time)
+        # print(time)
         for fps in self.aFiring_Position:
             for fp in fps:
 
@@ -547,6 +613,11 @@ class ensembleSim:
         return copie, std_copie
 
     def Its(self, n_rep=None, recompute=False, cut=0):
+
+        v = self.try_load_property("Its")
+        if v is not None:
+            return v
+
         if cut != 0 and recompute is False:
             print("Warning Its does not consider cut")
         elif cut != 0 and recompute is True:
@@ -596,6 +667,9 @@ class ensembleSim:
         return self.get_quant("anIts", n_rep=n_rep)
 
     def MeanIts(self, n_rep=None, cut=0):
+        v = self.try_load_property("MeanIts")
+        if v is not None:
+            return v
         self.tUNrs = np.sum(np.array(self.aUnrs), axis=1)
         x, Nf, std, alls = self.get_quant("anIts", n_rep=n_rep, cut=cut)
         x, Unr, std, allsu = self.get_quant("tUNrs", n_rep=n_rep)
@@ -606,6 +680,26 @@ class ensembleSim:
         alls[np.isnan(alls)] = 0
 
         return x, Nf / Unr / self.dt_speed, np.nanmean(alls / allsu, axis=0) / self.dt_speed, np.nanmean(alls, axis=0) / np.nanmean(allsu, axis=0) / self.dt_speed
+
+    def passi_acti(self):
+        v = self.try_load_property("passi_acti")
+        if v is not None:
+            return v
+
+        x, Nori_libre = self.Free_origins()[:2]
+
+        ori_loss = Nori_libre[:-1] - Nori_libre[1:]
+        # plot(x[:-1],ori_loss)
+
+        x, activated = self.nIts()[:2]
+        # plot(x,activated,label="Activated")
+
+        passivated = ori_loss - activated[:-1]
+        # plot(x[:-1],passivated,label="passivated")
+        # legend()
+
+        # figure()
+        return x[:-1], passivated / activated[:-1]
 
     def ItsDifferentWay(self, cut=0):
         pass
@@ -620,6 +714,9 @@ class ensembleSim:
         return self.get_quant("aRps", n_rep=n_rep)
 
     def DNAs(self, n_rep=None):
+        v = self.try_load_property("DNAs")
+        if v is not None:
+            return v
         return self.get_quant("aDNAs", n_rep=n_rep)
 
     def Free_origins(self, n_rep=None):
@@ -672,7 +769,7 @@ class ensembleSim:
 
         return error, Np
 
-    def error_firing_time(self, plot=False, specie="yeast", coarse=1):
+    def error_firing_time(self, plot=False, specie="yeast", coarse=1, arach=False, smooth=1):
 
         # Universal Temporal Prrofile of Replication Origin (Goldar)
         if not specie in ["yeast", "xenope"]:
@@ -732,6 +829,21 @@ class ensembleSim:
             point = np.array(point)
             point = point.reshape(-1, 2)
 
+        if arach:
+            if specie == "yeast":
+                print(point.shape)
+                point = pd.read_csv("../../data/external/I2T_yeast.txt", sep="  ", header=None)
+                point[0] += 10
+                point = np.array(point)
+                print(point.shape)
+
+            if specie == "xenope":
+                A = pd.read_csv("../../data/external/I2T_exenope.txt", sep="  ", header=None)
+
+                A[0] = (A[0] - 20 * 60) / 60
+                A[1] = pd.rolling_mean(A[1], window=smooth) * 10
+                point = np.array(A)
+
         x, y, std, alls = self.Its()
         error = 0
         Np = 0
@@ -749,7 +861,7 @@ class ensembleSim:
     def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
                             default_rep="../../data/external/time-coordinate.pick",
                             experiment=True, profile=False, which="mean", fig=None,
-                            warning=True, ori=True, shift=0, N_chrom=range(16)):
+                            warning=True, ori=True, shift=0, N_chrom=range(16), strength_ori=None):
 
         import matplotlib.pyplot as plt
 
@@ -848,14 +960,23 @@ class ensembleSim:
 
                 top = mean_C / len(k)
             if ori:
-                for x in self.l_ori[chro]:
+                if strength_ori is not None:
+                    st = strength_ori[chro]
+                else:
+                    st = [1] * len(self.l_ori[chro])
+                for x, s in zip(self.l_ori[chro], st):
                     # print(np.array(top)[~np.equal(top, None)])
 
                     mini = min(np.array(top)[~np.equal(top, None)])
                     maxi = max(np.array(top)[~np.equal(top, None)])
+                    mini = 1
+                    maxi = 2
                     # print(mini, maxi)
+                    col = "k"
+                    if s != 1:
+                        col = {"Confirmed": "r", "Likely": "g", "Dubious": "b"}[s]
                     plt.plot([x * coarse / 1000., x * coarse / 1000],
-                             [mini, maxi], "--", color="k", linewidth=1)
+                             [mini, maxi], "--", color=col, linewidth=1)
 
             def get_rep_prof(times, coordinate, ch, profile=True):
                 k = list(times.keys())
@@ -912,7 +1033,7 @@ class ensembleSim:
                 plt.ylim(max_t, 0)
 
             else:
-                plt.ylim(1.2, 1.8)
+                plt.ylim(1., 2.)
             if extra[chro] == 6:
                 plt.xlabel("Genomic position (kb)")
             if position[chro] == 0:
@@ -920,3 +1041,14 @@ class ensembleSim:
                     plt.ylabel("rep time (min)")
                 else:
                     plt.ylabel("gene copy number")
+
+
+class ensembleSimAnalysis(ensembleSim):
+
+    def __init__(self, json_file, hdf5_file):
+        with open(json_file, "r") as f:
+            self.parameters = json.load(f)
+
+        ensembleSim.__init__(self, Nsim=None, Nori=None, Ndiff=None,
+                             lengths=None, p_on=None, p_off=None, only_one=True)
+        self.hdf5_file = hdf5_file
