@@ -86,6 +86,20 @@ class Diffusing:
                     dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
         return np.array(dists)
 
+    def pos_boundings(self, time=False, only_replicating=False):
+        # sort events then get distances
+        if only_replicating:
+            merged = sorted(self.replicating, key=lambda x: x[0].t)
+        else:
+            merged = sorted(self.bound + self.replicating, key=lambda x: x[0].t)
+
+        pos = []
+        if len(merged) >= 1:
+            for event in merged:
+                pos.append(event[0].pos)
+                pos.append(event[1].pos)
+        return np.array(pos)
+
     def build_time_line(self, maxt=None):
         # Get max_time
         provided = False

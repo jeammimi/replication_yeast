@@ -134,6 +134,7 @@ class ensembleSim:
         self.aIODs = []
         self.aIRTDs = []
         self.aTLs = []
+        self.record_diffusing = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
@@ -185,6 +186,7 @@ class ensembleSim:
                     if os.path.exists(troot + "record_diffusing.dat"):
                         with open(troot + "record_diffusing.dat", "rb") as f:
                             record_diffusing = cPickle.load(f)
+                    self.record_diffusing.append(record_diffusing)
 
                     S = Simu(polys, oris, Ndiff_libre_t, record_diffusing)
                     found += 1
