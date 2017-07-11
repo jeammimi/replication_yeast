@@ -15,7 +15,10 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=No
     for ch, p, status in zip(Oris["chr"], Oris["start"], Oris["status"]):
         if status in ori_type:  # ,"Likely"]:
             l_ori[ch - 1].append(int(p / coarse))
-            strengths[ch - 1].append(strength[status])
+            if strength is not None:
+                strengths[ch - 1].append(strength[status])
+            else:
+                strengths[ch - 1].append(1)
             istrength[ch - 1].append(status)
 
     # Then remove duplicate (/kb ) and outside of boundaries
