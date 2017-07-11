@@ -96,8 +96,12 @@ class Diffusing:
         pos = []
         if len(merged) >= 1:
             for event in merged:
-                pos.append(event[0].pos)
-                pos.append(event[1].pos)
+                if time:
+                    pos.append(event[0].t)
+                    pos.append(event[1].t)
+                else:
+                    pos.append(event[0].pos)
+                    pos.append(event[1].pos)
         return np.array(pos)
 
     def build_time_line(self, maxt=None):

@@ -739,17 +739,17 @@ def simulate(traj):
             for diff1, diff2 in bind_diff:
 
                 record_diffusing[
-                    diff1 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff1 - offset_diff].position)
+                    diff1 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff1].position)
                 record_diffusing[
-                    diff2 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff2 - offset_diff].position)
+                    diff2 - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff2].position)
 
             for diff in alone:
                 if record_diffusing[diff - offset_diff].bound:
                     record_diffusing[
-                        diff - offset_diff].end_bound(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
+                        diff - offset_diff].end_bound(i * dt_speed, pos=snp.particles[diff].position)
                 elif record_diffusing[diff - offset_diff].replicating:
                     record_diffusing[
-                        diff - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff - offset_diff].position)
+                        diff - offset_diff].end_replication(i * dt_speed, pos=snp.particles[diff].position)
                 else:
                     print(diff, record_diffusing[diff - offset_diff].free)
                     raise
@@ -880,7 +880,7 @@ def simulate(traj):
 
                                 for diff in ptags:
                                     record_diffusing[
-                                        diff - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[diff - offset_diff].position)
+                                        diff - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[diff].position)
 
                             else:
                                 Change_type(
@@ -905,12 +905,12 @@ def simulate(traj):
                                                [p1[1], p2[1]], btag)
 
                                     record_diffusing[
-                                        p1[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p1[0] - offset_diff].position)
+                                        p1[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p1[0]].position)
                                     record_diffusing[
-                                        p2[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p2[0] - offset_diff].position)
+                                        p2[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p2[0]].position)
                                 else:
                                     record_diffusing[ptags[0] -
-                                                     offset_diff].start_bound(particular_origin, i * dt_speed,  pos=snp.particles[ptags[0] - offset_diff].position)
+                                                     offset_diff].start_bound(particular_origin, i * dt_speed,  pos=snp.particles[ptags[0]].position)
 
                         else:
                             # start when touched and release
