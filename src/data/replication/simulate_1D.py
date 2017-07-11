@@ -44,7 +44,7 @@ class simulate:
                 self.oris[-1] = list(set(self.oris[-1]))
         # print(self.oris)
             # print(len(self.oris),(nori-len(self.oris)) / nori)
-        if strengths is None:
+        if strengths is None or strengths == []:
             self.uniform_strength = True
             self.strengths = [[1] * len(o) for o in self.oris]
 
