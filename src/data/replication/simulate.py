@@ -686,6 +686,8 @@ def simulate(traj):
     N_diffu = traj["N_diffu"]
 
     offset_diff = min([p.tag for p in group_diffu])
+    print(offset_diff)
+    exit()
 
     record_diffusing = [Diffusing(d) for d in np.arange(N_diffu * 2)]
 
@@ -910,7 +912,7 @@ def simulate(traj):
                                         p2[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p2[0]].position)
                                 else:
                                     record_diffusing[ptags[0] -
-                                                     offset_diff].start_bound(particular_origin, i * dt_speed,  pos=snp.particles[ptags[0]].position)
+                                                     offset_diff].start_bound(particular_origin, i * dt_speed, pos=snp.particles[ptags[0]].position)
 
                         else:
                             # start when touched and release
