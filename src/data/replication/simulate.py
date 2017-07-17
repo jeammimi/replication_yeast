@@ -94,13 +94,17 @@ def create_initial_configuration(traj):
     snapshot.bonds.resize(sum(len_chrom) - len(len_chrom) + bond_diffu + spbb)
 
     bond_list = ['Mono_Mono', 'Diff_Diff', 'Mono_Diff']
+
     if spb:
         bond_list += ["Spb_Cen"]
     if nucleole:
         bond_list += ["Mono_Nuc", "Nuc_Nuc"]
+
     snapshot.bonds.types = bond_list
 
-    plist = ['Mono', 'Ori', 'Diff', 'A_Ori', 'P_Ori', 'S_Diff', 'F_Diff']
+    plist = ['Mono', 'Ori', 'Diff', 'S_Diff', 'F_Diff']
+    # if two_types:
+    #    plist.append("Mono1")
 
     if spb:
         plist.append("Spb")
@@ -121,6 +125,7 @@ def create_initial_configuration(traj):
     ################################################
     # Polymer chains
     Cen_pos = []
+    list_ori = []
     for i in range(Np):
 
         found_cen = False
@@ -171,6 +176,9 @@ def create_initial_configuration(traj):
             snapshot.particles.position[offset_particle + p] = initp
 
             if p in pos_origins:
+                list_ori.append(offset_particle + p)
+
+            if visu and (p in pos_origins):
                 snapshot.particles.typeid[
                     offset_particle + p] = plist.index('Ori')  # Ori
             else:
@@ -276,7 +284,7 @@ def create_initial_configuration(traj):
         if p[0] == p[1]:
             print(i, p)
 
-    return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers
+    return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori
 
 
 def force_field(traj, bond_list, plist, tag_spb):
@@ -553,7 +561,7 @@ def simulate(traj):
     #########################################
     # Define polymer bonding and positions
 
-    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers = \
+    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori = \
         create_initial_configuration(traj)
     system = init.read_snapshot(snapshot)
 
@@ -614,7 +622,10 @@ def simulate(traj):
     def Change_type(typep, particle_list, snp, msg=""):
         # print(particle_list)
         for p in particle_list:
-            snp.particles[p].type = typep
+            if "Ori" in typep:
+                list_ori.remove(typep)
+            else:
+                snp.particles[p].type = typep
         if particle_list != [] and msg != "":
             print(msg)
 
@@ -646,13 +657,6 @@ def simulate(traj):
             # b.a = new
 
     group_diffu = group.type(name="Diff", type='Diff')
-
-    if Activ_Origins != []:
-        group_origin = group.type(name="Activ_Ori", type=Activ_Origins[0])
-        if len(Activ_Origins) > 1:
-            for t in Activ_Origins[1:]:
-                group_origin = group.union(name="Activ_origin", a=group_origin,
-                                           b=group.type(name="tmp", type=t))
 
     # nl.tune(warmup=1,steps=1000)
 
@@ -792,7 +796,6 @@ def simulate(traj):
 
         hoomd.run(length_steps // 2, profile=False)
         group_diffu.force_update()
-        group_origin.force_update()
         # Update Type because of (Ori to passivated)
 
         # Update group
@@ -804,12 +807,11 @@ def simulate(traj):
         p_diffu = np.array([p.position for p in group_diffu])
         tag_diffu = [p.tag for p in group_diffu]
 
-        p_origin = np.array([p.position for p in group_origin])
-        tag_origin = [p.tag for p in group_origin]
+        p_origin = np.array([snp.particles[ori].position for ori in list_ori])
 
         Ndiff_libre_t.append(len(tag_diffu))
 
-        if tag_diffu != [] and tag_origin != []:
+        if tag_diffu != [] and list_ori != []:
             distances = cdist(p_diffu, p_origin)
             print(distances.shape)
             # Reorder the distances with the dimer tags
@@ -853,7 +855,7 @@ def simulate(traj):
                         continue
 
                     for P in lPolymers:
-                        if not P.has_origin(tag_origin[iorigin]):
+                        if not P.has_origin(list_ori[iorigin]):
                             continue
 
                         if diff_bind_when_free and \
@@ -870,7 +872,7 @@ def simulate(traj):
                                 # start
                                 Change_type(
                                     'F_Diff', ptags, snp)  # Diffusive element attached
-                                particular_origin = tag_origin[iorigin]
+                                particular_origin = list_ori[iorigin]
                                 new_btags = Bind("Mono_Diff", [[particular_origin, ptags[0]], [
                                                  particular_origin, ptags[1]]], snp)
                                 Change_type(
@@ -886,7 +888,7 @@ def simulate(traj):
                             else:
                                 Change_type(
                                     'F_Diff', ptags, snp)  # Diffusive element attached
-                                particular_origin = tag_origin[iorigin]
+                                particular_origin = list_ori[iorigin]
                                 new_btags = Bind(
                                     "Mono_Diff", [[particular_origin, ptags[0]]], snp)
                                 start = P.attach_one_diff(
@@ -915,7 +917,7 @@ def simulate(traj):
 
                         else:
                             # start when touched and release
-                            particular_origin = tag_origin[iorigin]
+                            particular_origin = list_ori[iorigin]
                             activated.append(iorigin)
                             Change_type(
                                 'A_Ori', [particular_origin], snp)
