@@ -623,7 +623,7 @@ def simulate(traj):
         # print(particle_list)
         for p in particle_list:
             if "Ori" in typep:
-                list_ori.remove(typep)
+                list_ori.remove(p)
             else:
                 snp.particles[p].type = typep
         if particle_list != [] and msg != "":
