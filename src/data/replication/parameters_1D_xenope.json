@@ -15,6 +15,7 @@
  "only_one" : true,
  "all_same_ori" : true,
  "homogeneous" : true,
+ "ramp_time" : 5,
  "ori_type" : ["Confirmed"],
  "data_folder" : "./data/raw/"
 }
