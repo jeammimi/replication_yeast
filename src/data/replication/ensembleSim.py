@@ -138,7 +138,6 @@ class ensembleSim:
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
-            # print(sim)
 
             ori = self.Nori
             if self.l_ori != []:

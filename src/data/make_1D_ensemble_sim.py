@@ -79,6 +79,12 @@ if __name__ == "__main__":
     correlation = parameters.get("correlation", True)
     if "correlation" in parameters:
         parameters.pop("correlation")
+
+    parameters["max_ramp"] = parameters["Ndiff"]
+    # if parameters["Nori"] == "xenope":
+    parameters["ramp"] = parameters["max_ramp"] / 2
+    # else:
+
     E = ensembleSim(**parameters)
     E.run_all(20000, correlation=correlation)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:

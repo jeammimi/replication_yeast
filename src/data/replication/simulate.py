@@ -44,6 +44,9 @@ def create_initial_configuration(traj):
                                       traj["coarse"])
     p_ribo = [[int(position) // int(traj["coarse"]), length] for position, length in p_ribo]
 
+    two_types = traj.get("two_types", False)
+    p_second = traj.get("p_second", [])
+
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]
@@ -103,8 +106,8 @@ def create_initial_configuration(traj):
     snapshot.bonds.types = bond_list
 
     plist = ['Mono', 'Ori', 'Diff', 'S_Diff', 'F_Diff']
-    # if two_types:
-    #    plist.append("Mono1")
+    if two_types:
+        plist.append("Mono1")
 
     if spb:
         plist.append("Spb")
@@ -184,6 +187,9 @@ def create_initial_configuration(traj):
             else:
                 snapshot.particles.typeid[
                     offset_particle + p] = plist.index('Mono')  # A
+                if two_types and p in p_second[i]:
+                    snapshot.particles.typeid[
+                        offset_particle + p] = plist.index('Mono1')  # A
 
             if spb and p == Cent[i]:
                 Cen_pos.append(offset_particle + p)
@@ -287,7 +293,7 @@ def create_initial_configuration(traj):
     return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori
 
 
-def force_field(traj, bond_list, plist, tag_spb):
+def force_field(traj, bond_list, plist, tag_spb, two_types):
 
     R = traj["R"]
     micron = traj["micron"]
