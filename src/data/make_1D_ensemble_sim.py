@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     parameters["max_ramp"] = parameters["Ndiff"]
     # if parameters["Nori"] == "xenope":
-    parameters["ramp"] = parameters["max_ramp"] / 2
+    parameters["ramp"] = parameters["max_ramp"] / 5
     # else:
 
     E = ensembleSim(**parameters)
