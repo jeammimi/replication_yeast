@@ -12,6 +12,6 @@
  "gindin": false,
  "only_one" : true,
  "all_same_ori" : true,
- "ori_type" : ["Confirmed"],
+ "ori_type" : ["Confirmed","Likely","Dubious"],
  "data_folder" : "./data/raw/"
 }
