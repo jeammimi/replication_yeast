@@ -115,26 +115,27 @@ class ensembleSim:
         del self.aIRTDs
         del self.aTLs
 
-    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False):
+    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False, init=True):
 
-        self.aIts = []
-        self.aIfs = []
+        if init:
+            self.aIts = []
+            self.aIfs = []
 
-        self.aFts = []
-        self.aFds = []
-        self.aRps = []
-        self.aDNAs = []
-        self.raDNAs = []
-        self.aUnrs = []
-        self.aFree_origins = []
-        self.aFree_Diff_bis = []
-        self.anIts = []
-        self.aFree_Diff = []
-        self.aFiring_Position = []
-        self.aIODs = []
-        self.aIRTDs = []
-        self.aTLs = []
-        self.record_diffusing = []
+            self.aFts = []
+            self.aFds = []
+            self.aRps = []
+            self.aDNAs = []
+            self.raDNAs = []
+            self.aUnrs = []
+            self.aFree_origins = []
+            self.aFree_Diff_bis = []
+            self.anIts = []
+            self.aFree_Diff = []
+            self.aFiring_Position = []
+            self.aIODs = []
+            self.aIRTDs = []
+            self.aTLs = []
+            self.record_diffusing = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):

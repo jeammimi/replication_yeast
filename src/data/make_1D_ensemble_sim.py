@@ -47,8 +47,14 @@ if __name__ == "__main__":
         parameters["lengths"] = lengths
 
     if type(parameters["Nori"]) == str and parameters["Nori"] != "xenope":
+
+        d = {"C": "Confirmed", "L": "Likely", "D": "Dubious"}
+        ot = []
+        for o in parameters["ori_type"]:
+            ot.append(d[o])
+
         l_ori = load_ori_position(parameters["Nori"],
-                                  parameters["ori_type"],
+                                  ot,
                                   parameters["lengths"],
                                   parameters["coarse"])
     if "coarse" in parameters:

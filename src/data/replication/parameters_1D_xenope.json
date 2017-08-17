@@ -16,6 +16,6 @@
  "all_same_ori" : true,
  "homogeneous" : true,
  "ramp_time" : 5,
- "ori_type" : ["Confirmed"],
+ "ori_type" : "C",
  "data_folder" : "./data/raw/"
 }
