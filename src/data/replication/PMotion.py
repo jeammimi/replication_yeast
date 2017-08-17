@@ -71,7 +71,7 @@ class Diffusing:
             self.change_state("free")
         self.bound[-1].append(SpaceTime(self.bound[-1][0].ori, time, pos=pos))
 
-    def distance_between_boundings(self, time=False, only_replicating=False):
+    def distance_between_boundings(self, time=False, only_replicating=False, pos=None, real_d=True):
         # sort events then get distances
         if only_replicating:
             merged = sorted(self.replicating, key=lambda x: x[0].t)
@@ -83,7 +83,17 @@ class Diffusing:
                 if time:
                     dists.append(event2[0].t - event1[1].t)
                 else:
-                    dists.append(np.linalg.norm(np.array(event2[0].pos) - np.array(event1[1].pos)))
+                    if pos is None:
+                        if real_d:
+                            dists.append(np.linalg.norm(
+                                np.array(event2[0].pos) - np.array(event1[1].pos)))
+                        else:
+                            dists.append(np.linalg.norm(
+                                np.array(event2[0].pos) - np.array(event1[0].pos)))
+                    else:
+                        dists.append(np.linalg.norm(
+                            np.array(pos[event2[0].ori]) - np.array(pos[event1[0].ori])))
+
         return np.array(dists)
 
     def pos_boundings(self, time=False, only_replicating=False):
@@ -100,6 +110,7 @@ class Diffusing:
                     pos.append(event[0].t)
                     pos.append(event[1].t)
                 else:
+                    # print(event)
                     pos.append(event[0].pos)
                     pos.append(event[1].pos)
         return np.array(pos)

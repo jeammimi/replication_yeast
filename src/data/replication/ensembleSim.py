@@ -138,7 +138,6 @@ class ensembleSim:
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
-            # print(sim)
 
             ori = self.Nori
             if self.l_ori != []:
@@ -163,10 +162,11 @@ class ensembleSim:
 
                 S.simulate(run_length)
                 found += 1
+                self.record_diffusing.append(S.record_diffusing)
             else:
-                #print("Sim", sim)
+                # print("Sim", sim)
                 if sim in skip:
-                    #print("skip", skip)
+                    # print("skip", skip)
                     continue
                 # print(sim)
                 Simu = namedtuple("Simu", ["polys", "oris", "Ndiff_libre_t", "record_diffusing"])
@@ -353,7 +353,7 @@ class ensembleSim:
                     if np.any(keep == False):
                         print(pos.shape, keep.shape, pos[keep].shape)
                         print(len(res[-1][-1]), len(ch[ipos]))
-                        #print(spos, pos, keep, tl[ich][ipos])
+                        # print(spos, pos, keep, tl[ich][ipos])
                         print(res[-1][-1])
 
                         raise"""
@@ -531,11 +531,11 @@ class ensembleSim:
                 quant = myfile.get("analysis")
                 if quant is not None:
                     prop = quant.get(name)
-                    #print(prop, hasattr(prop, "shape"))
+                    # print(prop, hasattr(prop, "shape"))
 
                     if hasattr(prop, "shape"):
                         return prop.value
-                    #print(prop, dir(prop))
+                    # print(prop, dir(prop))
                     if prop is not None:
                         return [prop[str(i)].value for i in range(len(prop))]
         return None
@@ -591,7 +591,7 @@ class ensembleSim:
         if v is not None:
             return v
         x, y = self.Free_Diff_bis(n_rep=n_rep)[:2]
-        #print(self.nori, self.length)
+        # print(self.nori, self.length)
         return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
 
     def get_rep_profile(self):

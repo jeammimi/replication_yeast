@@ -11,7 +11,9 @@
  "correlation":false,
  "gindin": false,
  "only_one" : true,
+ "random" : true,
  "all_same_ori" : true,
- "ori_type" : ["Confirmed","Likely","Dubious"],
+ "ramp_time" : 5,
+ "ori_type" : ["Confirmed"],
  "data_folder" : "./data/raw/"
 }
