@@ -26,6 +26,10 @@ class simulate:
         self.strengths = copy.deepcopy(strengths)
         self.uniform_strength = False
 
+        if self.max_ramp > self.ndiff:
+            print(self.max_ramp, self.ndiff)
+            raise "Problem max_ramp > ndiff"
+
         # print(nori)
 
         assert(len(lengths) == len(nori))
@@ -247,7 +251,6 @@ class simulate:
                 order = int(self.ramp * time * self.dt_speed)
                 if self.max_ramp:
                     order = min(order, self.max_ramp)
-                # print()
                 order = np.arange(int(order))
 
             np.random.shuffle(order)

@@ -49,6 +49,7 @@ class ensembleSim:
         self.max_ramp = max_ramp
         self.strengths = strengths
         self.hdf5_file = None
+        print(self.Ndiff, "la")
 
     def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
         qt = getattr(self, name)()
@@ -115,6 +116,12 @@ class ensembleSim:
         del self.aIRTDs
         del self.aTLs
 
+    def add_traj(self, N, run_length=10000):
+        old_nsim = 0 + self.Nsim
+        self.Nsim = N
+        self.run_all(init=False)
+        self.Nsim = old_nsim + N
+
     def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False, init=True):
 
         if init:
@@ -144,6 +151,11 @@ class ensembleSim:
             if self.l_ori != []:
                 ori = self.l_ori
 
+            # check dimension of position
+            positions = self.positions
+            if self.positions and type(self.positions[0][0]) is list:
+                positions = self.positions[sim]
+
             if load_from_file is None:
                 S = simulate(ori,
                              self.Ndiff,
@@ -156,7 +168,7 @@ class ensembleSim:
                              gindin=self.gindin,
                              p_v=self.p_v,
                              random=self.random,
-                             positions=self.positions,
+                             positions=positions,
                              ramp=self.ramp,
                              max_ramp=self.max_ramp,
                              strengths=self.strengths)

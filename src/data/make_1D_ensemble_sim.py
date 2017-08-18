@@ -70,9 +70,13 @@ if __name__ == "__main__":
             for i in range(len((l_ori[0]))):
                 positions[-1].append(i * interval + interval * np.random.uniform())
         else:
-            for i in range(len((l_ori[0]))):
-                positions[-1].append(parameters["lengths"][0] * np.random.uniform())
-            positions[0].sort()
+            positions = []
+            for sim in range(parameters["Nsim"]):
+                spositions = []
+                for i in range(len((l_ori[0]))):
+                    spositions[-1].append(parameters["lengths"][0] * np.random.uniform())
+                spositions[0].sort()
+                positions.append(spositions)
         parameters.pop("homogeneous")
         parameters["positions"] = positions
 
