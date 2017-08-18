@@ -26,7 +26,7 @@ class simulate:
         self.strengths = copy.deepcopy(strengths)
         self.uniform_strength = False
 
-        if self.max_ramp > self.ndiff:
+        if self.max_ramp and self.max_ramp > self.ndiff:
             print(self.max_ramp, self.ndiff)
             raise "Problem max_ramp > ndiff"
 
