@@ -7,7 +7,8 @@ class simulate:
 
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
                  fork_speed=1, dt_speed=1, tolerance=0.1,
-                 gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None, strengths=None):
+                 gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None,
+                 ramp_type="linear", strengths=None):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -25,6 +26,9 @@ class simulate:
         self.max_ramp = max_ramp
         self.strengths = copy.deepcopy(strengths)
         self.uniform_strength = False
+        self.ramp_type = ramp_type
+        if self.ramp_type not in ["linear", "exp"]:
+            raise "Invalid ramp type"
 
         if self.max_ramp and self.max_ramp > self.ndiff:
             print(self.max_ramp, self.ndiff)
@@ -250,7 +254,10 @@ class simulate:
             if self.ramp:
                 order = int(self.ramp * time * self.dt_speed)
                 if self.max_ramp:
-                    order = min(order, self.max_ramp)
+                    if self.ramp_type == "linear":
+                        order = min(order, self.max_ramp)
+                    if self.ramp_type == "exp":
+                        order = self.max_ramp * (1 - np.exp(- time * self.dt_speed / self.ramp))
                 order = np.arange(int(order))
 
             np.random.shuffle(order)

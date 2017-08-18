@@ -18,7 +18,8 @@ class ensembleSim:
                  gindin=True,
                  p_v=1,
                  l_ori=[], cut=10, random=False, one_minute=False,
-                 positions=None, ramp=None, max_ramp=None, strengths=[], hdf5_file=None):
+                 positions=None, ramp=None,
+                 max_ramp=None, ramp_type="linear", strengths=[], hdf5_file=None):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -47,9 +48,9 @@ class ensembleSim:
         self.positions = positions
         self.ramp = ramp
         self.max_ramp = max_ramp
+        self.ramp_type = ramp_type
         self.strengths = strengths
         self.hdf5_file = None
-        print(self.Ndiff, "la")
 
     def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
         qt = getattr(self, name)()
@@ -171,6 +172,7 @@ class ensembleSim:
                              positions=positions,
                              ramp=self.ramp,
                              max_ramp=self.max_ramp,
+                             ramp_type=self.ramp_type,
                              strengths=self.strengths)
 
                 S.simulate(run_length)
