@@ -96,10 +96,16 @@ if __name__ == "__main__":
             parameters["max_ramp"] = parameters["Ndiff"]
             # if parameters["Nori"] == "xenope":
             parameters["ramp"] = parameters["max_ramp"] / parameters.pop("ramp_time")
+
+        if parameters.get("ramp_type") == "exp":
+            parameters["ramp"] = parameters["ramp_time"]
+
     if "ramp_type" in parameters:
         if parameters["ramp_type"] == "pulse":
             parameters["ramp"] = False
     # else:
+
+    print(parameters.get("ramp_type", "linear"), parameters["ramp"])
 
     E = ensembleSim(**parameters)
     E.run_all(20000, correlation=correlation)
