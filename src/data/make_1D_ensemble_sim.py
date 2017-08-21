@@ -98,6 +98,7 @@ if __name__ == "__main__":
             parameters["ramp"] = parameters["max_ramp"] / parameters.pop("ramp_time")
 
         if parameters.get("ramp_type") == "exp":
+            print(parameters)
             parameters["ramp"] = parameters["ramp_time"]
 
     if "ramp_type" in parameters:
