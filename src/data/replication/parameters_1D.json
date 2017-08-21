@@ -13,6 +13,7 @@
  "only_one" : true,
  "random" : true,
  "all_same_ori" : true,
+ "ramp_type" : "linear",
  "ramp_time" : 5,
  "ori_type" : "C",
  "data_folder" : "./data/raw/"
