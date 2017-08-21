@@ -100,6 +100,7 @@ if __name__ == "__main__":
         if parameters.get("ramp_type") == "exp":
             print(parameters)
             parameters["ramp"] = parameters.pop("ramp_time")
+            parameters["max_ramp"] = parameters["Ndiff"]
 
     if "ramp_type" in parameters:
         if parameters["ramp_type"] == "pulse":
