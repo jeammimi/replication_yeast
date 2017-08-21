@@ -107,8 +107,6 @@ if __name__ == "__main__":
             parameters["ramp"] = False
     # else:
 
-    print(parameters.get("ramp_type", "linear"), parameters["ramp"])
-
     E = ensembleSim(**parameters)
     E.run_all(20000, correlation=correlation)
     with open(os.path.join(data_folder, "ensembleSim.pick"), "wb") as f:
