@@ -27,7 +27,7 @@ class simulate:
         self.strengths = copy.deepcopy(strengths)
         self.uniform_strength = False
         self.ramp_type = ramp_type
-        if self.ramp_type not in ["linear", "exp"]:
+        if self.ramp_type not in ["linear", "exp", "pulse"]:
             raise "Invalid ramp type"
 
         if self.max_ramp and self.max_ramp > self.ndiff:
