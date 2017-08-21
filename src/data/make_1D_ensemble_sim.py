@@ -91,7 +91,7 @@ if __name__ == "__main__":
         parameters.pop("correlation")
 
     if "ramp_time" in parameters:
-        if parameters.get("ramp_type", "linear"):
+        if parameters.get("ramp_type", "linear") == "linear":
 
             parameters["max_ramp"] = parameters["Ndiff"]
             # if parameters["Nori"] == "xenope":
