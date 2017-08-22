@@ -886,7 +886,7 @@ def simulate(traj):
                                                  particular_origin, ptags[1]]], snp)
                                 Change_type(
                                     'A_Ori', [particular_origin], snp)
-                                activated.append(iorigin)
+                                activated.append(0 + iorigin)
                                 P.add_fork(
                                     ptags, particular_origin, new_btags, btag)
 
@@ -913,7 +913,7 @@ def simulate(traj):
 
                                     Change_type(
                                         'A_Ori', [particular_origin], snp)
-                                    activated.append(iorigin)
+                                    activated.append(0 + iorigin)
                                     P.add_fork([p1[0], p2[0]], particular_origin,
                                                [p1[1], p2[1]], btag)
 
@@ -938,7 +938,10 @@ def simulate(traj):
                     # If we arrive there it means that one interaction has beeen
                     # found
                     break
+            print(activated)
+            print(list_ori)
             for io in activated[::-1]:
+                print(io)
                 list_ori.pop(io)
         # t0 = time.time()
         with open(data_folder + "polymer_timing.dat", "wb") as f:

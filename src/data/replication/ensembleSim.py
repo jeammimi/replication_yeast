@@ -166,8 +166,6 @@ class ensembleSim:
                 Nd = poisson.rvs(size=1, mu=self.Ndiff)[0]
                 max_ramp = Nd
 
-                print("poisson")
-
             if load_from_file is None:
                 S = simulate(ori,
                              Nd,
