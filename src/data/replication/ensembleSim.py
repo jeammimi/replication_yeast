@@ -7,6 +7,7 @@ from tqdm import tqdm
 import pandas as pd
 import h5py
 import json
+from scipy.stats import poisson
 
 
 class ensembleSim:
@@ -19,7 +20,8 @@ class ensembleSim:
                  p_v=1,
                  l_ori=[], cut=10, random=False, one_minute=False,
                  positions=None, ramp=None,
-                 max_ramp=None, ramp_type="linear", strengths=[], hdf5_file=None):
+                 max_ramp=None, ramp_type="linear", strengths=[], hdf5_file=None,
+                 D_Ndiff="pulse"):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -51,6 +53,7 @@ class ensembleSim:
         self.ramp_type = ramp_type
         self.strengths = strengths
         self.hdf5_file = None
+        self.D_Ndiff = "pulse"
 
     def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
         qt = getattr(self, name)()
@@ -157,9 +160,17 @@ class ensembleSim:
             if self.positions and type(self.positions[0][0]) is list:
                 positions = self.positions[sim]
 
+            Nd = self.Ndiff
+            max_ramp = self.max_ramp
+            if self.D_Ndiff == "poisson":
+                Nd = poisson.rvs(size=1, mu=self.Ndiff)[0]
+                max_ramp = Nd
+
+                print("poisson")
+
             if load_from_file is None:
                 S = simulate(ori,
-                             self.Ndiff,
+                             Nd,
                              self.lengths,
                              self.p_on,
                              self.p_off,
@@ -171,9 +182,10 @@ class ensembleSim:
                              random=self.random,
                              positions=positions,
                              ramp=self.ramp,
-                             max_ramp=self.max_ramp,
+                             max_ramp=max_ramp,
                              ramp_type=self.ramp_type,
-                             strengths=self.strengths)
+                             strengths=self.strengths
+                             )
 
                 S.simulate(run_length)
                 found += 1

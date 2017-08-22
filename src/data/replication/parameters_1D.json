@@ -8,6 +8,7 @@
  "p_on": 0.6,
  "p_off": 0.3,
  "p_v":0.0012,
+ "D_Ndiff":"pulse",
  "correlation":false,
  "gindin": false,
  "only_one" : true,

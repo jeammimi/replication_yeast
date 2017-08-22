@@ -258,6 +258,9 @@ class simulate:
                         order = min(order, self.max_ramp)
                     if self.ramp_type == "exp":
                         order = self.max_ramp * (1 - np.exp(- time * self.dt_speed / self.ramp))
+
+                    if self.ramp_type == "pulse":
+                        order = self.max_ramp
                 order = np.arange(int(order))
 
             np.random.shuffle(order)
