@@ -537,8 +537,9 @@ def simulate(traj):
     Activ_Origins = traj["Activ_Origins"]
     visu = traj["visu"]
     dump_hic = traj["dump_hic"]
+    two_types = traj.get("two_types", False)
 
-    # Scenari
+# Scenari
     diff_alone = traj["diff_alone"]
     diff_bind_when_free = traj["diff_bind_when_free"]
     diff_bind_when_on_DNA = traj["diff_bind_when_on_DNA"]
@@ -587,7 +588,7 @@ def simulate(traj):
     ###############################################
     # Defining force field:
     all_beads, all_move, Spb_g, nl = force_field(
-        traj, bond_list=bond_list, plist=plist, tag_spb=tag_spb)
+        traj, bond_list=bond_list, plist=plist, tag_spb=tag_spb, two_types=two_types)
 
     # Log
     if not visu:
