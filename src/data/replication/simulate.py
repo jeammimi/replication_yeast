@@ -630,7 +630,8 @@ def simulate(traj):
         # print(particle_list)
         for p in particle_list:
             if "Ori" in typep:
-                list_ori.remove(p)
+                # Remove it from the list activated
+                # list_ori.remove(p)
             else:
                 snp.particles[p].type = typep
         if particle_list != [] and msg != "":
@@ -911,6 +912,7 @@ def simulate(traj):
 
                                     Change_type(
                                         'A_Ori', [particular_origin], snp)
+                                    activated.append(iorigin)
                                     P.add_fork([p1[0], p2[0]], particular_origin,
                                                [p1[1], p2[1]], btag)
 
@@ -935,6 +937,8 @@ def simulate(traj):
                     # If we arrive there it means that one interaction has beeen
                     # found
                     break
+            for io in activated[::-1]:
+                list_ori.pop(io)
         # t0 = time.time()
         with open(data_folder + "polymer_timing.dat", "wb") as f:
             cPickle.dump(lPolymers, f, protocol=2)
