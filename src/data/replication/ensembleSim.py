@@ -53,7 +53,7 @@ class ensembleSim:
         self.ramp_type = ramp_type
         self.strengths = strengths
         self.hdf5_file = None
-        self.D_Ndiff = "pulse"
+        self.D_Ndiff = D_Ndiff
 
     def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
         qt = getattr(self, name)()
