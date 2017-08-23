@@ -938,8 +938,10 @@ def simulate(traj):
                     # If we arrive there it means that one interaction has beeen
                     # found
                     break
+            activated.sort()
             print(activated)
             print(list_ori)
+
             for io in activated[::-1]:
                 print(io)
                 list_ori.pop(io)
