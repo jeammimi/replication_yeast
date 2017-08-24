@@ -685,6 +685,7 @@ def simulate(traj):
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
     hoomd.run(100)
+    md.integrate.mode_standard(dt=sim_dt)
 
     if warmup != 0:
         hoomd.run(warmup)
