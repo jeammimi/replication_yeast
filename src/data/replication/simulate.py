@@ -377,8 +377,8 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
         else:
             r_cut = 1.12
-            nl = md.nlist.tree()  # r_buff=10, check_period=1)
-            # nl = md.nlist.cell()
+            # nl = md.nlist.tree()  # r_buff=10, check_period=1)
+            nl = md.nlist.cell()
             gauss = md.pair.lj(r_cut=r_cut, nlist=nl)  # , d_max=diameter_nuc)
 
         gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=1.0)
