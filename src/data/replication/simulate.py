@@ -819,7 +819,7 @@ def simulate(traj):
                     Change_type("Diff", [ptag], snp)
 
         Timeit("AFter update")
-        hoomd.run(length_steps // 2, profile=False, profile=True)
+        hoomd.run(length_steps // 2, profile=True)
         Timeit("AFter second half")
 
         group_diffu.force_update()
