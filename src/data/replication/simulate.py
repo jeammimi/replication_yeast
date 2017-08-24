@@ -336,7 +336,8 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
             return (V, F)
 
-        nl = md.nlist.tree(r_buff=0.4, check_period=1)
+        #nl = md.nlist.tree(r_buff=0.4, check_period=1)
+        nl = md.nlist.cell()
         # nl = md.nlist.stencil(r_buff=0.4, check_period=1)
         # nl = md.nlist.cell(r_buff=0.4, check_period=1)
 
