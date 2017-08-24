@@ -703,7 +703,9 @@ def simulate(traj):
 
     record_diffusing = [Diffusing(d) for d in np.arange(N_diffu * 2)]
 
+    global timeit
     timeit = True
+    global t0
     t0 = time.time()
 
     def Timeit(where=""):
