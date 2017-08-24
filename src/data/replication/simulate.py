@@ -707,6 +707,8 @@ def simulate(traj):
     t0 = time.time()
 
     def Timeit(where=""):
+        global timeit
+        global t0
         if timeit:
             if where == "":
                 print(time.time() - t0)
@@ -827,7 +829,6 @@ def simulate(traj):
 
         # First check if Dimer are close from one origin
 
-        t0 = time.time()
         p_diffu = np.array([p.position for p in group_diffu])
         tag_diffu = [p.tag for p in group_diffu]
 
