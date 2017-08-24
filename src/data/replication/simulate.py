@@ -703,6 +703,17 @@ def simulate(traj):
 
     record_diffusing = [Diffusing(d) for d in np.arange(N_diffu * 2)]
 
+    timeit = True
+    t0 = time.time()
+
+    def Timeit(where=""):
+        if timeit:
+            if where == "":
+                print(time.time() - t0)
+            else:
+                print(where, time.time() - t0)
+            t0 = time.time()
+
     for i in range(n_steps):
 
         # Chek that the microtubule length is correct
@@ -718,9 +729,10 @@ def simulate(traj):
                     exit()
 
         # Dump the Hi-Cs
-
+        Timeit()
         # system.restore_snapshot(snp)
         hoomd.run(length_steps // 2, profile=False)
+        Timeit("After first half")
 
         if dump_hic:
             ph = np.array([p.position for p in group_hic])
@@ -739,7 +751,6 @@ def simulate(traj):
         # snp = system.take_snapshot()
 
         # update the position of the monomer by updating bonds
-
         for iP, P in enumerate(lPolymers):
             verbose = False
             # if iP == 9:
@@ -803,7 +814,10 @@ def simulate(traj):
                     Release([bond_tag], snp)
                     Change_type("Diff", [ptag], snp)
 
+        Timeit("AFter update")
         hoomd.run(length_steps // 2, profile=False)
+        Timeit("AFter second half")
+
         group_diffu.force_update()
         # Update Type because of (Ori to passivated)
 
@@ -813,6 +827,7 @@ def simulate(traj):
 
         # First check if Dimer are close from one origin
 
+        t0 = time.time()
         p_diffu = np.array([p.position for p in group_diffu])
         tag_diffu = [p.tag for p in group_diffu]
 
@@ -945,6 +960,7 @@ def simulate(traj):
             for io in activated[::-1]:
                 print(io)
                 list_ori.pop(io)
+        Timeit("After binding")
         # t0 = time.time()
         with open(data_folder + "polymer_timing.dat", "wb") as f:
             cPickle.dump(lPolymers, f, protocol=2)
@@ -953,6 +969,9 @@ def simulate(traj):
 
         with open(data_folder + "record_diffusing.dat", "wb") as f:
             cPickle.dump(record_diffusing, f, protocol=2)
+
+        Timeit("After writing")
+
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin
 
