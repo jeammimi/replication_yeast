@@ -398,7 +398,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
                                  func=gauss_center_decay_strength, rmin=0, rmax=1.5,
                                  coeff=dict(epsilon=1, sigma=.3))
             if two_types:
-                def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=-0.5):
+                def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=-0.2):
 
                     V1, F1 = gauss_center_decay_strength(
                         r, rmin, rmax, c=c, sigma=sigma, epsilon=epsilon)

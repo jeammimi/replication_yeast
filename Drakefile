@@ -12,6 +12,7 @@ visu <-
   # drake --vars="dir=20170206-131856" visu
   # python src/data//make_dataset_for_testing_parameters.py $dir/params.json 1
   dir=data/raw/$dir
+  echo $dir
   vmd -e src/data/visu_in_progress.vmd -args $dir/atoms.hoomdxml $dir/poly.dcd
 
 
