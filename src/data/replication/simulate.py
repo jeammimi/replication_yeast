@@ -789,11 +789,9 @@ def simulate(traj):
 
             ###################################################################
             # take care of the bondings
-            Change_type(
-                'P_Ori',
-                passivated_origin,
-                snp,
-                msg="")  # Passivated origin
+
+            for ori in passivated_origin:
+                list_ori.remove(ori)
 
             if not diff_alone:
                 Shift(shifted_bonds, snp)
@@ -904,8 +902,7 @@ def simulate(traj):
                                 particular_origin = list_ori[iorigin]
                                 new_btags = Bind("Mono_Diff", [[particular_origin, ptags[0]], [
                                                  particular_origin, ptags[1]]], snp)
-                                Change_type(
-                                    'A_Ori', [particular_origin], snp)
+
                                 activated.append(0 + iorigin)
                                 P.add_fork(
                                     ptags, particular_origin, new_btags, btag)
@@ -931,8 +928,6 @@ def simulate(traj):
                                         btag = Bind("Diff_Diff", [
                                             [p1[0], p2[0]]], snp)[0]
 
-                                    Change_type(
-                                        'A_Ori', [particular_origin], snp)
                                     activated.append(0 + iorigin)
                                     P.add_fork([p1[0], p2[0]], particular_origin,
                                                [p1[1], p2[1]], btag)
@@ -949,8 +944,7 @@ def simulate(traj):
                             # start when touched and release
                             particular_origin = list_ori[iorigin]
                             activated.append(iorigin)
-                            Change_type(
-                                'A_Ori', [particular_origin], snp)
+
                             P.add_fork([None, None], particular_origin, [
                                        None, None], None)
 
