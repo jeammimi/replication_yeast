@@ -46,6 +46,11 @@ def create_initial_configuration(traj):
 
     two_types = traj.get("two_types", False)
     p_second = traj.get("p_second", [])
+    if p_second != []:
+        ps = []
+        for p1, p2 in p_second:
+            ps += range(p1, p2)
+        p_second = ps
 
     # Yeast case
     spb = traj["spb"]
