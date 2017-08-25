@@ -376,14 +376,28 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             #nl = md.nlist.tree(r_buff=0.4, check_period=1)
             nl = md.nlist.cell()
 
-            gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+            #gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+            #gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
+
+            def gauss_center_decay_strength(x, c, sigma, epsilon):
+
+                V = epsilon * np.exp(-(x - c)**2 / (2 * sigma**2))
+                F = epsilon * (x - c) / sigma**2 * np.exp(-(x - c)**2 / (2 * sigma**2))
+
+                return (V, F)
+
+            table = md.pair.table(width=1000, nlist=nl)
+            table.pair_coeff.set(plist, plist,
+                                 func=gauss_center_decay_strength, rmin=0, rmax=1.5,
+                                 coeff=dict(epsilon=1, sigma=.3))
+
         else:
             r_cut = 1.12
             # nl = md.nlist.tree()  # r_buff=10, check_period=1)
             nl = md.nlist.cell()
             gauss = md.pair.lj(r_cut=r_cut, nlist=nl)  # , d_max=diameter_nuc)
 
-        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
+            gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
 
         if nucleole:
             for ip1, p1 in enumerate(plist):
