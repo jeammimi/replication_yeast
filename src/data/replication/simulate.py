@@ -336,7 +336,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
             return (V, F)
 
-        #nl = md.nlist.tree(r_buff=0.4, check_period=1)
+        # nl = md.nlist.tree(r_buff=0.4, check_period=1)
         nl = md.nlist.cell()
         # nl = md.nlist.stencil(r_buff=0.4, check_period=1)
         # nl = md.nlist.cell(r_buff=0.4, check_period=1)
@@ -373,11 +373,11 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
         if gauss:
             r_cut = 1.5
-            #nl = md.nlist.tree(r_buff=0.4, check_period=1)
+            # nl = md.nlist.tree(r_buff=0.4, check_period=1)
             nl = md.nlist.cell()
 
-            #gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
-            #gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
+            # gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
+            # gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
 
             def gauss_center_decay_strength(r, rmin, rmax, c=0, sigma=0.3, epsilon=1):
 
@@ -390,6 +390,17 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             table.pair_coeff.set(plist, plist,
                                  func=gauss_center_decay_strength, rmin=0, rmax=1.5,
                                  coeff=dict(epsilon=1, sigma=.3))
+            if two_types:
+                def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=-0.5):
+
+                    V1, F1 = gauss_center_decay_strength(
+                        r, rmin, rmax, c=c, sigma=sigma, epsilon=epsilon)
+                    Va, Fa = gauss_center_decay_strength(
+                        r, rmin, rmax, c=sigma * 1.6, sigma=sigma / 2, epsilon=epsilona)
+                    return (V1 + Va, F1 + Fa)
+                table.pair_coeff.set(["Mono1"], ["Mono1"],
+                                     func=gauss_center_decay_strength_a, rmin=0, rmax=1.5,
+                                     coeff=dict(epsilon=1, sigma=.3))
 
         else:
             r_cut = 1.12
