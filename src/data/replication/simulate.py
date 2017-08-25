@@ -379,10 +379,10 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             #gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
             #gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
 
-            def gauss_center_decay_strength(x, c=0, sigma=0.3, epsilon=1):
+            def gauss_center_decay_strength(r, rmin, rmax, c=0, sigma=0.3, epsilon=1):
 
-                V = epsilon * np.exp(-(x - c)**2 / (2 * sigma**2))
-                F = epsilon * (x - c) / sigma**2 * np.exp(-(x - c)**2 / (2 * sigma**2))
+                V = epsilon * np.exp(-(r - c)**2 / (2 * sigma**2))
+                F = epsilon * (r - c) / sigma**2 * np.exp(-(r - c)**2 / (2 * sigma**2))
 
                 return (V, F)
 
