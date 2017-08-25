@@ -48,8 +48,10 @@ def create_initial_configuration(traj):
     p_second = traj.get("p_second", [])
     if p_second != []:
         ps = []
-        for p1, p2 in p_second:
-            ps += range(p1, p2)
+        for ch in p_second:
+            ps.append([])
+            for p1, p2 in ch:
+                ps[-1] += range(p1, p2)
         p_second = ps
 
     # Yeast case
