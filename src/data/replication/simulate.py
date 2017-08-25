@@ -383,7 +383,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             nl = md.nlist.cell()
             gauss = md.pair.lj(r_cut=r_cut, nlist=nl)  # , d_max=diameter_nuc)
 
-        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.4)
+        gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
 
         if nucleole:
             for ip1, p1 in enumerate(plist):
