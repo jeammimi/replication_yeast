@@ -223,7 +223,7 @@ def cut_path(start, end, direction):
 
 class Fork:
 
-    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag, fork_speed):
         self.tag = tag  # particle tagg
         self.position = position  # Position on the chromosome
         self.bond_tag = bond_tag  # Bond between diffusive elements and monomec
@@ -234,13 +234,14 @@ class Fork:
         self.t = t
         self.type = "fork"
         self.diff_diff_tag = diff_diff_tag
+        self.fork_speed = fork_speed
 
-    def update_position(self, dt, fork_speed, mini, maxi):
+    def update_position(self, dt, mini, maxi):
 
         # print("Pos",self.position,self.__repr__())
         old_realp = 0 + self.position
         oldp = int(self.position)
-        self.position += self.d * fork_speed * dt
+        self.position += self.d * self.fork_speed * dt
         self.t += dt
         if (self.d > 0 and oldp != int(self.position)) or (self.d < 0 and (oldp != int(self.position) or self.position == self.path[-1].bead)):
                     # if oldp != int(self.position) or
@@ -253,7 +254,7 @@ class Fork:
                     path.pop(-1)
                 for ip, p in enumerate(path[1:]):
                     self.path[-1].outpos = p
-                    init_t += abs(p - path[ip]) / fork_speed
+                    init_t += abs(p - path[ip]) / self.fork_speed
                     if int(p + 0.1 * self.d) <= maxi + 1:
                         self.path.append(SpaceTimeB(p, init_t, None, int(p + 0.1 * self.d)))
                     else:
@@ -264,7 +265,7 @@ class Fork:
                     path.pop(-1)
                 for ip, p in enumerate(path[1:]):
                     self.path[-1].outpos = p
-                    init_t += abs(p - path[ip]) / fork_speed
+                    init_t += abs(p - path[ip]) / self.fork_speed
                     if int(p + 0.1 * self.d) >= mini and int(p + 0.1 * self.d) != self.path[-1].bead:
                         self.path.append(SpaceTimeB(p, init_t, None, int(p + 0.1 * self.d)))
                     else:
@@ -411,7 +412,7 @@ class Polymer():
         # list of particles tag , particle bond
         return self.bound_to_origin[otag]
 
-    def add_fork(self, ptags, otag, new_btags, diff_diff_tag):
+    def add_fork(self, ptags, otag, new_btags, diff_diff_tag, fork_speed):
         found = False
         for i, mod in enumerate(self.modules):
             if mod.origin:
@@ -427,10 +428,10 @@ class Polymer():
         # with open("logp.txt","a") as f:
         #     f.writelines("%i Warning, origin already used %i\n"%(self.number,self.t))
         self.modules.insert(
-            i + 1, RFork(ptags[1], mod.position, new_btags[1], self.t, diff_diff_tag))
+            i + 1, RFork(ptags[1], mod.position, new_btags[1], self.t, diff_diff_tag, fork_speed=fork_speed))
         self.add_event(ptags[1], "R")
         self.modules.insert(
-            i, LFork(ptags[0], mod.position, new_btags[0], self.t, diff_diff_tag))
+            i, LFork(ptags[0], mod.position, new_btags[0], self.t, diff_diff_tag, fork_speed=fork_speed))
         self.add_event(ptags[0], "R")
 
         if self.modules[i + 1].passivated or self.modules[i + 1].activated:
@@ -749,8 +750,9 @@ class Polymer():
             print(self.modules)
             print(self.ended)
         for m in self.modules:
+            m.fork_speed = fork_speed
             if m.move:
-                m.update_position(dt=dt, fork_speed=fork_speed, mini=self.start, maxi=self.end)
+                m.update_position(dt=dt, mini=self.start, maxi=self.end)
 
         N_mod = len(self.modules)
 

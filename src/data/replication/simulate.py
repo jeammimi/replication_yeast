@@ -796,7 +796,7 @@ def simulate(traj):
             #    verbose = True
             bind_diff, diff_diff, shifted_bonds, \
                 passivated_origin, to_release, alone = P.increment_time(
-                    dt_speed, fork_speed, verbose)
+                    dt_speed, verbose)
 
             ###################################################################
             # Only to keep track of the diffusing elements
@@ -938,7 +938,7 @@ def simulate(traj):
 
                                 activated.append(0 + iorigin)
                                 P.add_fork(
-                                    ptags, particular_origin, new_btags, btag)
+                                    ptags, particular_origin, new_btags, btag, fork_speed=fork_speed)
 
                                 for diff in ptags:
                                     record_diffusing[
@@ -963,7 +963,7 @@ def simulate(traj):
 
                                     activated.append(0 + iorigin)
                                     P.add_fork([p1[0], p2[0]], particular_origin,
-                                               [p1[1], p2[1]], btag)
+                                               [p1[1], p2[1]], btag, fork_speed=fork_speed)
 
                                     record_diffusing[
                                         p1[0] - offset_diff].start_replication(particular_origin, i * dt_speed, pos=snp.particles[p1[0]].position)
@@ -979,7 +979,7 @@ def simulate(traj):
                             activated.append(iorigin)
 
                             P.add_fork([None, None], particular_origin, [
-                                       None, None], None)
+                                       None, None], None, fork_speed=fork_speed)
 
                         break
                     # If we arrive there it means that one interaction has beeen

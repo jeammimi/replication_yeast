@@ -119,7 +119,7 @@ class simulate:
                 for P in self.polys:
                     # events =
                     bind_diff, diff_diff, update_bond, passivated_origin, to_release, alone = P.increment_time(
-                        dt=dt_speed_d2, fork_speed=self.fork_speed)
+                        dt=dt_speed_d2)
                     if self.only_one:
                         for k in P.bound_to_origin:
                             if P.bound_to_origin[k] != []:
@@ -330,7 +330,7 @@ class simulate:
                         # print(self.poly.modules)
                         [diff1, _], [diff2, _] = self.polys[what_p].get_diff_at_origin(what_ori)
                         self.polys[what_p].add_fork(
-                            [diff1, diff2], what_ori, [None, None], None)
+                            [diff1, diff2], what_ori, [None, None], None, fork_speed=self.fork_speed)
                         self.libre[diff1] = 2
                         self.libre[diff2] = 2
                         if diff == diff1:
@@ -355,7 +355,7 @@ class simulate:
                         else:
                             # If only one needed start the fork and reciclate this
                             self.polys[what_p].add_fork(
-                                [diff, None], what_ori, [None, None], None)
+                                [diff, None], what_ori, [None, None], None, fork_speed=self.fork_speed)
                             self.libre[diff] = 2
                             self.origins[diff] = ori_libre[choice]
                             self.record_diffusing[diff].start_replication(

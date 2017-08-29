@@ -892,6 +892,37 @@ class ensembleSim:
             return zip(*point)
         return error, Np
 
+    def xenope_prof(self, profile=True, which="mean"):
+        import matplotlib.pyplot as plt
+
+        chro = 0
+        coarse = 1000
+        if profile:
+            if which == "mean":
+                Prof = self.get_rep_profile()[chro]
+                x = np.arange(len(Prof)) * coarse / 1000.
+                y = Prof * self.dte
+                plt.plot(x, Prof * self.dte, label="Simulated")
+                plt.xlim(-10, x[-1] + 10)
+            else:
+                for sim in which:
+                    x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
+                    plt.plot(x, self.aRps[sim][chro] * self.dte)
+                top = self.aRps[sim][chro]
+                plt.xlim(-10, x[-1] + 10)
+        else:
+            k = list(times.keys())
+            k.sort()
+            for ikk, kk in enumerate(k):
+                if ikk == 0:
+                    mean_C = mean_copie[kk][chro]
+                else:
+                    mean_C += mean_copie[kk][chro]
+            x = np.arange(len(mean_C)) * coarse / 1000.
+            plt.plot(np.arange(len(mean_C)) * coarse / 1000., mean_C / len(k))
+            plt.xlim(-10, x[-1] + 10)
+        return x, y
+
     def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
                             default_rep="../../data/external/time-coordinate.pick",
                             experiment=True, profile=False, which="mean", fig=None,
@@ -950,21 +981,20 @@ class ensembleSim:
             # ax = f.add_subplot(4,4,chro + 1)
             # ax = f.add_subplot(gs[chro])
 
-            column = extra[chro]
-            tot = extra.count(column)
-            p = position[chro]
-
-            row_lengths = [l for l, i in zip(self.lengths, extra) if column == i]
-            crow_length = [0] + np.cumsum(row_lengths).tolist()
-
-            xstart = (p + 1) * s + (1 - margin_right - tot * s) * \
-                crow_length[p] / (sum(row_lengths))
-            ystart = 1 - (column + 1) * (height + sh)
-            w = (1 - margin_right - tot * s) * row_lengths[p] / (sum(row_lengths))
-            h = height
-
             # print([xstart,ystart,w,h])
             if fig != "other":
+                column = extra[chro]
+                tot = extra.count(column)
+                p = position[chro]
+
+                row_lengths = [l for l, i in zip(self.lengths, extra) if column == i]
+                crow_length = [0] + np.cumsum(row_lengths).tolist()
+
+                xstart = (p + 1) * s + (1 - margin_right - tot * s) * \
+                    crow_length[p] / (sum(row_lengths))
+                ystart = 1 - (column + 1) * (height + sh)
+                w = (1 - margin_right - tot * s) * row_lengths[p] / (sum(row_lengths))
+                h = height
                 f.add_axes([xstart, ystart, w, h])
 
             # chro = 3
