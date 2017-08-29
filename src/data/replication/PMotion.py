@@ -305,15 +305,15 @@ class Fork:
 
 class RFork(Fork):
 
-    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
-        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag)
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag, fork_speed):
+        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag, fork_speed=fork_speed)
         self.d = 1
 
 
 class LFork(Fork):
 
-    def __init__(self, tag, position, bond_tag, t, diff_diff_tag):
-        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag)
+    def __init__(self, tag, position, bond_tag, t, diff_diff_tag, fork_speed):
+        Fork.__init__(self, tag, position, bond_tag, t, diff_diff_tag, fork_speed=fork_speed)
         self.d = -1
 
 
@@ -736,7 +736,7 @@ class Polymer():
 
         # print(self.modules)
 
-    def increment_time(self, dt, fork_speed, verbose=False):
+    def increment_time(self, dt, verbose=False):
 
         self.t += dt
         update_bond = []
@@ -750,7 +750,6 @@ class Polymer():
             print(self.modules)
             print(self.ended)
         for m in self.modules:
-            m.fork_speed = fork_speed
             if m.move:
                 m.update_position(dt=dt, mini=self.start, maxi=self.end)
 
