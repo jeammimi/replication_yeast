@@ -10,10 +10,10 @@ import mpld3
 import copy
 import sys
 #sys.path.append("../../src/data")
-from replication.PMotion import Polymer
-from replication.simulate_1D import simulate
+from .replication.PMotion import Polymer
+from .replication.simulate_1D import simulate
 
-from replication.tools import load_3D_simus
+from .replication.tools import load_3D_simus
 
 
 # In[2]:
