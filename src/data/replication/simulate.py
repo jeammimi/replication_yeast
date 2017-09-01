@@ -743,7 +743,7 @@ def simulate(traj):
 
     N_diffu = traj["N_diffu"]
 
-    offset_diff = min([p.tag for p in group_diffu])
+    offset_diff = np.min(p_tag_list)
     print(offset_diff)
 
     record_diffusing = [Diffusing(d) for d in np.arange(N_diffu * 2)]
