@@ -8,6 +8,7 @@ import pandas as pd
 import h5py
 import json
 from scipy.stats import poisson
+from replication.tools import load_ori_position, load_lengths_and_centro
 
 
 class ensembleSim:
@@ -1105,8 +1106,6 @@ class ensembleSim:
                     plt.ylabel("rep time (min)")
                 else:
                     plt.ylabel("gene copy number")
-
-from replication.tools import load_ori_position, load_lengths_and_centro
 
 
 class ensembleSimAnalysis(ensembleSim):
