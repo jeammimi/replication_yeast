@@ -45,10 +45,17 @@ if __name__ == "__main__":
 
         positions = [[]]
         # Homogeneous
-        interval = parameters["len_chrom"][0] / 1.0 / len((l_ori[0]))
-        for i in range(len((l_ori[0]))):
-            positions[-1].append(int(i * interval + interval * np.random.uniform()))
-        positions[0] = list(set(positions[0]))
+        homogeneous = parameters.get("homogeneous", True)
+        if homogeneous:
+            interval = parameters["len_chrom"][0] / 1.0 / len((l_ori[0]))
+            for i in range(len((l_ori[0]))):
+                positions[-1].append(int(i * interval + interval * np.random.uniform()))
+            positions[0] = list(set(positions[0]))
+
+        else:
+            for i in range(len((l_ori[0]))):
+                positions[0].append(parameters["len_chrom"][0] * np.random.uniform())
+            positions[0] = list(set(positions[0]))
         # else:
         #     for i in range(len((l_ori[0]))):
         #        positions[-1].append(parameters["lengths"][0] * np.random.uniform())
