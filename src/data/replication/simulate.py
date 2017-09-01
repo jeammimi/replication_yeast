@@ -112,7 +112,7 @@ def create_initial_configuration(traj):
 
     snapshot.bonds.types = bond_list
 
-    plist = ['Mono', 'Ori', 'Diff', 'S_Diff', 'F_Diff']
+    plist = ['Mono', 'Ori', 'Diff', 'S_Diff', 'F_Diff', "I_Diff"]
     if two_types:
         plist.append("Mono1")
 
@@ -249,7 +249,7 @@ def create_initial_configuration(traj):
     # Defining useful classes
 
     # Defining particles and bonds for the simulation
-
+    p_tag_list = []
     for i in range(N_diffu):
         npp = 2  # Number of particles
 
@@ -271,6 +271,8 @@ def create_initial_configuration(traj):
             offset_bond += npp - 1
 
         for p in range(npp):
+            p_tag_list.append([])
+
             # print(offset_bond, offset_bond + p)
             if diff_bind_when_free:
                 new = 2 * (2 * np.random.rand(3) - 1)
@@ -288,7 +290,8 @@ def create_initial_configuration(traj):
             snapshot.particles.typeid[
                 offset_particle +
                 p] = plist.index("Diff")  # Diffu
-
+            p_tag_list[-1].append(offset_particle +
+                                  p)
         offset_particle += npp
 
     # Load the configuration
@@ -297,7 +300,7 @@ def create_initial_configuration(traj):
         if p[0] == p[1]:
             print(i, p)
 
-    return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori
+    return snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori, p_tag_list
 
 
 def force_field(traj, bond_list, plist, tag_spb, two_types):
@@ -602,7 +605,7 @@ def simulate(traj):
     #########################################
     # Define polymer bonding and positions
 
-    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori = \
+    snapshot, phic, tag_spb, bond_list, plist, Cen_pos, lPolymers, list_ori, p_tag_list = \
         create_initial_configuration(traj)
     system = init.read_snapshot(snapshot)
 
@@ -699,6 +702,14 @@ def simulate(traj):
             # print(dir(snp.bonds))
             # b.a = new
 
+    snp = system  # .take_snapshot()
+
+    ramp_type = "exp"
+    ramp = 3
+    if ramp_type == "exp":
+        for couple in p_tag_list:
+            Change_type("I_Diff", couple, snp)
+
     group_diffu = group.type(name="Diff", type='Diff')
 
     # nl.tune(warmup=1,steps=1000)
@@ -708,7 +719,6 @@ def simulate(traj):
     t0 = time.time()
     md.integrate.mode_standard(dt=sim_dt)
     method = md.integrate.langevin(group=all_move, kT=1, seed=seed, dscale=dscale)
-    snp = system  # .take_snapshot()
 
     if benchmark:
         print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
@@ -753,6 +763,7 @@ def simulate(traj):
                 print(where, time.time() - t0)
             t0 = time.time()
 
+    previous_actifs = 0
     for i in range(n_steps):
 
         # Chek that the microtubule length is correct
@@ -770,6 +781,12 @@ def simulate(traj):
         # Dump the Hi-Cs
         Timeit()
         # system.restore_snapshot(snp)
+
+        N_actifs = len(p_tag_list) * (1 - np.exp(- n_steps * dt_speed / ramp))
+
+        for couple in p_tag_list[previous_actifs:N_actifs]:
+            Change_type("Diff", couple, snp)
+
         hoomd.run(length_steps // 2, profile=False)
         Timeit("After first half")
 
@@ -885,10 +902,11 @@ def simulate(traj):
                 for b in system.bonds:
                     if b.type == 'Diff_Diff' and system.particles[
                             b.a].type == 'Diff':
-                        Indexes.append(tag_diffu.index(b.a))
-                        Indexes.append(tag_diffu.index(b.b))
-                        Btags.append(b.tag)
-                        PTags.append([b.a, b.b])
+                        if b.a in tag_diffu:
+                            Indexes.append(tag_diffu.index(b.a))
+                            Indexes.append(tag_diffu.index(b.b))
+                            Btags.append(b.tag)
+                            PTags.append([b.a, b.b])
 
                 # print(time.time() -t0)
 
