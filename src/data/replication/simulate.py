@@ -786,6 +786,7 @@ def simulate(traj):
         print(previous_actifs, N_actifs)
         for couple in p_tag_list[previous_actifs:N_actifs]:
             Change_type("Diff", couple, snp)
+            print("Activated", couple)
         previous_actifs = N_actifs
 
         hoomd.run(length_steps // 2, profile=False)
