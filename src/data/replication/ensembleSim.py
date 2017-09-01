@@ -1106,6 +1106,8 @@ class ensembleSim:
                 else:
                     plt.ylabel("gene copy number")
 
+from replication.tools import load_ori_position, load_lengths_and_centro
+
 
 class ensembleSimAnalysis(ensembleSim):
 
@@ -1113,8 +1115,29 @@ class ensembleSimAnalysis(ensembleSim):
         with open(json_file, "r") as f:
             self.parameters = json.load(f)
 
-        sub_sample_ori = self.parameters.pop("sub_sample_ori")
-        l_ori = [list(range(int(self.parameters["lengths"][0] * sub_sample_ori)))]
+        sub_sample_ori = self.parameters.get("sub_sample_ori", None)
+        if sub_sample_ori:
+            self.parameters.pop("sub_sample_ori")
+            l_ori = [list(range(int(self.parameters["lengths"][0] * sub_sample_ori)))]
+            lengths = self.parameters["lengths"]
+        else:
+            extra = "../../"
+            if type(self.parameters["lengths"]) == str:
+                lengths, _ = load_lengths_and_centro(
+                    extra + self.parameters["lengths"], self.parameters["coarse"])
+                self.parameters["lengths"] = lengths
+
+            if type(self.parameters["Nori"]) == str and self.parameters["Nori"] != "xenope":
+
+                d = {"C": "Confirmed", "L": "Likely", "D": "Dubious"}
+                ot = []
+                for o in self.parameters["ori_type"]:
+                    ot.append(d[o])
+
+                l_ori = load_ori_position(extra + self.parameters["Nori"],
+                                          ot,
+                                          self.parameters["lengths"],
+                                          self.parameters["coarse"])
 
         ensembleSim.__init__(self, Nsim=self.parameters["Nsim"],
                              Nori=None, Ndiff=self.parameters["Ndiff"],
