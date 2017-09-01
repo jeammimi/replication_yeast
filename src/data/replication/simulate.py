@@ -594,6 +594,9 @@ def simulate(traj):
     np.random.seed(seed)
     hoomd.context.initialize()  # "--mode=cpu ")
 
+    ramp_type = traj.get("ramp_type", "exp")
+    ramp = traj.get("ramp_time", 3)
+
     if diff_alone:
         # Check
         assert(diff_bind_when_free is False)
