@@ -270,8 +270,8 @@ def create_initial_configuration(traj):
                                       p] = bond_list.index('Diff_Diff')  # Diff_Diff
             offset_bond += npp - 1
 
+        p_tag_list.append([])
         for p in range(npp):
-            p_tag_list.append([])
 
             # print(offset_bond, offset_bond + p)
             if diff_bind_when_free:
