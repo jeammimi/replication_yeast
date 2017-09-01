@@ -1,6 +1,5 @@
 import pandas
 import json
-from replication.ensembleSim import ensembleSim
 
 
 def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=None):
@@ -66,6 +65,8 @@ def load_parameters(filename):
 
 
 def load_3D_simus(folder_roots, n=5, S=False, skip=[], single=False):
+    from replication.ensembleSim import ensembleSim
+
     found = False
     if single:
         parameters = load_parameters(folder_roots + "/params.json")
