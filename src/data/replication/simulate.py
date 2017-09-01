@@ -782,7 +782,7 @@ def simulate(traj):
         Timeit()
         # system.restore_snapshot(snp)
 
-        N_actifs = len(p_tag_list) * (1 - np.exp(- n_steps * dt_speed / ramp))
+        N_actifs = int(len(p_tag_list) * (1 - np.exp(- i * dt_speed / ramp)))
         print(previous_actifs, N_actifs)
         for couple in p_tag_list[previous_actifs:N_actifs]:
             Change_type("Diff", couple, snp)
