@@ -783,9 +783,10 @@ def simulate(traj):
         # system.restore_snapshot(snp)
 
         N_actifs = len(p_tag_list) * (1 - np.exp(- n_steps * dt_speed / ramp))
-
+        print(previous_actifs, N_actifs)
         for couple in p_tag_list[previous_actifs:N_actifs]:
             Change_type("Diff", couple, snp)
+        previous_actifs = N_actifs
 
         hoomd.run(length_steps // 2, profile=False)
         Timeit("After first half")
