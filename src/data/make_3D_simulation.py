@@ -60,6 +60,8 @@ if __name__ == "__main__":
         #     for i in range(len((l_ori[0]))):
         #        positions[-1].append(parameters["lengths"][0] * np.random.uniform())
         positions[0].sort()
+        print(positions)
+        exit()
         parameters["p_origins"] = positions
         print(positions)
 
