@@ -893,6 +893,9 @@ def simulate(traj):
 
         Ndiff_libre_t.append(len(tag_diffu))
 
+        if not(tag_diffu != [] and list_ori != []):
+            print("No interactions")
+
         if tag_diffu != [] and list_ori != []:
             distances = cdist(p_diffu, p_origin)
             print(distances.shape)
