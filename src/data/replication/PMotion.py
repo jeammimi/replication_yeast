@@ -496,7 +496,7 @@ class Polymer():
         firing_position = np.array(firing_time)
 
         Dist = []
-        print(firing_position)
+        # print(firing_position)
         for time in range(max_t):
             fired = firing_position[::, 0] <= time
             dist = firing_position[fired][::, 1]

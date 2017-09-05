@@ -812,6 +812,7 @@ def simulate(traj):
         # snp = system.take_snapshot()
 
         # update the position of the monomer by updating bonds
+        ended = 0
         for iP, P in enumerate(lPolymers):
             verbose = False
             # if iP == 9:
@@ -872,6 +873,9 @@ def simulate(traj):
                     P.dettach_one_diff(ptag, ori_not_started)
                     Release([bond_tag], snp)
                     Change_type("Diff", [ptag], snp)
+
+            if P.modules == []:
+                ended += 1
 
         Timeit("AFter update")
         hoomd.run(length_steps // 2, profile=True)
@@ -1029,6 +1033,9 @@ def simulate(traj):
             cPickle.dump(record_diffusing, f, protocol=2)
 
         Timeit("After writing")
+
+        if traj.get("early_stop", False) and list_ori == [] and ended == len(lPolymers):
+            break
 
         # print(time.time() -t0)
         # Then if it is the case attach them according to p law to the origin

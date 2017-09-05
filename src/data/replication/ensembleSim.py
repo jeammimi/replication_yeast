@@ -200,25 +200,28 @@ class ensembleSim:
                 if single:
                     troot = load_from_file
                 file_to_open = troot + "polymer_timing.dat"
-                if os.path.exists(file_to_open):
-                    with open(file_to_open, "rb") as f:
-                        polys = cPickle.load(f)
-                        oris = [np.array(p.origins) - p.start for p in polys]
-                    Ndiff_libre_t = []
-                    if os.path.exists(troot + "Ndiff_libre_t.dat"):
-                        with open(troot + "Ndiff_libre_t.dat", "rb") as f:
-                            Ndiff_libre_t = cPickle.load(f)
-                    record_diffusing = []
-                    if os.path.exists(troot + "record_diffusing.dat"):
-                        with open(troot + "record_diffusing.dat", "rb") as f:
-                            record_diffusing = cPickle.load(f)
-                    self.record_diffusing.append(record_diffusing)
+                try:
+                    if os.path.exists(file_to_open):
+                        with open(file_to_open, "rb") as f:
+                            polys = cPickle.load(f)
+                            oris = [np.array(p.origins) - p.start for p in polys]
+                        Ndiff_libre_t = []
+                        if os.path.exists(troot + "Ndiff_libre_t.dat"):
+                            with open(troot + "Ndiff_libre_t.dat", "rb") as f:
+                                Ndiff_libre_t = cPickle.load(f)
+                        record_diffusing = []
+                        if os.path.exists(troot + "record_diffusing.dat"):
+                            with open(troot + "record_diffusing.dat", "rb") as f:
+                                record_diffusing = cPickle.load(f)
+                        self.record_diffusing.append(record_diffusing)
 
-                    S = Simu(polys, oris, Ndiff_libre_t, record_diffusing)
-                    found += 1
-                else:
-                    print(file_to_open, "does not exist")
-                    continue
+                        S = Simu(polys, oris, Ndiff_libre_t, record_diffusing)
+                        found += 1
+                    else:
+                        print(file_to_open, "does not exist")
+                        continue
+                except EOFError:
+                    print("Not all files in %i readable" % sim)
 
             if found == 1 and self.all_same_ori:
                 self.l_ori = S.oris
