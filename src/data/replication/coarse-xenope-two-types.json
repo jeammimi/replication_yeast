@@ -17,7 +17,7 @@
 "dscale" : 1.0,
 "fork_speed": 1,
 "dt_speed": 0.04,
-"p_origins" : 0.3 ,
+"p_origins" : "xenope" ,
 "ori_type" : [],
 "coarse": 5000,
 "two_types" : true,

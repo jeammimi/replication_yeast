@@ -39,8 +39,8 @@ if __name__ == "__main__":
         s = json.dumps(parameters)
         f.write(s)
 
-    if type(parameters["p_origins"]) == float:  # Xenopu
-        sub_sample_ori = parameters.pop("p_origins")
+    if type(parameters["p_origins"]) == "xenope":  # Xenopu
+        sub_sample_ori = parameters.pop("sub_sample_ori")
         l_ori = [list(range(int(parameters["len_chrom"][0] * sub_sample_ori)))]
 
         positions = [[]]
