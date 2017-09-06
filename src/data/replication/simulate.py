@@ -1032,7 +1032,7 @@ def simulate(traj):
 
         Timeit("After writing")
 
-        if traj.get("early_stop", False) and list_ori == [] and ended == len(lPolymers):
+        if traj.get("early_stop", True) and list_ori == [] and ended == len(lPolymers):
             break
 
         # print(time.time() -t0)
