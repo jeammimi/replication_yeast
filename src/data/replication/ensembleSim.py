@@ -896,7 +896,7 @@ class ensembleSim:
             return zip(*point)
         return error, Np
 
-    def xenope_prof(self, profile=True, which="mean"):
+    def xenope_prof(self, profile=True, which="mean", toplot=True):
         import matplotlib.pyplot as plt
 
         chro = 0
@@ -906,8 +906,9 @@ class ensembleSim:
                 Prof = self.get_rep_profile()[chro]
                 x = np.arange(len(Prof)) * coarse / 1000.
                 y = Prof * self.dte
-                plt.plot(x, Prof * self.dte, label="Simulated")
-                plt.xlim(-10, x[-1] + 10)
+                if toplot:
+                    plt.plot(x, Prof * self.dte, label="Simulated")
+                    plt.xlim(-10, x[-1] + 10)
             else:
                 for sim in which:
                     x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.

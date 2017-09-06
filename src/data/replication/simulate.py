@@ -707,8 +707,6 @@ def simulate(traj):
 
     snp = system  # .take_snapshot()
 
-    ramp_type = "exp"
-    ramp = 3
     if ramp_type == "exp":
         for couple in p_tag_list:
             Change_type("I_Diff", couple, snp)
@@ -795,7 +793,7 @@ def simulate(traj):
         hoomd.run(length_steps // 2, profile=False)
         Timeit("After first half")
 
-        if dump_hic:
+        if dump_hic and i % traj.get("hic_period", 1) == 0:
             ph = np.array([p.position for p in group_hic])
 
             D = cdist(ph, ph)
