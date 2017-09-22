@@ -28,7 +28,12 @@ if __name__ == "__main__":
 
         tmp_simu = cPickle.load(f)
         tmp_simu.add_precomputed("passi_acti", root + "/" + simu + "/" + "analysis.hdf5")
+        tmp_simu.add_precomputed("passi", root + "/" + simu + "/" + "analysis.hdf5")
+        tmp_simu.add_precomputed("acti", root + "/" + simu + "/" + "analysis.hdf5")
+
         tmp_simu.add_precomputed("Its", root + "/" + simu + "/" + "analysis.hdf5", two=two)
+        tmp_simu.add_precomputed("Fds", root + "/" + simu + "/" + "analysis.hdf5", two=two)
+
         tmp_simu.add_precomputed("get_times_replication", root + "/" + simu + "/" + "analysis.hdf5")
         tmp_simu.add_precomputed("get_dist_between_activated_origins",
                                  root + "/" + simu + "/" + "analysis.hdf5")
