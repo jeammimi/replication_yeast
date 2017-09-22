@@ -127,7 +127,7 @@ class ensembleSim:
         self.run_all(init=False)
         self.Nsim = old_nsim + N
 
-    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False, init=True):
+    def run_all(self, run_length=200, load_from_file=None, correlation=True, skip=[], single=False, init=True, orip=False):
 
         if init:
             self.aIts = []
@@ -148,6 +148,7 @@ class ensembleSim:
             self.aIRTDs = []
             self.aTLs = []
             self.record_diffusing = []
+            self.orip = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
@@ -244,6 +245,12 @@ class ensembleSim:
             self.aTLs.append([])
 
             for poly in S.polys:
+
+                if orip:
+                    p = poly.get_ori_position()
+                    p.sort()
+                    self.orip.append(p)
+                    print(p)
                 if self.one_minute:
                     dt = 1
                 else:
@@ -719,6 +726,39 @@ class ensembleSim:
 
         return x, Nf / Unr / self.dt_speed, np.nanmean(alls / allsu, axis=0) / self.dt_speed, np.nanmean(alls, axis=0) / np.nanmean(allsu, axis=0) / self.dt_speed
 
+    def passi(self):
+        v = self.try_load_property("passi")
+        if v is not None:
+            return v
+
+        x, Nori_libre = self.Free_origins()[:2]
+
+        ori_loss = Nori_libre[:-1] - Nori_libre[1:]
+        # plot(x[:-1],ori_loss)
+
+        x, activated = self.nIts()[:2]
+        # plot(x,activated,label="Activated")
+
+        passivated = ori_loss - activated[:-1]
+
+        return x[:-1], passivated
+
+    def acti(self):
+        v = self.try_load_property("acti")
+        if v is not None:
+            return v
+
+        x, Nori_libre = self.Free_origins()[:2]
+
+        x, activated = self.nIts()[:2]
+        # plot(x,activated,label="Activated")
+
+        # plot(x[:-1],passivated,label="passivated")
+        # legend()
+
+        # figure()
+        return x[:-1], activated[:-1]
+
     def passi_acti(self):
         v = self.try_load_property("passi_acti")
         if v is not None:
@@ -896,7 +936,7 @@ class ensembleSim:
             return zip(*point)
         return error, Np
 
-    def xenope_prof(self, profile=True, which="mean", toplot=True):
+    def xenope_prof(self, profile=True, which="mean", toplot=True, hour=False, kb=1):
         import matplotlib.pyplot as plt
 
         chro = 0
@@ -905,10 +945,13 @@ class ensembleSim:
             if which == "mean":
                 Prof = self.get_rep_profile()[chro]
                 x = np.arange(len(Prof)) * coarse / 1000.
-                y = Prof * self.dte
+                h = 1
+                if hour:
+                    h = 1 / 60.
+                y = Prof * self.dte * h
                 if toplot:
-                    plt.plot(x, Prof * self.dte, label="Simulated")
-                    plt.xlim(-10, x[-1] + 10)
+                    plt.plot(x * kb, Prof * self.dte * h, label="Simulated", color="red")
+                    plt.xlim(-10 * kb, (x[-1] + 10) * kb)
             else:
                 for sim in which:
                     x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.

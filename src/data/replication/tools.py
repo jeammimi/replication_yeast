@@ -2,7 +2,7 @@ import pandas
 import json
 
 
-def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=None):
+def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=None, coarsed=True):
 
     Oris = pandas.read_csv(File, comment="#")
 
@@ -13,7 +13,11 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=No
     istrength = [[] for i in range(len(lengths))]
     for ch, p, status in zip(Oris["chr"], Oris["start"], Oris["status"]):
         if status in ori_type:  # ,"Likely"]:
-            l_ori[ch - 1].append(int(p / coarse))
+            if coarsed:
+                l_ori[ch - 1].append(int(p / coarse))
+            else:
+                l_ori[ch - 1].append(p / coarse)
+
             if strength is not None:
                 strengths[ch - 1].append(strength[status])
             else:
@@ -25,6 +29,7 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=No
     tot = 0
     for i in range(len(lengths)):
         isize = len(l_ori[i])
+
         l_ori[i] = list(set(l_ori[i]))
         l_ori[i].sort()
         if verbose:
@@ -64,7 +69,7 @@ def load_parameters(filename):
     return traj
 
 
-def load_3D_simus(folder_roots, n=5, S=False, skip=[], single=False):
+def load_3D_simus(folder_roots, n=5, S=False, skip=[], single=False, orip=False):
     from replication.ensembleSim import ensembleSim
 
     found = False
@@ -101,7 +106,7 @@ def load_3D_simus(folder_roots, n=5, S=False, skip=[], single=False):
                     all_same_ori=True,
                     fork_speed=parameters["fork_speed"],
                     dt_speed=parameters["dt_speed"])
-    s = E.run_all(load_from_file=folder_roots, skip=skip, single=single)
+    s = E.run_all(load_from_file=folder_roots, skip=skip, single=single, orip=orip)
     if S:
         return E, lengths, parameters, s
 

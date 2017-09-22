@@ -643,6 +643,13 @@ class Polymer():
         self.DNA = DNA
         return self.sDNA, DNA
 
+    def get_ori_position(self):
+        op = []
+        for m in self.modules + self.ended:
+            if m.origin:
+                op.append(m.position)
+        return op
+
     def get_firing_time_It(self, fork_speed, normed=False, cut=0, dt=1):
 
         max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
