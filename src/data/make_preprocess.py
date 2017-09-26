@@ -33,6 +33,8 @@ if __name__ == "__main__":
 
         tmp_simu.add_precomputed("Its", root + "/" + simu + "/" + "analysis.hdf5", two=two)
         tmp_simu.add_precomputed("nIts", root + "/" + simu + "/" + "analysis.hdf5", two=two)
+        tmp_simu.add_precomputed("rho_ori", root + "/" + simu + "/" + "analysis.hdf5", two=two)
+        tmp_simu.add_precomputed("Free_Diff", root + "/" + simu + "/" + "analysis.hdf5", two=two)
 
         tmp_simu.add_precomputed("Fds", root + "/" + simu + "/" + "analysis.hdf5", two=two)
 
