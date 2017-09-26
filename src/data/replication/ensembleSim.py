@@ -822,6 +822,10 @@ class ensembleSim:
         return self.get_quant("aFree_origins", n_rep=n_rep)
 
     def Free_Diff_bis(self, n_rep=None):
+        v = self.try_load_property("Free_Diff_bis")
+        if v is not None:
+            return v
+
         return self.get_quant("aFree_Diff_bis", n_rep=n_rep)
 
     def n_activated_oris(self):
