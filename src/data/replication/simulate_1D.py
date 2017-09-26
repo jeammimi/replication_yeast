@@ -60,7 +60,7 @@ class simulate:
             self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, strengths=strengths) for i, (start, length, oris, strengths) in
                           enumerate(zip(starts, lengths, self.oris, self.strengths))]
         else:
-            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=position, strengths=strengths) for i, (start, length, oris, position, strengths) in
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=np.array(position) + start, strengths=strengths) for i, (start, length, oris, position, strengths) in
                           enumerate(zip(starts, lengths, self.oris, self.positions, self.strengths))]
 
         class MyD(dict):

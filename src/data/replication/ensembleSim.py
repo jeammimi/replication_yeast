@@ -783,10 +783,31 @@ class ensembleSim:
         pass
 
     def Fds(self, n_rep=None):
+        v = self.try_load_property("Fds")
+        if v is not None:
+            return v
         return self.get_quant("aFds", n_rep=n_rep)
 
     def Free_Diff(self, n_rep=None):
+        v = self.try_load_property("Free_Diff")
+        if v is not None:
+            return v
+
         return self.get_quant("aFree_Diff", n_rep=n_rep)
+
+    def rho_ori(self, n_rep=None):
+        v = self.try_load_property("rho_ori")
+        if v is not None:
+            return v
+
+        self.tUNrs = np.sum(np.array(self.aUnrs), axis=1)
+
+        x, _, _, Unr = self.get_quant("tUNrs", n_rep=n_rep)
+        Unr[Unr == 0] = np.nan
+
+        x, _, _, Nori_libre = self.Free_origins()
+
+        return x, np.nanmean(Nori_libre / Unr, axis=0)
 
     def Rps(self, n_rep=None):
         return self.get_quant("aRps", n_rep=n_rep)
@@ -833,7 +854,7 @@ class ensembleSim:
                  (1500, 0.09), (2000, 0.01)]  # Goldar 2008 (/kb)
         point = [(time / 60, value) for time, value in point]
 
-        x, y, std, alls = self.Fds()
+        x, y = self.Fds()[:2]
         error = 0
         Np = 0
         for xe, ye in point:
@@ -1019,7 +1040,7 @@ class ensembleSim:
                 max_t = np.max(self.get_times_replication(finished=False))
         extra = [0, 0, 0, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6]
         position = [0, 1, 2, 0, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 1]
-        s = 0.03
+        sS = 0.03
         sh = 0.04
         height = 1 / (7 + 1) - sh
 
@@ -1038,13 +1059,14 @@ class ensembleSim:
                 row_lengths = [l for l, i in zip(self.lengths, extra) if column == i]
                 crow_length = [0] + np.cumsum(row_lengths).tolist()
 
-                xstart = (p + 1) * s + (1 - margin_right - tot * s) * \
+                xstart = (p + 1) * sS + (1 - margin_right - tot * sS) * \
                     crow_length[p] / (sum(row_lengths))
                 ystart = 1 - (column + 1) * (height + sh)
-                w = (1 - margin_right - tot * s) * row_lengths[p] / (sum(row_lengths))
+                w = (1 - margin_right - tot * sS) * row_lengths[p] / (sum(row_lengths))
                 h = height
                 f.add_axes([xstart, ystart, w, h])
 
+                #print(chro, w, h, (1 - margin_right - tot * sS))
             # chro = 3
             if profile:
                 if which == "mean":
@@ -1076,7 +1098,10 @@ class ensembleSim:
                     st = strength_ori[chro]
                 else:
                     st = [1] * len(self.l_ori[chro])
-                for x, s in zip(self.l_ori[chro], st):
+                pos = self.l_ori[chro]
+                if self.positions != None:
+                    pos = self.positions[chro]
+                for x, s in zip(pos, st):
                     # print(np.array(top)[~np.equal(top, None)])
 
                     mini = min(np.array(top)[~np.equal(top, None)])
