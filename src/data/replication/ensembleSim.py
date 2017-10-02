@@ -630,13 +630,18 @@ class ensembleSim:
         # print(self.nori, self.length)
         return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
 
-    def get_rep_profile(self):
+    def get_rep_profile(self, allp=False):
         rep = []
+        repall = []
         for il, l in enumerate(self.lengths):
             rep.append(np.zeros(l))
+            repall.append([])
             Nsim = len(self.aRps)
             for sim in range(Nsim):
                 rep[il] += np.array(self.aRps[sim][il]) / Nsim
+                repall[-1].append(np.array(self.aRps[sim][il]))
+        if allp:
+            return rep, repall
         return rep
 
     def get_mean_copie(self, time):
@@ -961,22 +966,35 @@ class ensembleSim:
             return zip(*point)
         return error, Np
 
-    def xenope_prof(self, profile=True, which="mean", toplot=True, hour=False, kb=1):
+    def xenope_prof(self, profile=True, which="mean", toplot=True, hour=False, kb=1, color=None, std=False):
         import matplotlib.pyplot as plt
 
         chro = 0
         coarse = 1000
         if profile:
             if which == "mean":
-                Prof = self.get_rep_profile()[chro]
+                Prof, allP = self.get_rep_profile(allp=True)
+                Prof = Prof[0]
+                allP = allP[0]
                 x = np.arange(len(Prof)) * coarse / 1000.
                 h = 1
                 if hour:
                     h = 1 / 60.
                 y = Prof * self.dte * h
                 if toplot:
-                    plt.plot(x * kb, Prof * self.dte * h, label="Simulated", color="red")
-                    plt.xlim(-10 * kb, (x[-1] + 10) * kb)
+                    kwargs = {"label": "Simulated"}
+                    if color is not None:
+                        kwargs["color"] = color
+                    if std:
+                        print(np.array(allP).shape, Prof.shape)
+                        print((np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * self.dte * h)
+                        plt.errorbar(x * kb, Prof * self.dte * h,
+                                     (np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * self.dte * h,  errorevery=200, **kwargs)
+                        plt.xlim(-10 * kb, (x[-1] + 10) * kb)
+                    else:
+                        plt.plot(x * kb, Prof * self.dte * h, **kwargs)
+                        plt.xlim(-10 * kb, (x[-1] + 10) * kb)
+
             else:
                 for sim in which:
                     x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
@@ -1070,7 +1088,7 @@ class ensembleSim:
                 h = height
                 f.add_axes([xstart, ystart, w, h])
 
-                #print(chro, w, h, (1 - margin_right - tot * sS))
+                # print(chro, w, h, (1 - margin_right - tot * sS))
             # chro = 3
             if profile:
                 if which == "mean":
