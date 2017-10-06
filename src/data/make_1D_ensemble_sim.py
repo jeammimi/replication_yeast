@@ -53,7 +53,7 @@ if __name__ == "__main__":
         for o in parameters["ori_type"]:
             ot.append(d[o])
 
-        coarsed = parameters["coarsed"]
+        coarsed = parameters.get("coarsed", True)
         l_ori = load_ori_position(parameters["Nori"],
                                   ot,
                                   parameters["lengths"],
@@ -62,6 +62,8 @@ if __name__ == "__main__":
         if not coarsed:
             parameters["position"] = [] + l_ori
             l_ori = [list(range(len(ip_ori))) for ip_ori in parameters["position"]]
+        if "coarsed" in parameters:
+            parameters.pop("coarsed")
 
     if "coarse" in parameters:
         parameters.pop("coarse")
