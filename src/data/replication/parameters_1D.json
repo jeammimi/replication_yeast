@@ -3,6 +3,7 @@
  "Ndiff": 112,
  "lengths": "./data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff",
  "coarse" : 5000,
+ "coarsed": false,
  "fork_speed" : 0.3,
  "dt_speed" : 0.2,
  "p_on": 0.6,
