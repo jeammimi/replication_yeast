@@ -60,8 +60,8 @@ if __name__ == "__main__":
                                   parameters["coarse"], coarsed)
 
         if not coarsed:
-            parameters["position"] = [] + l_ori
-            l_ori = [list(range(len(ip_ori))) for ip_ori in parameters["position"]]
+            parameters["positions"] = [] + l_ori
+            l_ori = [list(range(len(ip_ori))) for ip_ori in parameters["positions"]]
         if "coarsed" in parameters:
             parameters.pop("coarsed")
 
