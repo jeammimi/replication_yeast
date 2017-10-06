@@ -20,7 +20,8 @@
 "p_origins" : "./data/external/oridb.csv",
 "ori_type" : ["Confirmed","Likely"],
 "coarse": 5000,
-"ramp_type": 10,
+"ramp_time": 10,
+"ramp_type" : "exp",
 
 "spb" : true ,
 "nucleole" : false ,
