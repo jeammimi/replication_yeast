@@ -54,6 +54,7 @@ if __name__ == "__main__":
             ot.append(d[o])
 
         coarsed = parameters.get("coarsed", True)
+        print(coarsed)
         l_ori = load_ori_position(parameters["Nori"],
                                   ot,
                                   parameters["lengths"],
