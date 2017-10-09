@@ -64,7 +64,7 @@ if __name__ == "__main__":
             l_ori = [list(range(len(ip_ori))) for ip_ori in parameters["positions"]]
         if "coarsed" in parameters:
             parameters.pop("coarsed")
-        print("Coarse", sum(list(map, (len, l_ori))))
+        print("Coarse", sum(list(map(len, l_ori))))
         exit()
 
     if "coarse" in parameters:
