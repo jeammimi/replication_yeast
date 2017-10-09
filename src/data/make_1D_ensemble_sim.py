@@ -58,7 +58,7 @@ if __name__ == "__main__":
         l_ori = load_ori_position(parameters["Nori"],
                                   ot,
                                   parameters["lengths"],
-                                  parameters["coarse"], coarsed)
+                                  parameters["coarse"], coarsed=coarsed)
 
         if not coarsed:
             parameters["positions"] = [] + l_ori
