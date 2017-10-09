@@ -35,7 +35,7 @@ def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=No
         if verbose:
             print(isize, len(l_ori[i]))
         while not (max(l_ori[i]) <= lengths[i]):
-            #print(max(l_ori[i]), lengths[i])
+            print(max(l_ori[i]), lengths[i])
             l_ori[i].remove(max(l_ori[i]))
             strengths[i].pop(-1)
             istrength[i].pop(-1)
