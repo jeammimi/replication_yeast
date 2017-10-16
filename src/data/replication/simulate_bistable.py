@@ -336,18 +336,19 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
     harmonic = md.bond.table(width=1000)
     harmonic.bond_coeff.set(bond_list, func=quadra, rmin=0.0,
-                            rmax=40.0, coeff=dict(kappa=20, r0=1, kappa2=80))
+                            rmax=400.0, coeff=dict(kappa=20, r0=1, kappa2=80))
 
     harmonic.bond_coeff.set('Mone_Diff', func=harmonicp, rmin=0.,
-                            rmax=40.0, coeff=dict(kappa=10, r0=1.0))
+                            rmax=400.0, coeff=dict(kappa=10, r0=1.0))
 
+    """
     if spb:
         harmonic.bond_coeff.set('Spb_Cen', k=1000.0, r0=microtubule_length)
 
     if nucleole:
         harmonic.bond_coeff.set('Nuc_Nuc', k=330, r0=diameter_nuc)
         harmonic.bond_coeff.set(
-            'Mono_Nuc', k=330, r0=diameter_nuc / 2. + 1. / 2)
+            'Mono_Nuc', k=330, r0=diameter_nuc / 2. + 1. / 2)"""
 
     # Potential for warmup
     if soft:
