@@ -335,7 +335,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
         return (V, F)
 
     harmonic = md.bond.table(width=10000)
-    print(bond_list)
+    print(bond_list, "Bond list")
     harmonic.bond_coeff.set(bond_list, func=quadra, rmin=0.0,
                             rmax=400.0, coeff=dict(kappa=20, r0=1, kappa2=80))
 
