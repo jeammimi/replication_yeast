@@ -331,16 +331,16 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
     def quadra(r, rmin, rmax, kappa, kappa2, r0):
         V = -0.5 * kappa * (r - r0)**2 + 0.25 * kappa2 * (r - r0)**4
-        F = +kappa * (r - r0) - kappa2 * (r - r0)**3
+        F = + kappa * (r - r0) - kappa2 * (r - r0)**3
         return (V, F)
 
     harmonic = md.bond.table(width=10000)
     print(bond_list, "Bond list")
-    # harmonic.bond_coeff.set(bond_list[:-1], func=quadra, rmin=0.0,
-#                        rmax=400.0, coeff=dict(kappa=20, r0=1, kappa2=80))
+    harmonic.bond_coeff.set(bond_list, func=quadra, rmin=0.0,
+                            rmax=400.0, coeff=dict(kappa=20, r0=1, kappa2=80))
 
-    harmonic.bond_coeff.set(bond_list, func=harmonicp, rmin=0.,
-                            rmax=400.0, coeff=dict(kappa=10, r0=1.0))
+    # harmonic.bond_coeff.set(bond_list, func=harmonicp, rmin=0.,
+    #                        rmax=400.0, coeff=dict(kappa=10, r0=1.0))
 
     """
     if spb:
