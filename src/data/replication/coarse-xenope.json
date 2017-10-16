@@ -20,6 +20,7 @@
 "p_origins" : "xenope" ,
 "ori_type" : [],
 "coarse": 5000,
+"sub_sample_ori": 0.1,
 
 "spb" : false ,
 "nucleole" : false ,
