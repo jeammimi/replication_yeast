@@ -1230,7 +1230,7 @@ class ensembleSimAnalysis(ensembleSim):
                 l_ori = load_ori_position(extra + self.parameters["Nori"],
                                           ot,
                                           self.parameters["lengths"],
-                                          self.parameters["coarse"])
+                                          self.parameters["coarse"], coarsed=self.parameters["coarsed"])
 
         ensembleSim.__init__(self, Nsim=self.parameters["Nsim"],
                              Nori=None, Ndiff=self.parameters["Ndiff"],
