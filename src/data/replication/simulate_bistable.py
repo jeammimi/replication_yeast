@@ -339,7 +339,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     harmonic.bond_coeff.set(bond_list[:-1], func=quadra, rmin=0.0,
                             rmax=400.0, coeff=dict(kappa=20, r0=1, kappa2=80))
 
-    harmonic.bond_coeff.set('Mone_Diff', func=harmonicp, rmin=0.,
+    harmonic.bond_coeff.set('Mono_Diff', func=harmonicp, rmin=0.,
                             rmax=400.0, coeff=dict(kappa=10, r0=1.0))
 
     """
