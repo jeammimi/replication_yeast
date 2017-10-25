@@ -72,6 +72,8 @@ def create_initial_configuration(traj):
                 ps[-1] += range(p1, p2)
         p_second = ps
 
+    print(strengths)
+    exit()
     # Yeast case
     spb = traj["spb"]
     nucleole = traj["nucleole"]
