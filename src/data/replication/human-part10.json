@@ -21,6 +21,7 @@
 "sub_sample_ori" : 0.015,
 "homogeneous" : false,
 "ramp_time" : 15,
+"ramp_type" : "exp",
 "ori_type" : [],
 "coarse": 5000,
 "two_types" : true,
