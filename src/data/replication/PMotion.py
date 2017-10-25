@@ -336,6 +336,8 @@ class Polymer():
         if strengths is None:
             strengths = np.ones_like(self.origins)
 
+        assert(len(strengths) == len(origins))
+
         if positions is not None:
             if len(positions) != len(origins):
 
@@ -346,7 +348,7 @@ class Polymer():
         else:
             self.modules = [Origin(tag, random=random, strength=strength)
                             for tag, strength in zip(origins, strengths)]
-        #print(origins, strengths)
+        # print(origins, strengths)
         self.o_strength = {tag: strength for tag, strength in zip(origins, strengths)}
         # to keep track of the diff attached in case we attach them one by one
         self.bound_to_origin = {tag: [] for tag in origins}
@@ -580,13 +582,18 @@ class Polymer():
             TLs.append(tl)
         return IODs, IRTDs, TLs
 
-    def get_DNA_with_time(self, fork_speed, dt=1):
+    def get_DNA_with_time(self, fork_speed, dt=1, polarity=False):
         # Quantity of replicated dna
         if hasattr(self, "cache"):
             if int(self.t / dt) + int(1 / fork_speed / dt) + 2 == self.max_t:
+                if polarity:
+
+                    return self.sDNA, self.DNA, self.Pol
                 return self.sDNA, self.DNA
+
         max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
         DNA = np.zeros((self.end + 1 - self.start, max_t))
+        Pol = np.zeros((self.end + 1 - self.start))
         for m in self.modules + self.ended:
             if not m.move:
                 continue
@@ -624,6 +631,7 @@ class Polymer():
                     rt = int(round(t, 0)) + 1
                     # print(rt)
                     DNA[bead - self.start, rt:] += (tp1 - t) * fork_speed * dt
+                    Pol[bead - self.start] = m.d
 
                 # print
                 # print(DNA)
@@ -641,6 +649,10 @@ class Polymer():
         self.max_t = max_t
         self.sDNA = np.sum(DNA, axis=0)
         self.DNA = DNA
+        self.Pol = Pol
+        # print(polarity)
+        if polarity:
+            return self.sDNA, DNA, Pol
         return self.sDNA, DNA
 
     def get_ori_position(self):

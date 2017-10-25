@@ -46,7 +46,25 @@ def create_initial_configuration(traj):
 
     two_types = traj.get("two_types", False)
     p_second = traj.get("p_second", [])
+    dstrength = traj.get("dstrength", 0)
+    strengths = None
     if p_second != []:
+
+        # Assign delta_strength
+        if dstrength != 0:
+            strengths = []
+            for bands, pos in zip(p_second, p_origins):
+                strengths.append([])
+                for p in pos:
+                    found = False
+                    for Intervals in bands:
+                        if Intervals[0] < p < Intervals[1]:
+                            strengths[-1].append(dstrength)
+                            found = True
+                            break
+                    if not found:
+                        strengths[-1].append(1)
+
         ps = []
         for ch in p_second:
             ps.append([])
@@ -143,6 +161,10 @@ def create_initial_configuration(traj):
         # Position of origin of replication
         pos_origins = p_origins[i]
 
+        istrength = None
+        if strengths is not None:
+            istrength = strengths[i]
+
         if Sim == []:
             initp = 2 * np.random.rand(3) - 1
         else:
@@ -216,7 +238,8 @@ def create_initial_configuration(traj):
         lPolymers.append(Polymer(i,
                                  offset_particle,
                                  offset_particle + npp - 1,
-                                 [po + offset_particle for po in pos_origins]))
+                                 [po + offset_particle for po in pos_origins],
+                                 strengths=istrength))
         offset_particle += npp
 
         assert(found_cen == spb)
@@ -939,11 +962,12 @@ def simulate(traj):
                         continue
                     if di > cut_off_inte:
                         continue
-                    if np.random.rand() > p_inte:
-                        continue
 
                     for P in lPolymers:
                         if not P.has_origin(list_ori[iorigin]):
+                            continue
+
+                        if np.random.rand() > p_inte * P.o_strength[list_ori[iorigin]]:
                             continue
 
                         if diff_bind_when_free and \

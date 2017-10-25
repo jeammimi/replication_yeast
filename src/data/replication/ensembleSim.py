@@ -8,6 +8,7 @@ import pandas as pd
 import h5py
 import json
 from scipy.stats import poisson
+import copy
 from replication.tools import load_ori_position, load_lengths_and_centro
 
 
@@ -149,6 +150,7 @@ class ensembleSim:
             self.aTLs = []
             self.record_diffusing = []
             self.orip = []
+            self.aPol = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
@@ -243,6 +245,7 @@ class ensembleSim:
             self.aIODs.append([])
             self.aIRTDs.append([])
             self.aTLs.append([])
+            self.aPol.append([])
 
             for poly in S.polys:
 
@@ -266,7 +269,11 @@ class ensembleSim:
                 self.aFds[-1].append(fd)
 
                 self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
-                self.raDNAs[-1].append(poly.get_DNA_with_time(fork_speed=self.fork_speed, dt=dt)[0])
+
+                dnat, _, pol = poly.get_DNA_with_time(
+                    fork_speed=self.fork_speed, dt=dt, polarity=True)
+                self.raDNAs[-1].append(dnat)
+                self.aPol[-1].append(pol)
                 if correlation:
                     iods, irtds, tls = poly.get_correlations(
                         fork_speed=self.fork_speed, dt=dt, thresh=0.99)
@@ -524,6 +531,15 @@ class ensembleSim:
 
         return x * self.dte, y, err, normed_prop
 
+    def get_time(self, n_rep=None):
+
+        times = self.get_times_replication(n_rep=n_rep)
+        # print(times)
+        # print(maxl)
+
+        maxl = int(max(times / self.dte))
+        return np.arange(maxl) * self.dte
+
     def get_times_replication(self, finished=True, n_rep=None):
         v = self.try_load_property("get_times_replication")
         if v is not None:
@@ -606,6 +622,58 @@ class ensembleSim:
             if d >= dna:
                 return x[iid]
         return x[-1]
+
+    def Mean_replication_time(self, n_intervals=6):
+
+        def get_times_at_fraction(nsim, time, n_interval=6):
+
+            fracs = np.arange(0, 1.01, 1 / n_interval)
+
+            idna = 0
+            dna = fracs[idna] + 1
+            DNA = self.aDNAs[nsim]
+            times = []
+            # print(DNA)
+            for iid, d in enumerate(DNA):
+
+                if d >= dna:
+                    # print(dna)
+                    times.append(time[iid])
+                    idna += 1
+                    dna = fracs[idna] + 1
+                if dna >= 2:
+                    times.append(time[-1])
+                    break
+            return times
+
+        rep = []
+        cp = []
+        time = self.get_time()
+
+        for il, l in enumerate(self.lengths):
+            rep.append(np.zeros((n_intervals, l)))
+            Nsim = len(self.aRps)
+            for sim in range(Nsim):
+                intervals = get_times_at_fraction(sim, time)
+                # print(intervals)
+                # print(self.aRps[sim][il])
+                for iinte, (end, start) in enumerate(zip(intervals[1:], intervals[:-1])):
+
+                    pos = (self.aRps[sim][il] * self.dte <
+                           end) & (self.aRps[sim][il] * self.dte > start)
+                    # print(pos)
+                    rep[-1][iinte, pos] += 1
+            cp.append(copy.deepcopy(rep[-1]))
+            cp[-1] = cp[-1] / np.sum(cp[-1], axis=0)
+            tmp = np.zeros_like(cp[-1])
+            for i in range(1, n_intervals + 1):
+                tmp[i - 1, ::] = i
+
+            toc = cp[-1] * tmp * 6 / 5 - 1 / 5
+            mcp = np.mean(toc, axis=0)
+            std = np.mean((toc - mcp)**2, axis=0)**0.5
+            cp[-1] = [mcp, std]
+        return rep, cp
 
     def It_Mean_field_origins(self, n_rep=None):
         v = self.try_load_property("It_Mean_field_origins")
@@ -748,6 +816,18 @@ class ensembleSim:
 
         return x[:-1], passivated
 
+    def Pol(self):
+        rep = []
+        repall = []
+        for il, l in enumerate(self.lengths):
+            rep.append(np.zeros(l))
+            repall.append([])
+            Nsim = len(self.aPol)
+            for sim in range(Nsim):
+                rep[il] += np.array(self.aPol[sim][il]) / Nsim
+
+        return rep
+
     def acti(self):
         v = self.try_load_property("acti")
         if v is not None:
@@ -863,7 +943,7 @@ class ensembleSim:
                  (1500, 0.09), (2000, 0.01)]  # Goldar 2008 (/kb)
         point = [(time / 60, value) for time, value in point]
 
-        x, y = self.Fds()[:2]
+        x, y = self.Fds()[: 2]
         error = 0
         Np = 0
         for xe, ye in point:
@@ -952,7 +1032,7 @@ class ensembleSim:
                 A[1] = pd.rolling_mean(A[1], window=smooth) * 10
                 point = np.array(A)
 
-        x, y = self.Its()[:2]
+        x, y = self.Its()[: 2]
         error = 0
         Np = 0
         shift = 0
