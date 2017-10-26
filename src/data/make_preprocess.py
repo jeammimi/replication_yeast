@@ -33,11 +33,9 @@ if __name__ == "__main__":
         with open(root + "/" + simu + "/" + "ensembleSim.pick", "rb") as f:
             tmp_simu = cPickle.load(f)
     else:
-        ni = len(glob.glob(simu + "/traj*"))
-        tmp_simu, lengths, parameters1 = load_3D_simus(simu + "/traj", n=ni, orip=True)
+        ni = len(glob.glob(root + "/" + simu + "/traj*"))
+        tmp_simu, lengths, parameters1 = load_3D_simus(root + "/" + simu + "/traj", n=ni, orip=True)
         tmp_simu.Nsim = len(tmp_simu.aIts)
-
-        simu = simu.replace("/traj", "")
 
         tmp_simu.add_precomputed("Mean_replication_time", root + "/" + simu + "/" + "analysis.hdf5")
         tmp_simu.add_precomputed("get_rep_profile", root + "/" + simu + "/" + "analysis.hdf5")
