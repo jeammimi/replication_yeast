@@ -260,7 +260,6 @@ class ensembleSim:
             self.anIts.append([])
             self.aFts.append([])
             self.aFds.append([])
-            self.aRps.append([])
             self.aDNAs.append([])
             self.raDNAs.append([])
             self.aUnrs.append([])
@@ -850,6 +849,9 @@ class ensembleSim:
         return x[:-1], passivated
 
     def Pol(self):
+        v = self.try_load_property("Pol")
+        if v is not None:
+            return v
         rep = []
         repall = []
         for il, l in enumerate(self.lengths):
@@ -1317,15 +1319,21 @@ class ensembleSim:
 
 class ensembleSimAnalysis(ensembleSim):
 
-    def __init__(self, json_file, hdf5_file):
+    def __init__(self, json_file, hdf5_file, Nsim):
         with open(json_file, "r") as f:
             self.parameters = json.load(f)
 
         sub_sample_ori = self.parameters.get("sub_sample_ori", None)
         if sub_sample_ori:
             self.parameters.pop("sub_sample_ori")
-            l_ori = [list(range(int(self.parameters["lengths"][0] * sub_sample_ori)))]
-            lengths = self.parameters["lengths"]
+            if "lengths" in self.parameters:
+                l_ori = [list(range(int(self.parameters["lengths"][0] * sub_sample_ori)))]
+                lengths = self.parameters["lengths"]
+
+            else:
+                l_ori = [list(range(int(self.parameters["len_chrom"][0] * sub_sample_ori)))]
+                lengths = self.parameters["len_chrom"]
+
         else:
             extra = "../../"
             if type(self.parameters["lengths"]) == str:
@@ -1345,11 +1353,28 @@ class ensembleSimAnalysis(ensembleSim):
                                           self.parameters["lengths"],
                                           self.parameters["coarse"], coarsed=self.parameters["coarsed"])
 
-        ensembleSim.__init__(self, Nsim=self.parameters["Nsim"],
-                             Nori=None, Ndiff=self.parameters["Ndiff"],
-                             lengths=self.parameters["lengths"],
-                             p_on=self.parameters["p_on"],
-                             p_v=self.parameters["p_v"],
+        if Nsim is None:
+            Nsim = self.parameters["Nsim"]
+
+        if "Ndiff" in self.parameters:
+            Ndiff = self.parameters["Ndiff"]
+        else:
+            Ndiff = self.parameters["N_diffu"]
+        if "p_on" in self.parameters:
+            p_on = self.parameters["p_on"]
+        else:
+            p_on = self.parameters["p_inte"]
+
+        if "p_v" in self.parameters:
+            p_v = self.parameters["p_v"]
+        else:
+            p_v = self.parameters["cut_off_inte"]**3 / self.parameters["R"]**3
+
+        ensembleSim.__init__(self, Nsim=Nsim,
+                             Nori=None, Ndiff=Ndiff,
+                             lengths=lengths,
+                             p_on=p_on,
+                             p_v=p_v,
                              dt_speed=self.parameters["dt_speed"],
                              fork_speed=self.parameters["fork_speed"],
                              p_off=None, only_one=True, l_ori=l_ori)

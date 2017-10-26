@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
         tmp_simu.add_precomputed("Mean_replication_time", root + "/" + simu + "/" + "analysis.hdf5")
         tmp_simu.add_precomputed("get_rep_profile", root + "/" + simu + "/" + "analysis.hdf5")
+        tmp_simu.add_precomputed("Pol", root + "/" + simu + "/" + "analysis.hdf5")
         tmp_simu.add_precomputed("n3Dsim", root + "/" + simu + "/" + "analysis.hdf5")
 
     tmp_simu.add_precomputed("passi_acti", root + "/" + simu + "/" + "analysis.hdf5")
