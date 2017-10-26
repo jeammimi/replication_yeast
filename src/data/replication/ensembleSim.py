@@ -236,6 +236,25 @@ class ensembleSim:
             if found == 1 and self.all_same_ori:
                 self.l_ori = S.oris
 
+            unfinished = False
+            self.aRps.append([])
+
+            for poly in S.polys:
+                if self.one_minute:
+                    dt = 1
+                else:
+                    dt = self.dt_speed
+
+                try:
+                    self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
+                except TypeError:
+                    unfinished = True
+                    print("Sim %i not finished" % sim)
+                    break
+            if unfinished:
+                self.aRps.pop(-1)
+                continue
+
             self.aIts.append([])
             self.aIfs.append([])
             self.anIts.append([])
@@ -274,8 +293,6 @@ class ensembleSim:
                 self.aIts[-1].append(it)
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
-
-                self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
 
                 dnat, _, pol = poly.get_DNA_with_time(
                     fork_speed=self.fork_speed, dt=dt, polarity=True)
