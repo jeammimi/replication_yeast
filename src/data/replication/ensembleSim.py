@@ -70,7 +70,7 @@ class ensembleSim:
                 return
             # print(quant.get(name))
             # print(type(qt[0]))
-            if qt != [] and type(qt[0]) in[list, np.ndarray]:
+            if qt != [] and type(qt) in [tuple, list] and type(qt[0]) in[list, np.ndarray]:
 
                 prop = quant.create_group(name)
                 if precision:
@@ -111,6 +111,13 @@ class ensembleSim:
                 self.raDNAs,
                 self.aUnrs,
                 self.aFree_origins]
+
+    def n3Dsim(self):
+        v = self.try_load_property("n3Dsim")
+        if v is not None:
+            return v
+
+        return len(self.aIts)
 
     def load_data(self, data):
         self.aIts, self.aFts, self.aFds, self.aRps, self.aDNAs, self.raDNAs, self.aUnrs, self.aFree_origins = data
@@ -625,6 +632,10 @@ class ensembleSim:
 
     def Mean_replication_time(self, n_intervals=6):
 
+        v = self.try_load_property("Mean_replication_time")
+        if v is not None:
+            return v
+
         def get_times_at_fraction(nsim, time, n_interval=6):
 
             fracs = np.arange(0, 1.01, 1 / n_interval)
@@ -698,7 +709,12 @@ class ensembleSim:
         # print(self.nori, self.length)
         return x, y * self.nori / self.length * self.p_on * self.p_v / self.dt_speed
 
-    def get_rep_profile(self, allp=False):
+    def get_rep_profile(self, allp=True):
+
+        v = self.try_load_property("get_rep_profile")
+        if v is not None:
+            return v
+
         rep = []
         repall = []
         for il, l in enumerate(self.lengths):
