@@ -957,7 +957,7 @@ def simulate(traj):
                 # print(d2.shape)
                 # print(d2[iD])
                 lo = list(range(len(d2[iD])))
-                lo = np.random.shuffle(lo)
+                np.random.shuffle(lo)
                 for iorigin in lo:
                     di = d2[iD][iorigin]
                     if iorigin in activated:
