@@ -956,7 +956,7 @@ def simulate(traj):
             for iD, (btag, ptags) in enumerate(zip(Btags, PTags)):
                 # print(d2.shape)
                 # print(d2[iD])
-                lo = range(len(d2[iD]))
+                lo = list(range(len(d2[iD])))
                 lo = np.random.shuffle(lo)
                 for iorigin in lo:
                     di = d2[iD][iorigin]
