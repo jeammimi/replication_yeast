@@ -247,6 +247,9 @@ class ensembleSim:
 
                 try:
                     self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
+                    if np.any(self.aRps[-1][0] == 0):
+                        print(self.aRps[-1])
+                        raise TypeError
                 except TypeError:
                     unfinished = True
                     print("Sim %i not finished" % sim)

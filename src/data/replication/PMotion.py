@@ -493,6 +493,7 @@ class Polymer():
                     if time is not None and m.activation_time / 1.0 / dt > time:
                         continue
                     firing_time.append([int(round(m.activation_time / 1.0 / dt, 0)), m.position])
+        # print(firing_time)
         firing_time.sort(key=lambda x: x[1])
 
         firing_position = np.array(firing_time)
