@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
         else:
             for i in range(len((l_ori[0]))):
-                positions[0].append(int(parameters["len_chrom"][0] * np.random.uniform()))
+                positions[0].append(int(round(parameters["len_chrom"][0] * np.random.uniform(), 0)))
             positions[0] = list(set(positions[0]))
         # else:
         #     for i in range(len((l_ori[0]))):
