@@ -1322,7 +1322,7 @@ class ensembleSim:
 
 class ensembleSimAnalysis(ensembleSim):
 
-    def __init__(self, json_file, hdf5_file, Nsim):
+    def __init__(self, json_file, hdf5_file, Nsim=None):
         with open(json_file, "r") as f:
             self.parameters = json.load(f)
 
