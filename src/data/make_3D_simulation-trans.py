@@ -1,6 +1,6 @@
 import sys
 sys.path.append("./")
-from replication.simulate_bistable import simulate, load_parameters
+from replication.simulate_trans import simulate, load_parameters
 import os
 import json
 import copy
