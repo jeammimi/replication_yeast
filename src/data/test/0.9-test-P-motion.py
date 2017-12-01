@@ -6,7 +6,7 @@
 
 from pylab import *
 import numpy as np
-import mpld3
+
 import copy
 import sys
 #sys.path.append("../../src/data")
