@@ -535,6 +535,7 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
 
             converged = True
         except:
+            method.disable()
             converged = False
             dt /= 2.
             print("Reducing time step", dt)
@@ -544,6 +545,7 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                 system.particles[ip].position = p
 
     dcd.disable()
+    method.disable()
 
 
 def simulate(traj):
@@ -639,7 +641,7 @@ def simulate(traj):
 
     # Warmup
 
-    #minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length)
+    minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length)
 
     # Dumping
 
