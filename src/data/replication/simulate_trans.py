@@ -639,7 +639,7 @@ def simulate(traj):
 
     # Warmup
 
-    minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length)
+    #minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length)
 
     # Dumping
 
