@@ -504,6 +504,7 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
         try:
 
             method = md.integrate.mode_minimize_fire(group=all_move, dt=dt)
+            nve = md.integrate.nve(group=group.all())
             while not(method.has_converged()):
 
                 if spb:
@@ -534,10 +535,10 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                         raise
 
             converged = True
-            method.disable()
+            nve.disable()
 
         except:
-            method.disable()
+            nve.disable()
             converged = False
             dt /= 2.
             print("Reducing time step", dt)
