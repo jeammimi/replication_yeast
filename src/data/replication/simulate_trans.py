@@ -535,10 +535,10 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                         raise
 
             converged = True
-            nve.disable()
+            # nve.disable()
 
         except:
-            nve.disable()
+            # nve.disable()
             converged = False
             dt /= 2.
             print("Reducing time step", dt)
