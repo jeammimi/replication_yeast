@@ -504,7 +504,7 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
         try:
 
             method = md.integrate.mode_minimize_fire(group=all_move, dt=dt)
-            nve = md.integrate.nve(group=all_move)
+            #nve = md.integrate.nve(group=all_move)
             while not(method.has_converged()):
 
                 if spb:
