@@ -534,6 +534,8 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                         raise
 
             converged = True
+            method.disable()
+
         except:
             method.disable()
             converged = False
@@ -545,7 +547,6 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                 system.particles[ip].position = p
 
     dcd.disable()
-    method.disable()
 
 
 def simulate(traj):
