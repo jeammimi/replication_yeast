@@ -358,6 +358,7 @@ class Polymer():
         self.ended = []
         self.replicated = {r: False for r in range(start, end + 1)}
         self.events = {}
+        self.fork_speeds = []
 
     def has_origin(self, ptag):
         if ptag in self.origins:
@@ -444,9 +445,14 @@ class Polymer():
         self.modules[i + 1].activated = True
         self.modules[i + 1].activation_time = self.t
         self.ended.append(self.modules.pop(i + 1))
+        self.fork_speeds.append(fork_speed)
 
-    def get_replication_profile(self, fork_speed, t=None, dt=1):
-        prof = self.get_DNA_with_time(fork_speed=fork_speed, dt=dt)[1]
+    @property
+    def max_t(self):
+        return int(self.t / self.dt) + int(1 / max(self.fork_speeds) / self.dt) + 2
+
+    def get_replication_profile(self, t=None):
+        prof = self.get_DNA_with_time()[1]
         # print("la")
         return np.argmax(prof, axis=1)
         # self.position_index = range(self.start, self.end + 1)
@@ -458,21 +464,20 @@ class Polymer():
                 P.append(m.tag)
         return P
 
-    def get_fork_density(self, fork_speed, cut=0, normed=False, dt=1):
-        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
+    def get_fork_density(self, cut=0, normed=False):
 
-        fork_number = np.zeros(max_t)
+        fork_number = np.zeros(self.max_t)
         # rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
         for m in self.modules + self.ended:
             if not m.origin:
                 # print(m.path)
                 if m.path != []:
-                    start = int(round(m.path[0].time / dt, 0))
-                    end = int(round(m.path[-1].time / dt, 0))
+                    start = int(round(m.path[0].time / self.dt, 0))
+                    end = int(round(m.path[-1].time / self.dt, 0))
                     fork_number[int(start): int(end)] += 1
 
         if normed:
-            for t in np.arange(max_t):
+            for t in np.arange(self.max_t):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
                     Un_replicated = 1
@@ -482,17 +487,16 @@ class Polymer():
             fork_number[-cut:] = 0
         return fork_number
 
-    def get_dist_between_activated_origins(self, fork_speed, time=None, dt=1):
-
-        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
+    def get_dist_between_activated_origins(self, time=None):
 
         firing_time = []
         for m in self.modules + self.ended:
             if not m.move:
                 if m.activated and m.activation_time is not None:
-                    if time is not None and m.activation_time / 1.0 / dt > time:
+                    if time is not None and m.activation_time / 1.0 / self.dt > time:
                         continue
-                    firing_time.append([int(round(m.activation_time / 1.0 / dt, 0)), m.position])
+                    firing_time.append(
+                        [int(round(m.activation_time / 1.0 / self.dt, 0)), m.position])
         # print(firing_time)
         firing_time.sort(key=lambda x: x[1])
 
@@ -500,21 +504,20 @@ class Polymer():
 
         Dist = []
         # print(firing_position)
-        for time in range(max_t):
+        for time in range(self.max_t):
             fired = firing_position[::, 0] <= time
             dist = firing_position[fired][::, 1]
             dist = dist[1:] - dist[:-1]
             Dist.append(dist)
         return Dist, firing_position
 
-    def get_norm(self, fork_speed):
-        max_t = int(self.t) + int(1 / fork_speed) + 2
+    def get_norm(self):
 
-        Un_replicated = np.zeros(max_t)
+        Un_replicated = np.zeros(self.max_t)
 
         rep_p = np.array(self.get_replication_profile())
         not_none = ~np.equal(rep_p, None)
-        for t in np.arange(max_t):
+        for t in np.arange(self.max_t):
             # print(not_none)
             # print(rep_p[not_none])
             # print(rep_p)
@@ -522,9 +525,9 @@ class Polymer():
 
         return Un_replicated
 
-    def get_correlations(self, fork_speed, dt=1, thresh=1, merge=0):
+    def get_correlations(self, thresh=1, merge=0):
 
-        DNA_time = self.get_DNA_with_time(fork_speed=fork_speed, dt=dt)[1]
+        DNA_time = self.get_DNA_with_time()[1]
         # print(DNA_time.shape)
         # axis0 = length axis1 = time
 
@@ -583,17 +586,16 @@ class Polymer():
             TLs.append(tl)
         return IODs, IRTDs, TLs
 
-    def get_DNA_with_time(self, fork_speed, dt=1, polarity=False):
+    def get_DNA_with_time(self, polarity=False):
         # Quantity of replicated dna
         if hasattr(self, "cache"):
-            if int(self.t / dt) + int(1 / fork_speed / dt) + 2 == self.max_t:
+            if self.max_t == self.max_ta:
                 if polarity:
 
                     return self.sDNA, self.DNA, self.Pol
                 return self.sDNA, self.DNA
 
-        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
-        DNA = np.zeros((self.end + 1 - self.start, max_t))
+        DNA = np.zeros((self.end + 1 - self.start, self.max_t))
         Pol = np.zeros((self.end + 1 - self.start))
         for m in self.modules + self.ended:
             if not m.move:
@@ -613,10 +615,10 @@ class Polymer():
 
                 # print(pos,outpos,time)
 
-                outtime = (time + abs(outpos - pos) / fork_speed)
+                outtime = (time + abs(outpos - pos) / m.fork_speed)
 
-                time /= dt
-                outtime /= dt
+                time /= self.dt
+                outtime /= self.dt
                 # print(outtime)
                 times = [time, outtime]
                 t = int(round(time, 0)) + 1
@@ -631,7 +633,7 @@ class Polymer():
                     # if abs(int(t)-t) < 1e-5:
                     rt = int(round(t, 0)) + 1
                     # print(rt)
-                    DNA[bead - self.start, rt:] += (tp1 - t) * fork_speed * dt
+                    DNA[bead - self.start, rt:] += (tp1 - t) * m.fork_speed * self.dt
                     Pol[bead - self.start] = m.d
 
                 # print
@@ -647,7 +649,7 @@ class Polymer():
 #            print (np.sum(DNA, axis=0)[:10])
         # raise
         self.cache = True
-        self.max_t = max_t
+        self.max_ta = 0 + self.max_t
         self.sDNA = np.sum(DNA, axis=0)
         self.DNA = DNA
         self.Pol = Pol
@@ -663,18 +665,16 @@ class Polymer():
                 op.append(m.position)
         return op
 
-    def get_firing_time_It(self, fork_speed, normed=False, cut=0, dt=1):
-
-        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
+    def get_firing_time_It(self, normed=False, cut=0):
 
         firing_time = []
         for m in self.modules + self.ended:
             if not m.move:
                 if m.activated and m.activation_time is not None:
-                    firing_time.append(int(round(m.activation_time / 1.0 / dt, 0)))
+                    firing_time.append(int(round(m.activation_time / 1.0 / self.dt, 0)))
         firing_time.sort()
         # print(firing_time)
-        It = np.zeros(max_t)
+        It = np.zeros(self.max_t)
         if cut != 0:
             for el in range(cut):
                 firing_time.pop(-1)
@@ -691,7 +691,7 @@ class Polymer():
         # print("Done1")
         return firing_time, It
 
-    def get_firing_at_fraction(self, fork_speed, DNA_time, cut=0, bins=100):
+    def get_firing_at_fraction(self, DNA_time, cut=0, bins=100):
 
         DNA_time /= max(DNA_time)
 
@@ -715,39 +715,38 @@ class Polymer():
 
         return It
 
-    def get_free_origins_time(self, fork_speed, normed=False, dt=1):
-        max_t = int(self.t / dt) + int(1 / fork_speed / dt) + 2
+    def get_free_origins_time(self, normed=False):
 
-        free = np.zeros(max_t)
+        free = np.zeros(self.max_t)
 
         # print("T", int(self.t), self.origins)
         for m in self.modules:
             if not m.move:
                 # print(m.activation_time,m.position)
 
-                free[:max_t - 1] += 1
+                free[:self.max_t - 1] += 1
 
         for m in self.ended:
             if not m.move:
                 # print(m.activation_time,m.position)
 
                 if m.activated:
-                    free[:int(round(m.activation_time / dt, 0))] += 1
+                    free[:int(round(m.activation_time / self.dt, 0))] += 1
                     # print(m.activation_time,m.activated,m.passivated)
                 else:
                     # Passivated origins
                     if m.activation_time is None:
                         print("Warning incorrect calculation free origins")
                     else:
-                        free[:int(round(m.activation_time / dt, 0))] += 1
+                        free[:int(round(m.activation_time / self.dt, 0))] += 1
                         # print(m.activation_time,m.activated,m.passivated)
 
                     # print("Passivated")
 
                     # print(free)
         if normed:
-            rep_p = np.array(self.get_replication_profile(fork_speed=fork_speed))
-            for t in np.arange(max_t):
+            rep_p = np.array(self.get_replication_profile())
+            for t in np.arange(self.max_t):
                 Un_replicated = np.sum(rep_p >= t)
                 if Un_replicated == 0:
                     Un_replicated = 1
@@ -760,6 +759,7 @@ class Polymer():
     def increment_time(self, dt, verbose=False):
 
         self.t += dt
+        self.dt = dt
         update_bond = []
         alone = []
         to_release = []
