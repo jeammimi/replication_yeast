@@ -23,7 +23,7 @@ class ensembleSim:
                  l_ori=[], cut=10, random=False, one_minute=False,
                  positions=None, ramp=None,
                  max_ramp=None, ramp_type="linear", strengths=[], hdf5_file=None,
-                 D_Ndiff="pulse"):
+                 D_Ndiff="pulse", fsd="uniform", variance_fs=2):
         self.Nsim = Nsim
         self.Nori = Nori
         self.Ndiff = Ndiff
@@ -56,6 +56,8 @@ class ensembleSim:
         self.strengths = strengths
         self.hdf5_file = None
         self.D_Ndiff = D_Ndiff
+        self.fsd = fsd
+        self.variance_fs = variance_fs
 
     def add_precomputed(self, name, file_hdf5="None", precision=None, two=False):
         qt = getattr(self, name)()
@@ -158,6 +160,7 @@ class ensembleSim:
             self.record_diffusing = []
             self.orip = []
             self.aPol = []
+            self.fork_speeds = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
@@ -193,7 +196,9 @@ class ensembleSim:
                              ramp=self.ramp,
                              max_ramp=max_ramp,
                              ramp_type=self.ramp_type,
-                             strengths=self.strengths
+                             strengths=self.strengths,
+                             fsd=self.fsd,
+                             variance_fs=self.variance_fs
                              )
 
                 S.simulate(run_length)
@@ -245,8 +250,12 @@ class ensembleSim:
                 else:
                     dt = self.dt_speed
 
+                if not hasattr(poly, "dt"):
+                    poly.dt = self.dt_speed
+                    poly.max_fs = self.fork_speed
+
                 try:
-                    self.aRps[-1].append(poly.get_replication_profile(fork_speed=self.fork_speed, dt=dt))
+                    self.aRps[-1].append(poly.get_replication_profile())
                     if np.any(self.aRps[-1][0] == 0):
                         print(self.aRps[-1])
                         raise TypeError
@@ -274,6 +283,7 @@ class ensembleSim:
             self.aIRTDs.append([])
             self.aTLs.append([])
             self.aPol.append([])
+            self.fork_speeds.append([])
 
             for poly in S.polys:
 
@@ -287,25 +297,24 @@ class ensembleSim:
                 else:
                     dt = self.dt_speed
                 # Cut == 0 because we removed them from all the chromosomes
-                ft, it = poly.get_firing_time_It(
-                    fork_speed=self.fork_speed, cut=0, normed=False, dt=dt)
-                fd = poly.get_fork_density(fork_speed=self.fork_speed,
-                                           cut=0, normed=False, dt=dt)  # Normed afteward
+                ft, it = poly.get_firing_time_It(cut=0, normed=False, dt=dt)
+                fd = poly.get_fork_density(cut=0, normed=False, dt=dt)  # Normed afteward
 
                 self.aIts[-1].append(it)
                 self.aFts[-1].append(ft)
                 self.aFds[-1].append(fd)
 
-                dnat, _, pol = poly.get_DNA_with_time(
-                    fork_speed=self.fork_speed, dt=dt, polarity=True)
+                dnat, _, pol = poly.get_DNA_with_time(dt=dt, polarity=True)
                 self.raDNAs[-1].append(dnat)
                 self.aPol[-1].append(pol)
                 if correlation:
-                    iods, irtds, tls = poly.get_correlations(
-                        fork_speed=self.fork_speed, dt=dt, thresh=0.99)
+                    iods, irtds, tls = poly.get_correlations(dt=dt, thresh=0.99)
                     self.aIODs[-1].append(iods)
                     self.aIRTDs[-1].append(irtds)
                     self.aTLs[-1].append(tls)
+
+                if hasattr(poly, "fork_speeds"):
+                    self.fork_speeds[-1].extend(poly.fork_speeds)
 
                 """
                 All the following line to be able to compute No(t-1)
@@ -314,8 +323,7 @@ class ensembleSim:
                 # .append(poly.get_DNA_with_time(fork_speed=self.fork_speed)[0])
                 # print(self.raDNAs[-1][-1][-1])
 
-                Free_o = poly.get_free_origins_time(
-                    fork_speed=self.fork_speed, normed=False, dt=dt).tolist()
+                Free_o = poly.get_free_origins_time(normed=False, dt=dt).tolist()
                 assert (Free_o[-1] == 0)
 
                 self.aFree_origins[-1].append(np.array([len(poly.origins)] + Free_o[:-1]))
@@ -340,8 +348,7 @@ class ensembleSim:
 
                 self.aUnrs[-1].append(len_poly - self.raDNAs[-1][-1])
 
-                ftime, firing_position = poly.get_dist_between_activated_origins(
-                    fork_speed=self.fork_speed, dt=dt)
+                ftime, firing_position = poly.get_dist_between_activated_origins(dt=dt)
                 self.aFiring_Position[-1].append(firing_position)
 
                 # print (norm.shape,self.aUnrs[-1][-1].shape)
@@ -369,7 +376,7 @@ class ensembleSim:
             bins = 100
             for poly in S.polys:
                 self.aIfs[-1].append(poly.get_firing_at_fraction(DNA_time=DNA_time,
-                                                                 fork_speed=self.fork_speed, cut=0, bins=bins))
+                                                                 cut=0, bins=bins))
 
             self.aIfs[-1] = np.sum(np.array(self.aIfs[-1]), axis=0) / \
                 (np.array(np.arange(0, 1, 1 / bins) + 1 / 100.) * self.length)[::-1]

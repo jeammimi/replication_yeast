@@ -319,7 +319,7 @@ class LFork(Fork):
 
 class Polymer():
 
-    def __init__(self, number, start, end, origins, random=False, positions=None, strengths=None):
+    def __init__(self, number, start, end, origins, random=False, positions=None, strengths=None, max_fs=2):
         self.number = number
         self.start = start
         self.end = end  # End is included
@@ -359,6 +359,7 @@ class Polymer():
         self.replicated = {r: False for r in range(start, end + 1)}
         self.events = {}
         self.fork_speeds = []
+        self.max_fs = max_fs
 
     def has_origin(self, ptag):
         if ptag in self.origins:
@@ -448,12 +449,15 @@ class Polymer():
         self.fork_speeds.append(fork_speed)
 
     def max_t(self, dt):
-        return int(self.t / dt) + int(1 / max(self.fork_speeds) / dt) + 2
+        return int(self.t / dt) + int(1 / self.max_fs / dt) + 2
 
-    def get_replication_profile(self, t=None):
-        prof = self.get_DNA_with_time()[1]
+    def get_replication_profile(self, dt=None):
+        # dt temporal resolution of the profile
+        if dt is None:
+            dt = self.dt / 2
+        prof = self.get_DNA_with_time(dt=dt)[1]
         # print("la")
-        return np.argmax(prof, axis=1)
+        return np.argmax(prof, axis=1) * dt
         # self.position_index = range(self.start, self.end + 1)
 
     def get_interacting_particles(self):
@@ -587,12 +591,15 @@ class Polymer():
 
     def get_DNA_with_time(self, polarity=False, dt=1):
         # Quantity of replicated dna
-        if hasattr(self, "cache"):
+        if hasattr(self, "cache") and self.cache and self.dt_cache == dt:
             if self.max_t(dt) == self.max_ta:
                 if polarity:
 
                     return self.sDNA, self.DNA, self.Pol
                 return self.sDNA, self.DNA
+
+        if dt is None:
+            dt = self.dt
 
         DNA = np.zeros((self.end + 1 - self.start, self.max_t(dt)))
         Pol = np.zeros((self.end + 1 - self.start))
@@ -608,7 +615,11 @@ class Polymer():
 
             for ip, spaceTimeB in enumerate(m.path):
                 pos, time, outpos, bead = spaceTimeB.get_values()
-
+                rbead = int(pos / 2 + outpos / 2)
+                if np.abs(rbead - bead) > 1.1:
+                    print(
+                        "Bead posistions(positions) should not be different than more than one from bead value(l_ori)")
+                bead = rbead
                 if ip > 1 and pos != m.path[ip - 1].outpos:
                     print(m.path)
 
@@ -641,7 +652,8 @@ class Polymer():
                 # print(DNA[pos - self.start])
 
         # print(DNA[0,::])
-        DNA[DNA > 1] = 1
+        # print(DNA)
+        DNA[DNA >= 1] = 1
         # print(DNA)
         # if self.number == 0:
     #        print (DNA[:10])
@@ -652,6 +664,7 @@ class Polymer():
         self.sDNA = np.sum(DNA, axis=0)
         self.DNA = DNA
         self.Pol = Pol
+        self.dt_cache = dt
         # print(polarity)
         if polarity:
             return self.sDNA, DNA, Pol
@@ -758,6 +771,7 @@ class Polymer():
     def increment_time(self, dt, verbose=False):
 
         self.t += dt
+        self.dt = dt
         update_bond = []
         alone = []
         to_release = []
@@ -854,7 +868,18 @@ class Polymer():
                         diff_diff.append(m.tag)
                         diff_diff.append(self.modules[im + 1].tag)
                         bind_diff.append([m.tag, self.modules[im + 1].tag])
-                        outpos = (m.position + self.modules[im + 1].position) / 2.
+                        # Compute collision posision
+                        # outpos = (m.position + self.modules[im + 1].position) / 2. # with same
+                        # fok speed
+                        x1 = m.position - m.d * dt * m.fork_speed
+                        x2 = self.modules[im + 1].position - self.modules[im +
+                                                                          1].d * dt * self.modules[im + 1].fork_speed
+                        tr = (x1 - x2) / (self.modules[im + 1].d *
+                                          self.modules[im + 1].fork_speed - m.d * m.fork_speed)
+                        outpos = x1 + m.d * m.fork_speed * tr
+
+                        #print(m.position, self.modules[im + 1].position, outpos)
+                        #print(x1, x2)
                         if m.d == 1 and outpos < m.path[-1].pos:
                             m.path.pop(-1)
                         elif m.d == -1 and outpos > m.path[-1].pos:
@@ -862,11 +887,15 @@ class Polymer():
                         m.path[-1].outpos = outpos
 
                         if self.modules[im + 1].d == 1 and outpos < self.modules[im + 1].path[-1].pos:
-                            self.modules[im + 1].path.pop(-1)
+                            ptmp = self.modules[im + 1].path.pop(-1)
                         elif self.modules[im + 1].d == -1 and outpos > self.modules[im + 1].path[-1].pos:
-                            self.modules[im + 1].path.pop(-1)
+                            ptmp = self.modules[im + 1].path.pop(-1)
 
-                        self.modules[im + 1].path[-1].outpos = outpos
+                        try:
+                            self.modules[im + 1].path[-1].outpos = outpos
+                        except:
+                            from IPython.core.debugger import Tracer
+                            Tracer()()
 
                         to_remove.append(im)
                         to_remove.append(im + 1)

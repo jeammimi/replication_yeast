@@ -8,7 +8,7 @@ class simulate:
     def __init__(self, nori, ndiff, lengths, p_on, p_off, only_one=False,
                  fork_speed=1, dt_speed=1, tolerance=0.1,
                  gindin=True, p_v=1, random=False, positions=None, ramp=None, max_ramp=None,
-                 ramp_type="linear", strengths=None):
+                 ramp_type="linear", strengths=None, fsd="uniform", variance_fs=1):
 
         self.p_on = p_on
         self.p_off = p_off
@@ -17,7 +17,9 @@ class simulate:
         self.only_one = only_one
         self.lengths = lengths
         self.dt_speed = dt_speed
-        self.fork_speed = fork_speed
+        self.fs = fork_speed
+        self.fsd = fsd
+        self.vfs = variance_fs
         self.gindin = gindin
         self.p_v = p_v
         self.Ndiff_libre_t = []
@@ -57,10 +59,12 @@ class simulate:
             self.strengths = [[1] * len(o) for o in self.oris]
 
         if positions is None:
-            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, strengths=strengths) for i, (start, length, oris, strengths) in
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, strengths=strengths, max_fs=self.max_fs()) for i, (start, length, oris, strengths) in
                           enumerate(zip(starts, lengths, self.oris, self.strengths))]
         else:
-            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start, random=random, positions=np.array(position) + start, strengths=strengths) for i, (start, length, oris, position, strengths) in
+            self.polys = [Polymer(i, start, start + length - 1, np.array(oris) + start,
+                                  random=random, positions=np.array(position) + start, strengths=strengths,
+                                  max_fs=self.max_fs()) for i, (start, length, oris, position, strengths) in
                           enumerate(zip(starts, lengths, self.oris, self.positions, self.strengths))]
 
         class MyD(dict):
@@ -79,13 +83,29 @@ class simulate:
         self.libre = {d: 0 for d in np.arange(ndiff)}
         self.origins = {d: None for d in np.arange(ndiff)}
         self.record_diffusing = [Diffusing(d) for d in np.arange(ndiff)]
-
+        self.fork_speeds = []
         # print(self.oris)
         # print(self.poly.modules)
 
+    def fork_speed(self):
+        if self.fsd == "uniform":
+            self.fork_speeds.append(self.fs)
+            return self.fs
+
+        if self.fsd == "lognormal":
+            self.fork_speeds.append(np.random.lognormal(self.fs, self.vfs))
+            return self.fork_speeds[-1]
+
+    def max_fs(self):
+        if self.fsd == "uniform":
+            return self.fs
+
+        if self.fsd == "lognormal":
+            return self.fs + 10 * self.vfs
+
     def get_free(self, maxt=None):
         V = []
-        maxt = self.time + int(1 / self.fork_speed) + 2
+        maxt = self.time + int(1 / self.fork_speed()) + 2
         # print(maxt)
         for k in self.record_diffusing:
             # print(k)
@@ -330,7 +350,7 @@ class simulate:
                         # print(self.poly.modules)
                         [diff1, _], [diff2, _] = self.polys[what_p].get_diff_at_origin(what_ori)
                         self.polys[what_p].add_fork(
-                            [diff1, diff2], what_ori, [None, None], None, fork_speed=self.fork_speed)
+                            [diff1, diff2], what_ori, [None, None], None, fork_speed=self.fork_speed())
                         self.libre[diff1] = 2
                         self.libre[diff2] = 2
                         if diff == diff1:
@@ -355,7 +375,7 @@ class simulate:
                         else:
                             # If only one needed start the fork and reciclate this
                             self.polys[what_p].add_fork(
-                                [diff, None], what_ori, [None, None], None, fork_speed=self.fork_speed)
+                                [diff, None], what_ori, [None, None], None, fork_speed=self.fork_speed())
                             self.libre[diff] = 2
                             self.origins[diff] = ori_libre[choice]
                             self.record_diffusing[diff].start_replication(

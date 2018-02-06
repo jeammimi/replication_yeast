@@ -764,6 +764,11 @@ def simulate(traj):
     r_hic = []
     if dump_hic:
         group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
+
+    dump_inte = True
+    if dump_inte:
+        r_inte = []
+
     Ndiff_libre_t = []
 
     N_diffu = traj["N_diffu"]
@@ -904,13 +909,6 @@ def simulate(traj):
         Timeit("AFter second half")
 
         group_diffu.force_update()
-        # Update Type because of (Ori to passivated)
-
-        # Update group
-
-        # Find new interacting particles
-
-        # First check if Dimer are close from one origin
 
         p_diffu = np.array([p.position for p in group_diffu])
         tag_diffu = [p.tag for p in group_diffu]
@@ -922,7 +920,24 @@ def simulate(traj):
         if not(tag_diffu != [] and list_ori != []):
             print("No interactions")
 
-        if tag_diffu != [] and list_ori != []:
+        # Generate the measures we are interested in
+        # Matrice interaction DNA / particules
+        if dump_inte and i % traj.get("inte_period", 1) == 0:
+            ph = np.array([p.position for p in group_hic])
+            pi = np.array([p.position for p in group_diffu])
+            D = cdist(ph, pi)
+            D[D < 2] = 1
+            D[D >= 2] = 0
+            #np.fill_diagonal(D, 0)
+            if r_inte != []:
+                r_inte += D
+            else:
+                r_inte = D
+            if i % 32 == 0:
+                np.save(data_folder + "/inte", r_inte)
+
+        start_replication = False
+        if tag_diffu != [] and list_ori != [] and start_replication:
             distances = cdist(p_diffu, p_origin)
             print(distances.shape)
             # Reorder the distances with the dimer tags
