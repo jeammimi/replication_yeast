@@ -758,7 +758,7 @@ def simulate(traj):
         method.set_gamma(plist.index(p), dscale)
     if two_types:
         method.set_gamma(plist.index(p), dscale)
-    exit()
+    # exit()
 
     if benchmark:
         print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
