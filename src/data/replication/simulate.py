@@ -30,6 +30,8 @@ def create_initial_configuration(traj):
     # Diffusing elements
     N_diffu = traj["N_diffu"]
     r_diffu = traj.get("diameter_diffu", 1)
+    print(r_diffu)
+    exit()
     p_origins = traj["p_origins"]
 
     if type(len_chrom) != list:
