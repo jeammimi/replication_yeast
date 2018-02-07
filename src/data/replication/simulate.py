@@ -763,13 +763,14 @@ def simulate(traj):
     if benchmark:
         print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
         return
+"""
 
     md.integrate.mode_standard(dt=sim_dt / 4)
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt / 2)
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt)
-
+"""
     if warmup != 0:
         hoomd.run(warmup)
 
