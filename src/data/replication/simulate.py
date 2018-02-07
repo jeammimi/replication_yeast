@@ -750,6 +750,16 @@ def simulate(traj):
     md.integrate.mode_standard(dt=sim_dt)
     method = md.integrate.langevin(group=all_move, kT=1, seed=seed, dscale=False)
 
+    print(plist)
+    for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
+        print(p, dscale * r_diffu)
+        method.set_gamma(plist.index(p), dscale * r_diffu)
+    for p in ['Mono', 'Ori']:
+        method.set_gamma(plist.index(p), dscale)
+    if two_types:
+        method.set_gamma(plist.index(p), dscale)
+    exit()
+
     if benchmark:
         print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
         return
@@ -760,14 +770,6 @@ def simulate(traj):
     hoomd.run(100)
     md.integrate.mode_standard(dt=sim_dt)
 
-    for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
-        print(p, dscale * r_diffu)
-        method.set_gamma(plist.index(p), dscale * r_diffu)
-    for p in ['Mono', 'Ori']:
-        method.set_gamma(plist.index(p), dscale)
-    if two_types:
-        method.set_gamma(plist.index(p), dscale)
-    exit()
     if warmup != 0:
         hoomd.run(warmup)
 
