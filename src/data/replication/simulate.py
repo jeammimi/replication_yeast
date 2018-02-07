@@ -762,11 +762,11 @@ def simulate(traj):
 
     for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
         print(p)
-        method.set_gamma(p, dscale * r_diffu)
+        method.set_gamma(plist.index(p), dscale * r_diffu)
     for p in ['Mono', 'Ori']:
-        method.set_gamma(p, dscale)
+        method.set_gamma(plist.index(p), dscale)
     if two_types:
-        method.set_gamma("Mono1", dscale)
+        method.set_gamma(plist.index(p), dscale)
 
     if warmup != 0:
         hoomd.run(warmup)
