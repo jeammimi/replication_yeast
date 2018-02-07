@@ -761,7 +761,7 @@ def simulate(traj):
     md.integrate.mode_standard(dt=sim_dt)
 
     for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
-
+        print(p)
         method.set_gamma(p, dscale * r_diffu)
     for p in ['Mono', 'Ori']:
         method.set_gamma(p, dscale)
