@@ -753,11 +753,11 @@ def simulate(traj):
     print(plist)
     for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
         print(p, dscale * r_diffu)
-        method.set_gamma(plist.index(p), dscale * r_diffu)
+        method.set_gamma(p, dscale * r_diffu)
     for p in ['Mono', 'Ori']:
-        method.set_gamma(plist.index(p), dscale)
+        method.set_gamma(p, dscale)
     if two_types:
-        method.set_gamma(plist.index(p), dscale)
+        method.set_gamma(p, dscale)
     # exit()
 
     if benchmark:
