@@ -10,6 +10,7 @@
 "data_folder" : "./data/raw" ,
 
 "N_diffu" : 20 ,
+"diffu_radius" : 1,
 "cut_off_inte" : 2 ,
 "p_inte" : 0.06 ,
 "p_off" : 0.1,

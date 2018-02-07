@@ -29,6 +29,7 @@ def create_initial_configuration(traj):
 
     # Diffusing elements
     N_diffu = traj["N_diffu"]
+    r_diffu = traj.get("diameter_diffu", 1)
     p_origins = traj["p_origins"]
 
     if type(len_chrom) != list:
@@ -207,6 +208,7 @@ def create_initial_configuration(traj):
                 initp = Sim.molecules[i].coords[p]
 
             snapshot.particles.position[offset_particle + p] = initp
+            snapshot.particles.diameter[offset_particle + p] = 1
 
             if p in pos_origins:
                 list_ori.append(offset_particle + p)
@@ -311,6 +313,7 @@ def create_initial_configuration(traj):
                     initp = (R - 2) * (2 * np.random.rand(3) - 1)
 
             snapshot.particles.position[offset_particle + p] = initp
+            snapshot.particles.diameter[offset_particle + p] = r_diffu
             snapshot.particles.typeid[
                 offset_particle +
                 p] = plist.index("Diff")  # Diffu
