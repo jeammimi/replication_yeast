@@ -761,13 +761,13 @@ def simulate(traj):
     md.integrate.mode_standard(dt=sim_dt)
 
     for p in ['Diff', 'S_Diff', 'F_Diff', "I_Diff"]:
-        print(p)
+        print(p, dscale * r_diffu)
         method.set_gamma(plist.index(p), dscale * r_diffu)
     for p in ['Mono', 'Ori']:
         method.set_gamma(plist.index(p), dscale)
     if two_types:
         method.set_gamma(plist.index(p), dscale)
-
+    exit()
     if warmup != 0:
         hoomd.run(warmup)
 
