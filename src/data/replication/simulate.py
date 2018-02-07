@@ -922,9 +922,10 @@ def simulate(traj):
 
         # Generate the measures we are interested in
         # Matrice interaction DNA / particules
-        if dump_inte and i % traj.get("inte_period", 1) == 0:
+        if dump_inte and i % traj.get("inte_period", 1) == 0 and len(group_diffu) != 0:
             ph = np.array([p.position for p in group_hic])
             pi = np.array([p.position for p in group_diffu])
+
             print(ph.shape, pi.shape)
             D = cdist(ph, pi)
             D[D < 2] = 1
