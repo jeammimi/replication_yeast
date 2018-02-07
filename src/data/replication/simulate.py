@@ -748,7 +748,7 @@ def simulate(traj):
 
     t0 = time.time()
     md.integrate.mode_standard(dt=sim_dt)
-    method = md.integrate.langevin(group=all_move, kT=1, seed=seed, dscale=dscale)
+    method = md.integrate.langevin(group=all_move, kT=1, seed=seed, dscale=False)
 
     if benchmark:
         print(nl.tune(warmup=4000, r_min=0.3, r_max=0.8, jumps=5, steps=5000))
