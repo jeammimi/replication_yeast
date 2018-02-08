@@ -29,6 +29,7 @@ def create_initial_configuration(traj):
 
     # Diffusing elements
     N_diffu = traj["N_diffu"]
+    r_diffu = traj.get("diameter_diffu", 1) / 2
 
     # exit()
     p_origins = traj["p_origins"]
@@ -314,7 +315,7 @@ def create_initial_configuration(traj):
                     initp = (R - 2) * (2 * np.random.rand(3) - 1)
 
             snapshot.particles.position[offset_particle + p] = initp
-            #snapshot.particles.diameter[offset_particle + p] = r_diffu
+            snapshot.particles.mass[offset_particle + p] = r_diffu**3 * 2**3
             snapshot.particles.typeid[
                 offset_particle +
                 p] = plist.index("Diff")  # Diffu
@@ -603,7 +604,7 @@ def simulate(traj):
     visu = traj["visu"]
     dump_hic = traj["dump_hic"]
     two_types = traj.get("two_types", False)
-    r_diffu = traj.get("diameter_diffu", 1)
+    r_diffu = traj.get("diameter_diffu", 1) / 2
 
 # Scenari
     diff_alone = traj["diff_alone"]
