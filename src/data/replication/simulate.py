@@ -413,7 +413,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
         if gauss:
             r_cut = 1.5
             # nl = md.nlist.tree(r_buff=0.4, check_period=1)
-            nl = md.nlist.cell(r_buff=1)
+            nl = md.nlist.cell(r_buff=4)
 
             # gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
             # gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
