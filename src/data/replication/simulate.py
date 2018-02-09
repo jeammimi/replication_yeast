@@ -315,7 +315,7 @@ def create_initial_configuration(traj):
                     initp = (R - 2) * (2 * np.random.rand(3) - 1)
 
             snapshot.particles.position[offset_particle + p] = initp
-            snapshot.particles.mass[offset_particle + p] = r_diffu**3 * 2**3
+            #snapshot.particles.mass[offset_particle + p] = r_diffu**3 * 2**3
             snapshot.particles.typeid[
                 offset_particle +
                 p] = plist.index("Diff")  # Diffu
