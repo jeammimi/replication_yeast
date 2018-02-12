@@ -536,8 +536,11 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                    period=10, overwrite=True)
     while not converged and not visu:
         try:
-
-            method = md.integrate.mode_minimize_fire(group=all_move, dt=dt)
+            if '2.2' in hoomd.__version__:
+                method = md.integrate.mode_minimize_fire(dt=dt)
+                nve = md.integrate.nve(group=all_move)
+            else:
+                method = md.integrate.mode_minimize_fire(group=all_move, dt=dt)
             while not(method.has_converged()):
 
                 if spb:
@@ -568,7 +571,12 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
                         raise
 
             converged = True
+            if '2.2' in hoomd.__version__:
+                nve.disable()
+
         except:
+            if '2.2' in hoomd.__version__:
+                nve.disable()
             converged = False
             dt /= 2.
             print("Reducing time step", dt)
