@@ -36,7 +36,6 @@ if __name__ == "__main__":
     print(parameters["data_folder"])
     make_sure_path_exists(parameters["data_folder"])
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
-        s = json.dumps(parameters)
         f.write(s)
 
     if parameters["p_origins"] == "xenope":  # Xenopu
