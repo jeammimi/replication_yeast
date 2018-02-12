@@ -26,7 +26,6 @@ dependencies:
   - pandocfilters=1.4.1=py35_0
   - pillow=3.2.0=py35_1
   - pythreejs=0.2.1=py35_0
-  - pyzmq=16.0.2=py35_1
   - terminado=0.6=py35_0
   - testpath=0.3=py35_0
   - tornado=4.4.2=py35_0
@@ -39,8 +38,6 @@ dependencies:
   - ca-certificates=2017.08.26=h1d4fec5_0
   - cairo=1.14.8=0
   - cffi=1.9.1=py35_0
-  - conda=4.3.30=py35hf9359ed_0
-  - conda-env=2.6.0=h36134e3_1
   - cryptography=1.7.1=py35_0
   - cudatoolkit=8.0=3
   - cycler=0.10.0=py35_0
