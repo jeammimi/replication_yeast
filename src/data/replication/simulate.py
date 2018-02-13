@@ -210,7 +210,7 @@ def create_initial_configuration(traj):
                 initp = Sim.molecules[i].coords[p]
 
             snapshot.particles.position[offset_particle + p] = initp
-            #snapshot.particles.diameter[offset_particle + p] = 1
+            # snapshot.particles.diameter[offset_particle + p] = 1
 
             if p in pos_origins:
                 list_ori.append(offset_particle + p)
@@ -315,7 +315,7 @@ def create_initial_configuration(traj):
                     initp = (R - 2) * (2 * np.random.rand(3) - 1)
 
             snapshot.particles.position[offset_particle + p] = initp
-            #snapshot.particles.mass[offset_particle + p] = r_diffu**3 * 2**3
+            # snapshot.particles.mass[offset_particle + p] = r_diffu**3 * 2**3
             snapshot.particles.typeid[
                 offset_particle +
                 p] = plist.index("Diff")  # Diffu
@@ -345,6 +345,9 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     telomere = traj["telomere"]
     microtubule_length = traj["microtubule_length"] * micron
     diameter_nuc = traj["diameter_nuc"] * micron
+
+    r_diffu = traj.get("diameter_diffu", 1) / 2
+    r0 = 0.5
 
     # Simulation parameters
 
@@ -411,7 +414,8 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     else:
 
         if gauss:
-            r_cut = 1.5
+
+            r_cut = 2 * max(r0, r_diffu) * 0.3 * 3.5
             # nl = md.nlist.tree(r_buff=0.4, check_period=1)
             nl = md.nlist.cell()
 
@@ -427,8 +431,14 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
             table = md.pair.table(width=1000, nlist=nl)
             table.pair_coeff.set(plist, plist,
-                                 func=gauss_center_decay_strength, rmin=0, rmax=1.5,
+                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r0 * 0.3 * 3.5,
                                  coeff=dict(epsilon=1, sigma=.3))
+            table.pair_coeff.set(["Mono"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
+                                 func=gauss_center_decay_strength, rmin=0, rmax=(r0 + r_diffu) * 0.3 * 3.5,
+                                 coeff=dict(epsilon=1, sigma=(r0 + r_diffu) * .3))
+            table.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
+                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * 0.3 * 3.5,
+                                 coeff=dict(epsilon=1, sigma=2 * r_diffu * .3))
             if two_types:
                 def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=traj.get("epsilona", -0.2)):
 
@@ -438,7 +448,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
                         r, rmin, rmax, c=sigma * 1.6, sigma=sigma / 2, epsilon=epsilona)
                     return (V1 + Va, F1 + Fa)
                 table.pair_coeff.set(["Mono1"], ["Mono1"],
-                                     func=gauss_center_decay_strength_a, rmin=0, rmax=1.5,
+                                     func=gauss_center_decay_strength_a, rmin=0, rmax=r_cut,
                                      coeff=dict(epsilon=1, sigma=.3))
 
         else:
@@ -955,7 +965,7 @@ def simulate(traj):
             D = cdist(ph, pi)
             D[D < 2] = 1
             D[D >= 2] = 0
-            #np.fill_diagonal(D, 0)
+            # np.fill_diagonal(D, 0)
             if r_inte != []:
                 r_inte += D
             else:
