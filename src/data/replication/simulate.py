@@ -416,7 +416,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
         if gauss:
 
             r_cut = 2 * max(r0, r_diffu) * 0.3 * 3.5
-            # nl = md.nlist.tree(r_cut / 3)  # r_buff=0.4, check_period=1)
+            nl = md.nlist.tree()  # r_cut / 3)  # r_buff=0.4, check_period=1)
 
             nl = md.nlist.cell()
 
@@ -492,8 +492,10 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
     # lj much more slower (at least in thu minimisation)
     wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
-    wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=1.0,
-                                   r_cut=1.12, mode="shift", r_extrap=r_extrap)
+    wall_force_slj.force_coeff.set(plist, epsilon=1.0, sigma=r0 * 1.0,
+                                   r_cut=r0 * 1.12, mode="shift", r_extrap=r_extrap)
+    wall_force_slj.force_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], epsilon=1.0, sigma=r_diffu * 1.0,
+                                   r_cut=r_diffu * 1.12, mode="shift", r_extrap=r_extrap)
 
     if spb:
         wall_force_slj.force_coeff.set("Spb", epsilon=1.0, sigma=1.0,
