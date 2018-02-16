@@ -37,10 +37,11 @@ if __name__ == "__main__":
     ir = pd.split("/").index("raw")
     root = "/".join(pd.split("/")[:ir + 1])
     print(root)
-    for d in pd.split("/")[ir:]:
+    for d in pd.split("/")[ir + 1:]:
         root += "/" + d
         print(root)
-        os.mkdir(root)
+        if not os.path.exists(root):
+            os.mkdir(root)
 
     os.makedirs(parameters["data_folder"], exist_ok=True)
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
