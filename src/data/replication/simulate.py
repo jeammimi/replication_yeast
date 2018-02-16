@@ -416,9 +416,9 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
         if gauss:
 
             r_cut = 2 * max(r0, r_diffu) * 0.3 * 3.5
-            nl = md.nlist.tree(r_cut / 3)  # r_buff=0.4, check_period=1)
+            # nl = md.nlist.tree(r_cut / 3)  # r_buff=0.4, check_period=1)
 
-            #nl = md.nlist.cell()
+            nl = md.nlist.cell()
 
             # gauss = md.pair.gauss(r_cut=r_cut, nlist=nl)
             # gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
