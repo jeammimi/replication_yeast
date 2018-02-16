@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     pd = parameters["data_folder"]
     ir = pd.split("/").index("raw")
-    root = pd.split("/")[:ir + 1]
+    root = "/".join(pd.split("/")[:ir + 1])
     print(root)
     for d in pd.split("/")[ir:]:
         root += "/" + d
