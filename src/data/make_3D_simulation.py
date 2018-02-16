@@ -33,7 +33,15 @@ if __name__ == "__main__":
     parameters["data_folder"] = os.path.join(parameters["data_folder"], "")
     parameters["filename"] = param_file
 
-    print(parameters["data_folder"])
+    pd = parameters["data_folder"]
+    ir = pd.split("/").index("raw")
+    root = pd.split("/")[:ir + 1]
+    print(root)
+    for d in pd.split("/")[ir:]:
+        root += "/" + d
+        print(root)
+        os.mkdir(root)
+
     os.makedirs(parameters["data_folder"], exist_ok=True)
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters, indent=True)
