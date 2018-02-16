@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parameters["filename"] = param_file
 
     print(parameters["data_folder"])
-    os.mkdirs(parameters["data_folder"], exist_ok=True)
+    os.makedirs(parameters["data_folder"], exist_ok=True)
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters, indent=True)
         f.write(s)
