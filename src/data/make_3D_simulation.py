@@ -7,13 +7,13 @@ import copy
 import errno
 import numpy as np
 
-
+"""
 def make_sure_path_exists(path):
     try:
         os.makedirs(path)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
-            raise
+            raise"""
 
 if __name__ == "__main__":
     param_file = sys.argv[1]
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parameters["filename"] = param_file
 
     print(parameters["data_folder"])
-    make_sure_path_exists(parameters["data_folder"])
+    os.mkdirs(parameters["data_folder"], exist_ok=True)
     with open(os.path.join(parameters["data_folder"], "params.json"), "w") as f:
         s = json.dumps(parameters, indent=True)
         f.write(s)
