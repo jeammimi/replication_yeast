@@ -436,9 +436,10 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             table.pair_coeff.set(plist, plist,
                                  func=gauss_center_decay_strength, rmin=0, rmax=2 * r0 * 0.3 * 3.5,
                                  coeff=dict(epsilon=1, sigma=.3))
+
             table.pair_coeff.set(["Mono", "Mono1"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
                                  func=gauss_center_decay_strength, rmin=0, rmax=(r0 + r_diffu) * 0.3 * 3.5,
-                                 coeff=dict(epsilon=1, sigma=(r0 + r_diffu) * .3))
+                                 coeff=dict(epsilon=10, sigma=(r0 + r_diffu) * .3))
             table.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
                                  func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * 0.3 * 3.5,
                                  coeff=dict(epsilon=1, sigma=2 * r_diffu * .3))
@@ -980,7 +981,7 @@ def simulate(traj):
 
             print(ph.shape, pi.shape)
             D = cdist(ph, pi)
-            D[D < 2] = 1
+            D[D < 2] = 0.5 + r_diffu
             D[D >= 2] = 0
             # np.fill_diagonal(D, 0)
             if r_inte != []:
