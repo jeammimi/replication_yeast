@@ -442,7 +442,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
                                  coeff=dict(epsilon=10, sigma=(r0 + r_diffu) * .3))
             table.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
                                  func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * 0.3 * 3.5,
-                                 coeff=dict(epsilon=1, sigma=2 * r_diffu * .3))
+                                 coeff=dict(epsilon=10, sigma=2 * r_diffu * .3))
             if two_types:
                 def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=traj.get("epsilona", -0.2)):
 
