@@ -503,14 +503,14 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
     sphere = md.wall.group()
 
-    r_extrap = 0.95
+    r_extrap = 0.5
     sphere.add_sphere(r=R, origin=(0.0, 0.0, 0.0), inside=True)
     # lj much more slower (at least in thu minimisation)
     wall_force_slj = md.wall.lj(sphere, r_cut=1.12)
 
-    wall_force_slj.force_coeff.set(plist, epsilon=4.0, sigma=0.5 + r0 * 1.0,
+    wall_force_slj.force_coeff.set(plist, epsilon=1, sigma=0.5 + r0 * 1.0,
                                    r_cut=0.5 + r0 * 1.12, mode="shift", r_extrap=0.5 + r_extrap * r0)
-    wall_force_slj.force_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], epsilon=4.0, sigma=0.5 + r_diffu * 1.0,
+    wall_force_slj.force_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], epsilon=1, sigma=0.5 + r_diffu * 1.0,
                                    r_cut=0.5 + r_diffu * 1.12, mode="shift", r_extrap=0.5 + r_extrap * r_diffu)
 
     if spb:
