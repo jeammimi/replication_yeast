@@ -547,7 +547,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     return all_beads, all_move, Spb_g, nl
 
 
-def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length):
+def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_length, maxi=1000):
 
     R = traj["R"]
     data_folder = traj["data_folder"]
@@ -566,7 +566,11 @@ def minimize(traj, all_move, system, snapshot, Spb_g, Cen_pos, microtubule_lengt
 
     dcd = dump.dcd(filename=data_folder + 'init.dcd',
                    period=10, overwrite=True)
+    it = 0
     while not converged and not visu:
+        it += 1
+        if it > maxi:
+            break
         try:
             if '2.2' in hoomd.__version__:
                 method = md.integrate.mode_minimize_fire(dt=dt)
