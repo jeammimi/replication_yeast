@@ -50,7 +50,7 @@
 "diff_bind_when_on_DNA" : false ,
 
 "replicate_DNA" : false ,
-"nucleus" : false,
+"nucleus" : true,
 "n_steps" : 400000,
 "length_steps" : 200 ,
 "warmup" : 100000,
