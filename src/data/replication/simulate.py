@@ -416,8 +416,9 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
     else:
 
         if gauss:
-
-            r_cut = 2 * max(r0, r_diffu) * 0.3 * 3.5
+            sigma = 0.5
+            eps = 1.65
+            r_cut = 2 * max(r0, r_diffu) * sigma * 3.5
             if r_diffu > 2:
                 nl = md.nlist.tree()  # r_cut / 3)  # r_buff=0.4, check_period=1)
             else:
@@ -436,26 +437,26 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
             table = md.pair.table(width=1000, nlist=nl)
             table.pair_coeff.set(plist, plist,
-                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r0 * 0.3 * 3.5,
-                                 coeff=dict(epsilon=1, sigma=.3))
+                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r0 * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=sigma))
 
             table.pair_coeff.set(["Mono", "Mono1"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
-                                 func=gauss_center_decay_strength, rmin=0, rmax=(r0 + r_diffu) * 0.3 * 3.5,
-                                 coeff=dict(epsilon=10, sigma=(r0 + r_diffu) * .3))
+                                 func=gauss_center_decay_strength, rmin=0, rmax=(r0 + r_diffu) * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=(r0 + r_diffu) * sigma))
             table.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
-                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * 0.3 * 3.5,
-                                 coeff=dict(epsilon=10, sigma=2 * r_diffu * .3))
+                                 func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=2 * r_diffu * sigma))
             if two_types:
                 def gauss_center_decay_strength_a(r, rmin, rmax, c=0, sigma=0.3, epsilon=1, epsilona=traj.get("epsilona", -0.2)):
 
                     V1, F1 = gauss_center_decay_strength(
                         r, rmin, rmax, c=c, sigma=sigma, epsilon=epsilon)
                     Va, Fa = gauss_center_decay_strength(
-                        r, rmin, rmax, c=sigma * 1.6, sigma=sigma / 2, epsilon=epsilona)
+                        r, rmin, rmax, c=sigma * 1.85, sigma=sigma / 2, epsilon=epsilona)
                     return (V1 + Va, F1 + Fa)
                 table.pair_coeff.set(["Mono1"], ["Mono1"],
                                      func=gauss_center_decay_strength_a, rmin=0, rmax=r_cut,
-                                     coeff=dict(epsilon=1, sigma=.3))
+                                     coeff=dict(epsilon=eps, sigma=sigma))
 
         else:
             r_cut = 1.12
