@@ -53,7 +53,7 @@
 "nucleus" : true,
 "n_steps" : 400000,
 "length_steps" : 200 ,
-"warmup" : 100000,
+"warmup" : 400000,
 "dcd_period" : 10000,
 "hic_period" : 10,
 "benchmark" : false,
