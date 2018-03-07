@@ -467,6 +467,16 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             gauss.pair_coeff.set(plist, plist, epsilon=1.0, sigma=0.3)
 
         if nucleole:
+            gauss.pair_coeff.set(["Nuc"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
+                                 func=gauss_center_decay_strength, rmin=0, rmax=(diameter_nuc / 2 + r_diffu) * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=(diameter_nuc / 2 + r_diffu) * sigma))
+            gauss.pair_coeff.set(["Nuc"], ['Mono', 'Mono1'],
+                                 func=gauss_center_decay_strength, rmin=0, rmax=(diameter_nuc / 2 + r0) * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=(diameter_nuc / 2 + r0) * sigma))
+            gauss.pair_coeff.set(["Nuc"], ['Nuc'],
+                                 func=gauss_center_decay_strength, rmin=0, rmax=diameter_nuc * sigma * 3.5,
+                                 coeff=dict(epsilon=eps, sigma=diameter_nuc * sigma))
+            """
             for ip1, p1 in enumerate(plist):
                 for p2 in plist[ip1:]:
                     inuc = 0
@@ -488,7 +498,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
                                 2.) * r_cut)
                     if inuc == 2:
                         gauss.pair_coeff.set(p1, p2, epsilon=1.0, sigma=diameter_nuc,
-                                             r_cut=diameter_nuc * r_cut)
+                                             r_cut=diameter_nuc * r_cut)"""
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
     # gauss.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
 
