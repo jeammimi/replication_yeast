@@ -770,6 +770,7 @@ class Polymer():
 
     def increment_time(self, dt, verbose=False):
 
+        #print(self.t, dt)
         self.t += dt
         self.dt = dt
         update_bond = []

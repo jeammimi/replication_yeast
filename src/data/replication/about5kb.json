@@ -45,5 +45,5 @@
 "dcd_period" : 1000,
 "benchmark" : false,
 "soft" : true,
-"gauss" : false
+"gauss" : true
 }

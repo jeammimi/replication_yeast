@@ -587,8 +587,8 @@ class ensembleSim:
                     break
                 else:
                     times[-1] = max(times[-1], max(np.array(c)[~np.equal(c, None)]))
-
-        return np.array(times) * self.dte
+        # print(self.dte)
+        return np.array(times)  # * self.dte
 
     @property
     def nori(self):
@@ -636,7 +636,7 @@ class ensembleSim:
         if time is None:
             time = 1e8
         else:
-            time = time / self.dte
+            time = time  # / self.dte
         # print(time)
         for fps in self.aFiring_Position:
             for fp in fps:
@@ -686,18 +686,19 @@ class ensembleSim:
         rep = []
         cp = []
         time = self.get_time()
+        #time, _, _, _ = self.get_quant("aDNAs")
 
         for il, l in enumerate(self.lengths):
             rep.append(np.zeros((n_intervals, l)))
             Nsim = len(self.aRps)
             for sim in range(Nsim):
                 intervals = get_times_at_fraction(sim, time)
-                # print(intervals)
+                #print("int", intervals, len(time))
                 # print(self.aRps[sim][il])
                 for iinte, (end, start) in enumerate(zip(intervals[1:], intervals[:-1])):
 
-                    pos = (self.aRps[sim][il] * self.dte <
-                           end) & (self.aRps[sim][il] * self.dte > start)
+                    pos = (self.aRps[sim][il] <
+                           end) & (self.aRps[sim][il] > start)
                     # print(pos)
                     rep[-1][iinte, pos] += 1
             cp.append(copy.deepcopy(rep[-1]))
@@ -792,11 +793,11 @@ class ensembleSim:
             y = np.nanmean(NF / Unr, axis=0)
             # Unr[Unr == 0] = 1
 
-            return x, y / self.dt_speed, np.mean(NF, axis=0) / self.dt_speed, np.nanmean(NF, axis=0) / np.nanmean(Unr, axis=0) / self.dt_speed
+            return x, y, np.mean(NF, axis=0), np.nanmean(NF, axis=0) / np.nanmean(Unr, axis=0)
         else:
             x, y, std, alls = self.get_quant("aIts", n_rep=n_rep)
             # As this are cumulative properties, this scale for one minute
-            return x, y / self.dt_speed, std / self.dt_speed, alls / self.dt_speed
+            return x, y, std, alls
 
     def Ifs(self, n_rep=None, recompute=False, cut=0):
         if recompute == True:
@@ -1105,25 +1106,25 @@ class ensembleSim:
                 h = 1
                 if hour:
                     h = 1 / 60.
-                y = Prof * self.dte * h
+                y = Prof * h
                 if toplot:
                     kwargs = {"label": "Simulated"}
                     if color is not None:
                         kwargs["color"] = color
                     if std:
                         print(np.array(allP).shape, Prof.shape)
-                        print((np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * self.dte * h)
-                        plt.errorbar(x * kb, Prof * self.dte * h,
-                                     (np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * self.dte * h,  errorevery=200, **kwargs)
+                        print((np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * h)
+                        plt.errorbar(x * kb, Prof * h,
+                                     (np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * h, errorevery=200, **kwargs)
                         plt.xlim(-10 * kb, (x[-1] + 10) * kb)
                     else:
-                        plt.plot(x * kb, Prof * self.dte * h, **kwargs)
+                        plt.plot(x * kb, Prof * h, **kwargs)
                         plt.xlim(-10 * kb, (x[-1] + 10) * kb)
 
             else:
                 for sim in which:
                     x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
-                    plt.plot(x, self.aRps[sim][chro] * self.dte)
+                    plt.plot(x, self.aRps[sim][chro])
                 top = self.aRps[sim][chro]
                 plt.xlim(-10, x[-1] + 10)
         else:
@@ -1142,7 +1143,8 @@ class ensembleSim:
     def whole_genome_timing(self, coarse=5000, figsize=(12, 12), plot=True,
                             default_rep="../../data/external/time-coordinate.pick",
                             experiment=True, profile=False, which="mean", fig=None,
-                            warning=True, ori=True, shift=0, N_chrom=range(16), strength_ori=None):
+                            warning=True, ori=True, shift=0, N_chrom=range(16), strength_ori=None,
+                            centro=False):
 
         import matplotlib.pyplot as plt
 
@@ -1177,9 +1179,10 @@ class ensembleSim:
 
         if profile:
             max_t = self.get_times_replication()
+            max_t = self.get_rep_profile(allp=False)
             if which == "mean":
 
-                max_t = max(max_t)
+                max_t = np.max(list(map(max, max_t)))
             else:
 
                 max_t = max(np.array(max_t)[which])
@@ -1217,10 +1220,12 @@ class ensembleSim:
             # chro = 3
             if profile:
                 if which == "mean":
-                    Prof = self.get_rep_profile()[chro]
+                    Prof = self.get_rep_profile(allp=False)[chro]
                     x = np.arange(len(Prof)) * coarse / 1000.
+                    # print(Prof)
                     plt.plot(x, Prof * self.dte, label="Simulated")
                     plt.xlim(-10, x[-1] + 10)
+                    top = Prof * self.dte
                 else:
                     for sim in which:
                         x = np.arange(len(self.aRps[sim][chro])) * coarse / 1000.
@@ -1253,8 +1258,8 @@ class ensembleSim:
 
                     mini = min(np.array(top)[~np.equal(top, None)])
                     maxi = max(np.array(top)[~np.equal(top, None)])
-                    mini = 1
-                    maxi = 2
+                    #mini = 1
+                    #maxi = 2
                     # print(mini, maxi)
                     col = "k"
                     if s != 1:
@@ -1312,7 +1317,20 @@ class ensembleSim:
                                 print("out of bounds")
                             result["mean_copie_simu"].append(top[-1])
 
-                plt.plot(np.array(locci) / 1000., p, "-", label="simulated")
+                if not profile:
+                    plt.plot(np.array(locci) / 1000., p, "-", label="simulated")
+                if profile:
+                    prof = pd.read_csv(
+                        "../../../ifromprof/notebooks/exploratory/Yeast_wt_alvino.csv")
+
+                    plt.plot(prof[prof.chr == chro + 1]["coordinate (kb)"],
+                             prof[prof.chr == chro + 1].TrepA, label="Experimental")
+            if centro:
+                lc = "../../data/external/saccharomyces_cerevisiae_R64-2-1_20150113.gff"
+
+                lengths, centrom = load_lengths_and_centro(lc, 1000, verbose=False)
+                # print(centrom)
+                plt.plot([centrom[chro], centrom[chro]], [0, max_t])
             if profile:
                 plt.ylim(max_t, 0)
 
