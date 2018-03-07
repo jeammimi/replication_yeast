@@ -667,6 +667,7 @@ def simulate(traj):
     benchmark = traj["benchmark"]
     warmup = traj["warmup"]
     dcd_period = traj["dcd_period"]
+    dump_inte = traj.get("dump_inte", False)
 
     np.random.seed(seed)
     hoomd.context.initialize()  # "--mode=cpu ")
@@ -829,7 +830,6 @@ def simulate(traj):
     # if dump_hic:
     group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
 
-    dump_inte = True
     if dump_inte:
         r_inte = []
 
