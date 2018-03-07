@@ -435,15 +435,15 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
 
                 return (V, F)
 
-            table = md.pair.table(width=1000, nlist=nl)
-            table.pair_coeff.set(plist, plist,
+            gauss = md.pair.table(width=1000, nlist=nl)
+            gauss.pair_coeff.set(plist, plist,
                                  func=gauss_center_decay_strength, rmin=0, rmax=2 * r0 * sigma * 3.5,
                                  coeff=dict(epsilon=eps, sigma=sigma))
 
-            table.pair_coeff.set(["Mono", "Mono1"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
+            gauss.pair_coeff.set(["Mono", "Mono1"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
                                  func=gauss_center_decay_strength, rmin=0, rmax=(r0 + r_diffu) * sigma * 3.5,
                                  coeff=dict(epsilon=eps, sigma=(r0 + r_diffu) * sigma))
-            table.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
+            gauss.pair_coeff.set(['Diff', 'S_Diff', 'F_Diff', "I_Diff"], ['Diff', 'S_Diff', 'F_Diff', "I_Diff"],
                                  func=gauss_center_decay_strength, rmin=0, rmax=2 * r_diffu * sigma * 3.5,
                                  coeff=dict(epsilon=eps, sigma=2 * r_diffu * sigma))
             if two_types:
@@ -454,7 +454,7 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
                     Va, Fa = gauss_center_decay_strength(
                         r, rmin, rmax, c=sigma * 1.85, sigma=sigma / 2, epsilon=epsilona)
                     return (V1 + Va, F1 + Fa)
-                table.pair_coeff.set(["Mono1"], ["Mono1"],
+                gauss.pair_coeff.set(["Mono1"], ["Mono1"],
                                      func=gauss_center_decay_strength_a, rmin=0, rmax=r_cut,
                                      coeff=dict(epsilon=eps, sigma=sigma))
 
