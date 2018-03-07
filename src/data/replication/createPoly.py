@@ -83,7 +83,7 @@ def create_init_conf_yeast(len_chrom=len_chrom, p_ribo=p_ribo, dist_centro=dist_
         else:
             # This chromosome is different because it has a nucleole
             p_r, size = p_ribo[11]
-            Beads = [2] + [1] * (d1 - 2) + [3] + [1] * (p_r - d1) + [4] * \
+            Beads = [2] + [1] * (d1 - 2) + [3] + [1] * (p_r - d2) + [4] * \
                 size + [1] * (len_chrom[X] - p_r - 1) + [2]
             # print(Beads)
             print(len(Beads),len_chrom[X] + size)
