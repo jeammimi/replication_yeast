@@ -826,8 +826,8 @@ def simulate(traj):
                    period=dcd_period, overwrite=True)
 
     r_hic = []
-    if dump_hic:
-        group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
+    # if dump_hic:
+    group_hic = group.tags(name="hic", tag_min=0, tag_max=phic)
 
     dump_inte = True
     if dump_inte:
