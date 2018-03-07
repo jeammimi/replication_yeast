@@ -1,5 +1,7 @@
 import pandas
 import json
+import pandas as pd
+import numpy as np
 
 
 def load_ori_position(File, ori_type, lengths, coarse, verbose=True, strength=None, coarsed=True):
@@ -64,6 +66,20 @@ def load_lengths_and_centro(File, coarse=1, verbose=True):
     if verbose:
         print(lengths, cents)
     return lengths, cents
+
+
+def load_boundaries(file="data/external/PNAS-tad/13059_2011_2852_MOESM2_ESM.XLS.xlsx", coarse=1000):
+    pos = pd.read_excel(file, skiprows=1)
+    extra = []
+    for ch in range(16):
+        posb = np.array(pos[pos.Chromosome == "chr%i" % (ch + 1)]["Position"])
+        posb *= 1000 / coarse
+        posb = np.array(posb, dtype=np.int)
+        posb = posb.tolist()
+        posb.pop(-1)
+        posb.pop(0)
+        extra.append(posb)
+    return extra
 
 
 def load_parameters(filename):

@@ -35,10 +35,10 @@
 "visu" : false ,
 "dump_hic" : false ,
 "dump_inte" : false,
+"boundaries" : false,
 
 
 "diff_alone" : false ,
-
 "diff_bind_when_free" : false ,
 "diff_bind_when_on_DNA" : false ,
 

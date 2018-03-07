@@ -13,7 +13,7 @@ from scipy.spatial.distance import cdist
 from .PMotion import Polymer, Diffusing
 import _pickle as cPickle
 from .createPoly import create_init_conf_yeast
-from replication.tools import load_ori_position, load_lengths_and_centro
+from replication.tools import load_ori_position, load_lengths_and_centro, load_boundaries
 from replication.tools import load_parameters
 import time
 import json
@@ -75,6 +75,9 @@ def create_initial_configuration(traj):
                 ps[-1] += range(p1, p2)
         p_second = ps
 
+    boundaries = traj.get("boundaries", False)
+    if boundaries:
+        extra_boundaries = load_boundaries(coarse=traj["coarse"])
     print("strengths", strengths)
     # Yeast case
     spb = traj["spb"]
@@ -237,6 +240,10 @@ def create_initial_configuration(traj):
                     offset_particle + p] = plist.index('Nuc')
 
             if telomere and (p == 0 or p == npp - 1):
+                snapshot.particles.typeid[
+                    offset_particle + p] = plist.index('Telo')
+
+            if boundaries and p in extra_boundaries[i]:
                 snapshot.particles.typeid[
                     offset_particle + p] = plist.index('Telo')
 
