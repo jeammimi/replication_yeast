@@ -86,7 +86,7 @@ def create_init_conf_yeast(len_chrom=len_chrom, p_ribo=p_ribo, dist_centro=dist_
             Beads = [2] + [1] * (d1 - 2) + [3] + [1] * (p_r - d2) + [4] * \
                 size + [1] * (len_chrom[X] - p_r - 1) + [2]
             # print(Beads)
-            print(len(Beads),len_chrom[X] + size)
+            print(len(Beads),len_chrom[X] + size,d1,d2)
             Sim.add(Polymer(N=len_chrom[X] + size, type_bead=Beads,
                             liaison=liaison,
                             rigid_constrain=False,
