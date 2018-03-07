@@ -34,6 +34,7 @@
 "Activ_Origins" : ["Ori"] ,
 "visu" : false ,
 "dump_hic" : false ,
+"dump_inte" : false,
 
 
 "diff_alone" : false ,
