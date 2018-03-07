@@ -45,7 +45,7 @@ def create_initial_configuration(traj):
                                       traj["ori_type"],
                                       len_chrom,
                                       traj["coarse"])
-    p_ribo = [[int(position) // int(traj["coarse"]), length] for position, length in p_ribo]
+    p_ribo = [[int(position) // int(traj["coarse"] // 1000), length] for position, length in p_ribo]
 
     two_types = traj.get("two_types", False)
     p_second = traj.get("p_second", [])
