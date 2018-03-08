@@ -547,7 +547,8 @@ def force_field(traj, bond_list, plist, tag_spb, two_types):
             sigma=diameter_nuc,
             r_cut=diameter_nuc * 1.12, mode="shift", r_extrap=diameter_nuc * r_extrap)
     if telomere:
-        wall_force_slj.force_coeff.set("Telo", epsilon=2.0, sigma=1.5,
+        print("la")
+        wall_force_slj.force_coeff.set("Telo", epsilon=10.0, sigma=1.5,
                                        r_cut=3, mode="shift", r_extrap=r_extrap)
 
     # Group;
