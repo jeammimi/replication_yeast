@@ -1,22 +1,23 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[42]:
 
-
+#Loading some libraries
+get_ipython().magic('matplotlib inline')
+get_ipython().magic('load_ext autoreload')
+get_ipython().magic('autoreload 2')
 from pylab import *
 import numpy as np
-
+import mpld3
 import copy
 import sys
-#sys.path.append("../../src/data")
-sys.path.append("./src/data")
+sys.path.append("../../src/data")
 from replication.PMotion import Polymer
 from replication.simulate_1D import simulate
 
 
-
-# In[2]:
+# In[43]:
 
 def test_simple():
     P = Polymer(0,start=0,end=2,origins=[0])
@@ -31,7 +32,7 @@ def test_simple():
     assert( np.all(P.get_replication_profile(1) ==[1,2,3]))
 
 
-# In[3]:
+# In[44]:
 
 def test_simple2():
 
@@ -54,7 +55,7 @@ def test_simple2():
 
 
 
-# In[4]:
+# In[45]:
 
 def test_symetrie():
     
@@ -94,7 +95,7 @@ def test_symetrie():
     assert(np.all(P.get_replication_profile(1) ==[1,2,1]))
 
 
-# In[5]:
+# In[46]:
 
 def test_remove_passivated1():
     P = Polymer(0,start=0,end=2,origins=[0,2])
@@ -119,12 +120,11 @@ def test_remove_passivated1():
                     
         if t == 4:
             assert(2 in passivated_origin)
-   
     assert(np.all(P.get_replication_profile(1) ==[1,2,3]))
-test_remove_passivated1()
+#test_remove_passivated1()
 
 
-# In[6]:
+# In[47]:
 
 def test_remove_passivated2():
     P = Polymer(0,start=0,end=2,origins=[0,2])
@@ -154,7 +154,7 @@ def test_remove_passivated2():
 #test_remove_passivated2()
 
 
-# In[7]:
+# In[48]:
 
 def test_remove_passivated3():
     P = Polymer(0,start=0,end=2,origins=[0,1,2])
@@ -190,7 +190,7 @@ def test_remove_passivated3():
 #test_remove_passivated3()
 
 
-# In[8]:
+# In[49]:
 
 def test_remove_passivated4():
     P = Polymer(0,start=0,end=2,origins=[0,1,2])
@@ -226,7 +226,7 @@ def test_remove_passivated4():
 #test_remove_passivated4()
 
 
-# In[9]:
+# In[50]:
 
 def test_remove_passivated5():
     P = Polymer(0,start=0,end=2,origins=[0,1,2])
@@ -264,7 +264,7 @@ def test_remove_passivated5():
 #test_remove_passivated5()
 
 
-# In[10]:
+# In[51]:
 
 def test_jump2():
     P = Polymer(0,start=0,end=2,origins=[0,2])
@@ -275,26 +275,27 @@ def test_jump2():
         #print([m.path for m in P.modules if m.move])
 
         P.increment_time(dt=1)
-    assert( np.all(P.get_replication_profile(3) ==[1,1,1]))
+    assert( np.all(P.get_replication_profile(1) ==[1,1,1]))
 
 
-# In[11]:
+# In[52]:
 
 def test_jump():
-    P = Polymer(0,start=0,end=2,origins=[0])
+    P = Polymer(0,start=0,end=3,origins=[0])
     #
     P.add_fork(ptags=["Left","Right"],otag=0,new_btags=[None,None],diff_diff_tag=None,fork_speed=3)
 
-    for t in range(3):
+    for t in range(4):
         #print([m.path for m in P.modules if m.move])
 
         P.increment_time(dt=1)
     #print(P.get_DNA_with_time())
-    #print(P.get_replication_profile(3))
-    assert( np.all(P.get_replication_profile(3) ==[1,1,1]))
+    #print(P.get_replication_profile(1))
+    assert( np.all(P.get_replication_profile(1) ==[1,1,1,2]))
+#test_jump()
 
 
-# In[12]:
+# In[53]:
 
 def test_fork_speed_dt_speed():
     testv = [[1,1],[1,0.5],[1,2],[2,1],[2,0.5],[0.5,1],[0.5,0.5]]
@@ -312,7 +313,30 @@ def test_fork_speed_dt_speed():
             assert(S.polys[0].get_DNA_with_time(fork_speed)[0][0] == 0)
 
 
-# In[13]:
+# In[61]:
+
+def test_It():
+
+    P = Polymer(0,start=0,end=2,origins=[0,2])
+    P.increment_time(dt=0.5)
+    P.add_fork(ptags=["Left","Right"],otag=0,new_btags=[None,None],diff_diff_tag=None,fork_speed=1)
+    P.add_fork(ptags=["Left1","Right1"],otag=2,new_btags=[None,None],diff_diff_tag=None,fork_speed=1)
+
+    for t in range(3):
+        P.increment_time(dt=1)
+    
+    #print([m.path for m in P.ended if m.move])
+    #print(P.get_replication_profile(1))
+    It = P.get_firing_time_It(cut=0, normed=False, dt=0.5)
+    #print(It)
+    assert( np.all(It[1] ==array([ 0.,  2.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])))
+    assert( np.all(It[0] ==array([ 1,1])))
+
+test_It()
+#test_simple2()
+
+
+# In[54]:
 
 test_simple()
 test_simple2()
@@ -324,6 +348,7 @@ test_remove_passivated4()
 test_jump()
 test_jump2()
 test_fork_speed_dt_speed()
+test_It()
 
 
 # In[ ]:
