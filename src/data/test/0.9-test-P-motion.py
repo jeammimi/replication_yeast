@@ -4,9 +4,6 @@
 # In[42]:
 
 #Loading some libraries
-get_ipython().magic('matplotlib inline')
-get_ipython().magic('load_ext autoreload')
-get_ipython().magic('autoreload 2')
 from pylab import *
 import numpy as np
 import mpld3
