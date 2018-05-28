@@ -352,23 +352,24 @@ class Polymer():
             self.modules = [Origin(tag, random=random, strength=strength)
                             for tag, strength in zip(origins, strengths)]
 
-            if random == False:
-                try:
-                    assert(np.max(origins) + 0.5 <= self.end + 1)
-                except:
-                    print(random)
-                    print(self.start, self.end, origins)
-                    print("np.max(origins) + 0.5 <= self.end + 1")
-                    raise
-            else:
+            if origins != []:
+                if random is False:
+                    try:
+                        assert(np.max(origins) + 0.5 <= self.end + 1)
+                    except:
+                        print(random)
+                        print(self.start, self.end, origins)
+                        print("np.max(origins) + 0.5 <= self.end + 1")
+                        raise
+                else:
 
-                try:
-                    assert(np.max(origins) <= self.end)
-                except:
-                    print(random)
-                    print(self.start, self.end, origins)
-                    print("np.max(origins) <= self.end")
-                    raise
+                    try:
+                        assert(np.max(origins) <= self.end)
+                    except:
+                        print(random)
+                        print(self.start, self.end, origins)
+                        print("np.max(origins) <= self.end")
+                        raise
                 # raise
 
         # print(origins, strengths)
