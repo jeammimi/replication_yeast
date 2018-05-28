@@ -161,6 +161,7 @@ class ensembleSim:
             self.orip = []
             self.aPol = []
             self.fork_speeds = []
+            self.lft_forks = []
 
         found = 0
         for sim in tqdm(range(self.Nsim)):
@@ -173,6 +174,10 @@ class ensembleSim:
             positions = self.positions
             if self.positions and type(self.positions[0][0]) is list:
                 positions = self.positions[sim]
+
+            strengths = self.strengths
+            if self.strengths and type(self.strengths[0][0]) is list:
+                strengths = self.strengths[sim]
 
             Nd = self.Ndiff
             max_ramp = self.max_ramp
@@ -196,7 +201,7 @@ class ensembleSim:
                              ramp=self.ramp,
                              max_ramp=max_ramp,
                              ramp_type=self.ramp_type,
-                             strengths=self.strengths,
+                             strengths=strengths,
                              fsd=self.fsd,
                              variance_fs=self.variance_fs
                              )
@@ -284,6 +289,7 @@ class ensembleSim:
             self.aTLs.append([])
             self.aPol.append([])
             self.fork_speeds.append([])
+            self.lft_forks.append([])
 
             for poly in S.polys:
 
@@ -292,10 +298,9 @@ class ensembleSim:
                     p.sort()
                     self.orip.append(p)
                     print(p)
-                if self.one_minute:
-                    dt = 1
-                else:
-                    dt = self.dt_speed
+
+                dt = self.dte  # if self.one_minute == 1
+
                 # Cut == 0 because we removed them from all the chromosomes
                 ft, it = poly.get_firing_time_It(cut=0, normed=False, dt=dt)
                 fd = poly.get_fork_density(cut=0, normed=False, dt=dt)  # Normed afteward
@@ -313,8 +318,11 @@ class ensembleSim:
                     self.aIRTDs[-1].append(irtds)
                     self.aTLs[-1].append(tls)
 
-                if hasattr(poly, "fork_speeds"):
-                    self.fork_speeds[-1].extend(poly.fork_speeds)
+                fsp, lft = poly.get_speeds_lifetime()
+                self.fork_speeds[-1].extend(fsp)
+                self.lft_forks[-1].extend(lft)
+                # if hasattr(poly, "fork_speeds"):
+                #    self.fork_speeds[-1].extend(poly.fork_speeds)
 
                 """
                 All the following line to be able to compute No(t-1)
@@ -777,6 +785,7 @@ class ensembleSim:
 
         v = self.try_load_property("Its")
         if v is not None:
+            # print("Pre")
             return v
 
         if cut != 0 and recompute is False:
@@ -797,7 +806,7 @@ class ensembleSim:
         else:
             x, y, std, alls = self.get_quant("aIts", n_rep=n_rep)
             # As this are cumulative properties, this scale for one minute
-            return x, y, std, alls
+            return x, y / self.dte, std, alls
 
     def Ifs(self, n_rep=None, recompute=False, cut=0):
         if recompute == True:
@@ -1112,8 +1121,8 @@ class ensembleSim:
                     if color is not None:
                         kwargs["color"] = color
                     if std:
-                        print(np.array(allP).shape, Prof.shape)
-                        print((np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * h)
+                        #print(np.array(allP).shape, Prof.shape)
+                        #print((np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * h)
                         plt.errorbar(x * kb, Prof * h,
                                      (np.mean((np.array(allP) - Prof)**2, axis=0)**0.5) * h, errorevery=200, **kwargs)
                         plt.xlim(-10 * kb, (x[-1] + 10) * kb)

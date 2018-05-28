@@ -343,11 +343,34 @@ class Polymer():
 
                 print("Error on position,PMotion.py", len(positions), len(origins))
                 raise
+
             self.modules = [Origin(tag, random=random, position=position, strength=strength)
                             for tag, position, strength in zip(origins, positions, strengths)]
+
+            #assert(max(positions) < self.end)
         else:
             self.modules = [Origin(tag, random=random, strength=strength)
                             for tag, strength in zip(origins, strengths)]
+
+            if random == False:
+                try:
+                    assert(np.max(origins) + 0.5 <= self.end + 1)
+                except:
+                    print(random)
+                    print(self.start, self.end, origins)
+                    print("np.max(origins) + 0.5 <= self.end + 1")
+                    raise
+            else:
+
+                try:
+                    assert(np.max(origins) <= self.end)
+                except:
+                    print(random)
+                    print(self.start, self.end, origins)
+                    print("np.max(origins) <= self.end")
+                    raise
+                # raise
+
         # print(origins, strengths)
         self.o_strength = {tag: strength for tag, strength in zip(origins, strengths)}
         # to keep track of the diff attached in case we attach them one by one
@@ -405,6 +428,20 @@ class Polymer():
             return False  # Do not start
         else:
             return True
+
+    def get_speeds_lifetime(self):
+
+        speeds = []
+        lft = []
+        for o in self.ended:
+            if not o.origin:
+                speeds.append(o.fork_speed)
+                if len(o.path) > 1:
+                    lft.append(o.path[-1].time - o.path[0].time)
+                else:
+                    lft.append(0)
+                lft[-1] += abs(o.path[-1].pos - o.path[-1].outpos) / o.fork_speed
+        return speeds, lft
 
     def get_free_origins(self):
         return self.bound_to_origin.keys()
@@ -616,6 +653,7 @@ class Polymer():
             for ip, spaceTimeB in enumerate(m.path):
                 pos, time, outpos, bead = spaceTimeB.get_values()
                 rbead = int(pos / 2 + outpos / 2)
+
                 if np.abs(rbead - bead) > 1.1:
                     print(
                         "Bead posistions(positions) should not be different than more than one from bead value(l_ori)")
@@ -643,8 +681,13 @@ class Polymer():
                     # if abs(int(t)-t) < 1e-5:
                     rt = int(round(t, 0)) + 1
                     # print(rt)
-                    DNA[bead - self.start, rt:] += (tp1 - t) * m.fork_speed * dt
-                    Pol[bead - self.start] = m.d
+                    try:
+                        DNA[bead - self.start, rt:] += (tp1 - t) * m.fork_speed * dt
+                        Pol[bead - self.start] = m.d
+                    except:
+                        print(spaceTimeB.get_values())
+                        print(m.path)
+                        raise
 
                 # print
                 # print(DNA)
